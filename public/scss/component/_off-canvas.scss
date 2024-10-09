@@ -1,0 +1,72 @@
+.offcanvas {
+    --bs-offcanvas-transition: transform 0.4s ease-in-out;
+    &.canvas-menu {
+        border-right: 0;
+        .offcanvas-header {
+            padding: 24px;
+            box-shadow: 0px 4px 18px 0px rgba(0, 0, 0, 0.08);
+            background-color: $white;
+        }
+        .off-canvas-body {
+            padding: 30px 24px;
+            overflow: auto;
+            .login-box {
+                border-bottom: 1px solid $outline;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+                a, span {
+                    font-family: $font-2;
+                    font-weight: 600;
+                }
+            }
+            &::-webkit-scrollbar {
+                width: 0px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: transparent;
+            }
+        }
+    }
+    &.canvas-filter {
+        height: 206px;
+        border: 0;
+        .main-header {
+            border: 0;
+        }
+        .tab-content {
+            position: relative;
+        }
+        // .wd-search-form {
+        //     height: 520px;
+        //     overflow: auto;
+        //     &::-webkit-scrollbar {
+        //         width: 1px;
+        //     }
+        //     &::-webkit-scrollbar-thumb {
+        //         background: $primary;
+        //     }
+        // }
+    }
+}
+
+.offcanvas-backdrop {
+    background-color: $backdrop;
+    &.show {
+        opacity: 1;
+    }
+}
+.icon-close-popup {
+    width: 30px;
+    height: 20px;
+    @include flex(center, center);
+    color: $variant-2;
+    cursor: pointer;
+}
+
+.offcanvas#createProject {
+    z-index: 1047;
+}
+
+.content-sidebarRight {
+    overflow: auto;
+}

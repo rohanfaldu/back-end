@@ -1,0 +1,119 @@
+/* ---------------------------------------------------------
+    * Name: Immofind
+    * Version: 1.0.1
+    * Author: Themesflat
+    * Author URI: http://themesflat.com 
+
+	* Abstracts variable
+    
+    * Reset css styles
+
+    * Components
+        * header
+        * footer
+        * tabs
+        * slider banner
+        * button
+        * range slider
+        * form
+        * nice select
+        * carousel
+        * avatar
+        * off canvas
+        * hover
+        * preloader
+
+    * section
+
+    * dashboard
+
+    * Responsive
+ ------------------------------------------------------------------------------ */
+
+/*--------- Abstracts variable ---------- */
+@import "./abstracts/index";
+
+/*---------- Reset css styles ----------- */
+@import "reset";
+
+/*------------ Components ---------------- */
+@import "./component/index";
+
+/*-------------- section ----------------- */
+@import "./section";
+
+/*--------------- dashboard ---------------- */
+@import "./dashboard";
+
+/*-------------- Responsive ----------------- */
+@import "./responsive";
+
+
+
+.leaflet-popup-content {
+	width: auto !important;
+	margin: 0px !important;
+}
+
+
+.horizontal-slider {
+	padding-bottom: 28px;
+}
+
+.example-track.example-track-0 {
+	background: $critical;
+}
+
+.horizontal-slider .example-track {
+	top: 20px;
+	height: 5px;
+	border: none;
+	border-radius: 30px;
+}
+
+.example-track.example-track-1 {
+	background: #d3d3d3;
+}
+
+.example-thumb {
+	top: 10px;
+	font-size: 0;
+	height: 24px;
+	width: 24px;
+	border-radius: 50%;
+	border: 2px solid $critical;
+	background: #ffffff;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.price-range {
+	line-height: 0px !important;
+}
+
+
+.group-range-title span {
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 26px;
+	color: $critical;
+	margin-left: 4px;
+}
+
+// range two
+.horizontal-slider.st2 {
+
+	.example-track.example-track-0,
+	.example-track.example-track-2 {
+		background: #d3d3d3;
+	}
+
+	.example-track.example-track-1 {
+		background: $critical;
+	}
+}
+
+
+.react-datepicker-wrapper {
+	width: 100%;
+}

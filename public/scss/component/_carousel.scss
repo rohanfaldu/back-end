@@ -1,0 +1,84 @@
+
+.swiper:hover {
+    cursor: pointer;
+}
+
+
+.swiper-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet,
+.swiper-pagination-horizontal.swiper-pagination-bullets .swiper-pagination-bullet {
+    margin: 0px 8px;
+}
+
+.sw-auto {
+    .swiper-slide {
+        width: auto;
+    }
+}
+
+.box-navigation {
+    display: flex;
+    gap: 20px;
+    .navigation {
+        width: 60px;
+        height: 60px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid $outline;
+        background-color: $white;
+        border-radius: 8px;
+        @include transition3;
+        .icon {
+            color: $on-surface;
+            font-size: 24px;
+        }
+        &.swiper-button-disabled,
+        &:hover {
+            background-color: $primary;
+            border-color: $primary;
+            .icon {
+                color: $white;
+            }
+        }
+        &.style-1 {
+            width: 44px;
+            height: 44px;
+            .icon {
+                font-size: 18px;
+            }
+        }
+    }
+}
+
+.sw-pagination {
+    .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background-color: $variant-2;
+        opacity: 1;
+        position: relative;
+        @include transition5;
+
+        &::before {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            content: "";
+            width: 18px;
+            height: 18px;
+            border: 1px solid $primary;
+            overflow: visible;
+            opacity: 0;
+            @include transition3;
+        }
+    }
+
+    .swiper-pagination-bullet-active {
+        background-color: $primary !important; 
+        &::before {
+            opacity: 1;
+        }
+    }
+}

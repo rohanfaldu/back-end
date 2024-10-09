@@ -1,0 +1,599 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    font-family: inherit;
+    font-size: 100%;
+    font-style: inherit;
+    font-weight: inherit;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+/* Elements
+-------------------------------------------------------------- */
+
+html {
+    margin-right: 0 !important;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: $font-1;
+    font-size: 16px;
+    line-height: 26px;
+    font-weight: 400;
+    color: $on-surface;
+    background-color: $white;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    transform: scale(1);
+    vertical-align: middle;
+    -ms-interpolation-mode: bicubic;
+}
+
+.row {
+    margin-right: -15px;
+    margin-left: -15px;
+    > * {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+ul,
+li {
+    list-style-type: none;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.center {
+    text-align: center;
+}
+
+.container4 {
+    max-width: 1710px;
+}
+
+.container3 {
+    max-width: 660px;
+}
+
+.container2 {
+    max-width: 1100px;
+}
+
+.container {
+    max-width: 1320px;
+}
+
+.container4,
+.container3,
+.container2,
+.container {
+    width: 100%;
+    margin: auto;
+}
+
+.container4,
+.container3,
+.container2,
+.container-fluid,
+.container {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.container-full {
+    max-width: 100%;
+}
+
+.cus-layout-1 {
+    width: calc(100vw - ((100vw - 1290px) / 2));
+    margin-right: unset !important;
+    max-width: 100%;
+    margin-left: auto;
+}
+
+// form //
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"] {
+    font-family: $font-2;
+    border: 1px solid $outline;
+    outline: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    font-size: 16px;
+    line-height: 26px;
+    border-radius: 8px;
+    padding: 14px 16px;
+    width: 100%;
+    background: $white;
+    color: $on-surface;
+    font-weight: 400;
+    &:focus {
+        border-color: $primary;
+    }
+}
+
+textarea::placeholder,
+input[type="text"]::placeholder,
+input[type="password"]::placeholder,
+input[type="datetime"]::placeholder,
+input[type="datetime-local"]::placeholder,
+input[type="date"]::placeholder,
+input[type="month"]::placeholder,
+input[type="time"]::placeholder,
+input[type="week"]::placeholder,
+input[type="number"]::placeholder,
+input[type="email"]::placeholder,
+input[type="url"]::placeholder,
+input[type="search"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="color"]::placeholder {
+    color: $variant-2;
+    @include transition3;
+}
+textarea {
+    height: 112px;
+    resize: none;
+}
+/* Placeholder color */
+::-webkit-input-placeholder {
+    color: #8a8aa0;
+}
+
+:-moz-placeholder {
+    color: #8a8aa0;
+}
+
+::-moz-placeholder {
+    color: #8a8aa0;
+    opacity: 1;
+}
+
+.error {
+    font-size: 16px;
+    // color: $color-2;
+    margin-bottom: 10px;
+    -webkit-transition: all ease 0.3s;
+    -moz-transition: all ease 0.3s;
+    transition: all ease 0.3s;
+}
+
+/* Since FF19 lowers the opacity of the placeholder by default */
+
+:-ms-input-placeholder {
+    color: #8a8aa0;
+}
+
+p {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+}
+
+.p-12 {
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.p-16 {
+    font-size: 16px;
+    line-height: 26px;
+    // color: $color-4;
+}
+
+/* Typography
+-------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: $font-2;
+    font-weight: 600;
+    text-rendering: optimizeLegibility;
+    color: $on-surface;
+}
+
+h1 {
+    font-size: 80px;
+    line-height: 88px;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 56px;
+    line-height: 68px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 44px;
+    line-height: 62px;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 36px;
+    line-height: 44px;
+    font-weight: 600;
+}
+
+h5 {
+    font-size: 30px;
+    line-height: 42px;
+}
+
+h6 {
+    font-size: 24px;
+    line-height: 30px;
+    font-weight: 600;
+}
+a {
+    @include transition3;
+    text-decoration: none;
+    // color: unset;
+    @include transition3;
+    cursor: pointer;
+    display: inline-block;
+    // display: inherit;
+    color: $on-surface;
+    &:focus,
+    &:hover {
+        @include transition3;
+        text-decoration: none;
+        outline: 0;
+        // color: unset;
+        // color: $primary;
+    }
+}
+label{
+    font-family: $font-2;
+    font-weight: 600;
+}
+.link {
+    @include transition3;
+    &:hover {
+        color: $primary !important;
+    }
+}
+
+.h7 {
+    font-family: $font-2;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+}
+
+.body-1 {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 30px;
+}
+.body-2 {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 28px;
+}
+.text-1 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28px;
+}
+.text-2 {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 26px;
+}
+.text-3 {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0.8px;
+}
+.caption-1 {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+}
+.caption-2 {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 26px;
+}
+.text-subheading {
+    font-family: $font-2;
+    font-size: 12px;
+    line-height: 19px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+.text-subtitle {
+    font-family: $font-2;
+    font-size: 14px;
+    line-height: 24px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+//
+.fw-1 {
+    font-weight: 100;
+}
+
+.fw-4 {
+    font-weight: 400;
+}
+
+.fw-5 {
+    font-weight: 500;
+}
+
+.fw-6 {
+    font-weight: 600;
+}
+
+.fw-7 {
+    font-weight: 700;
+}
+
+.fw-8 {
+    font-weight: 800;
+}
+.fs-12 {
+    font-size: 12px;
+}
+
+.fs-13 {
+    font-size: 13px;
+}
+
+.fs-16 {
+    font-size: 16px;
+}
+
+.fs-18 {
+    font-size: 18px;
+}
+
+.fs-20 {
+    font-size: 20px;
+}
+
+.fs-22 {
+    font-size: 22px;
+}
+
+.fs-26 {
+    font-size: 26px;
+}
+
+.fs-30 {
+    font-size: 30px;
+}
+
+.fs-40 {
+    font-size: 40px;
+}
+
+// color text
+.text-primary {
+    color: $primary !important;
+}
+.text-danger {
+    color: $critical !important;
+}
+.text-black {
+    color: $on-surface !important;
+}
+.text-white {
+    color: $white !important;
+}
+.text-success {
+    color: $success !important;
+}
+.text-variant-1 {
+    color: $variant-1;
+}
+.text-variant-2 {
+    color: $variant-2;
+}
+// background color
+.bg-surface {
+    background-color: $surface;
+}
+
+// margin-top
+.my-40 {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+.mt-4 {
+    margin-top: 4px !important;
+}
+.mt-8 {
+    margin-top: 8px;
+}
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+.mt-16 {
+    margin-top: 16px;
+}
+// radius
+.round-8 {
+    border-radius: 8px;
+}
+.round-12 {
+    border-radius: 12px;
+}
+// grid
+.grid-2 {
+    @include grid(2, 1fr);
+}
+.grid-3 {
+    @include grid(3, 1fr);
+}
+.grid-4 {
+    @include grid(4, 1fr);
+}
+.grid-6 {
+    @include grid(6, 1fr);
+}
+
+// gap
+.gap-4 {
+    gap: 4px !important;
+}
+.gap-6 {
+    gap: 6px !important;
+}
+.gap-8 {
+    gap: 8px;
+}
+.gap-12 {
+    gap: 12px;
+}
+.gap-16 {
+    gap: 16px;
+}
+.gap-20 {
+    gap: 20px;
+}
+.gap-30 {
+    gap: 30px;
+}
+.pt-0 {
+    padding-top: 0px !important;
+}
+
+.no-line {
+    border: 0 !important;
+}

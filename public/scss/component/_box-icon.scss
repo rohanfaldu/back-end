@@ -1,0 +1,78 @@
+// ------- box icon ---------
+
+.box-icon {
+    @include flex(center, center);
+    @include transition3;
+    cursor: pointer;
+    &.w-28 {
+        width: 28px;
+        height: 28px;
+        .icon {
+            font-size: 14px;
+        }
+    }
+    &.w-32 {
+        width: 32px;
+        height: 32px;
+    }
+    &.w-40 {
+        width: 40px;
+        height: 40px;
+    }
+    &.w-52 {
+        width: 52px;
+        height: 52px;
+    }
+    &.w-60 {
+        width: 60px;
+        height: 60px;
+    }
+    &.w-68 {
+        width: 68px;
+        height: 68px;
+    }
+    &.w-80 {
+        width: 80px;
+        height: 80px;
+        .icon {
+            font-size: 44px;
+        }
+    }
+    &.round {
+        border-radius: 50%;
+    }
+    &.social {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        .icon {
+            color: $white;
+            font-size: 18px;
+            &.icon-youtube {
+                font-size: 12px;
+            }
+        }
+
+        &.square {
+            background-color: $surface;
+            border-radius: 4px;
+            border: 1px solid $outline;
+            .icon {
+                color: $on-surface;
+                font-size: 18px;
+                &.icon-youtube {
+                    font-size: 12px;
+                }
+            }
+            &:hover {
+                .icon {
+                    color: $white;
+                }
+            }
+        }
+        &:hover {
+            background-color: $primary;
+            color: $white;
+            border-color: $primary;
+        }
+    }
+}
