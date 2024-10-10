@@ -1563,14 +1563,14 @@ label {
   display: block;
 }
 
-.mobile-menu .navigation li {
+.mobile-menu .navigation li, .admin-sidebar ul li.dropdown2{
   position: relative;
   display: block;
 }
 .mobile-menu .navigation li > ul > li:last-child {
   border-bottom: none;
 }
-.mobile-menu .navigation li.dropdown2 .dropdown2-btn {
+.mobile-menu .navigation li.dropdown2 .dropdown2-btn,  .admin-sidebar ul li.dropdown2 .dropdown2-btn{
   position: absolute;
   right: 0px;
   top: 0px;
@@ -1580,7 +1580,7 @@ label {
   cursor: pointer;
   z-index: 5;
 }
-.mobile-menu .navigation li.dropdown2 .dropdown2-btn::before {
+.mobile-menu .navigation li.dropdown2 .dropdown2-btn::before, .admin-sidebar ul li.dropdown2 .dropdown2-btn::before {
   content: "\e904";
   font-family: "icomoon";
   font-size: 12px;
@@ -1598,21 +1598,33 @@ label {
   transition: all 0.3s ease;
   transform: rotate(-90deg);
 }
-.mobile-menu .navigation li.open .dropdown2-btn::before {
+.mobile-menu .navigation li.open .dropdown2-btn::before, .admin-sidebar ul li.open .dropdown2-btn::before {
   transform: unset;
 }
-
-.mobile-menu .navigation li.dropdown2 > ul li a {
+.admin-sidebar ul li.dropdown2 > ul li a {
+  padding: 7px 0 !important;
+  font-weight: 500;
+  font-family: Josefin Sans, sans-serif;
+  position: relative;
+  line-height: 26px;
+  display: block;
+  font-size: 16px;
+  text-transform: capitalize;
+}
+.mobile-menu .navigation li.dropdown2 > ul li a,  .admin-sidebar ul li.dropdown2 > ul li a {
   border-bottom: unset;
   color: #161e2d;
 }
-
+.admin-sidebar ul > li.dropdown2 > ul {
+  margin-top: 10px;
+}
 .mobile-menu .navigation li.dropdown2 .dropdown2-btn span {
   opacity: 0;
 }
 
 .mobile-menu .navigation li > ul,
-.mobile-menu .navigation li > ul > li > ul {
+.mobile-menu .navigation li > ul > li > ul,
+.admin-sidebar ul > li.dropdown2  > ul{
   display: none;
   background: rgba(237, 32, 39, 0.1);
   padding: 15px 20px;
@@ -10163,11 +10175,16 @@ tr {
   position: absolute;
   margin: 0;
   top: 63px;
+  right: 0px;
+}
+.admin-login .logo-box{
+  display: flex;
+  justify-content: center;
 }
 @media only screen and (max-width: 1023px) {
   .main-header .header-account .dropdown-menu{
     top: 48px;
-    right: 90px;
+    right: 0px;
   }
 }
 

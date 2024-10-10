@@ -49,9 +49,9 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 										<Link className="dropdown-item" href="/">Logout</Link>
 									</div>
 
-									<div className="flat-bt-top">
+									{/* <div className="flat-bt-top">
 										<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
-									</div>
+									</div> */}
 								</div>
 								<div className="mobile-nav-toggler mobile-button" onClick={handleMobileMenu}><span /></div>
 							</div>
@@ -66,10 +66,22 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 					<nav className="menu-box">
 						<div className="nav-logo"><Link href="/"><img src="/images/logo/logo.svg" alt="nav-logo" width={174} height={44} /></Link></div>
 						<div className="bottom-canvas">
-							<MobileMenu />
-							<div className="button-mobi-sell">
-								<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
+							<div className="menu-outer">
+								<div className="navbar-collapse collapse clearfix" id="navbarSupportedContent">
+									<ul className="navigation clearfix">
+										<li><Link href="/my-property">My Properties</Link></li>
+										<li><Link href="/my-invoices">My Invoices</Link></li>
+										<li><Link href="/my-favorites">My Favorite</Link></li>
+										<li><Link href="/reviews">Reviews</Link></li>
+										<li><Link href="/add-property">Add Property</Link></li>
+										<li><Link href="/">Logout</Link></li>
+									</ul>
+								</div>
 							</div>
+		
+							{/* <div className="button-mobi-sell">
+								<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
+							</div> */}
 							<div className="mobi-icon-box">
 								<div className="box d-flex align-items-center">
 									<span className="icon icon-phone2" />

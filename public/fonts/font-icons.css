@@ -52,6 +52,9 @@
 .icon-review:before {
   content: "\e90a";
 }
+.icon-translate:before {
+  content: "\f1ab";
+}
 .icon-bookmark:before {
   content: "\e90b";
 }

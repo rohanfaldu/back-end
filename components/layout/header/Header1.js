@@ -33,7 +33,7 @@ export default function Header1({ scroll, isMobileMenu, handleMobileMenu, isLogi
 									</nav>
 									{/* Main Menu End*/}
 								</div>
-								<div className="header-account">
+								{/* <div className="header-account">
 									<div className="register">
 										<ul className="d-flex">
 											<li><a onClick={handleLogin}>Login</a></li>
@@ -44,7 +44,7 @@ export default function Header1({ scroll, isMobileMenu, handleMobileMenu, isLogi
 									<div className="flat-bt-top">
 										<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
 									</div>
-								</div>
+								</div> */}
 								<div className="mobile-nav-toggler mobile-button" onClick={handleMobileMenu}><span /></div>
 							</div>
 						</div>
@@ -58,15 +58,15 @@ export default function Header1({ scroll, isMobileMenu, handleMobileMenu, isLogi
 					<nav className="menu-box">
 						<div className="nav-logo"><Link href="/"><img src="/images/logo/logo.svg" alt="nav-logo" width={174} height={44} /></Link></div>
 						<div className="bottom-canvas">
-							<div className="login-box flex align-items-center">
+							{/* <div className="login-box flex align-items-center">
 								<Link href="#modalLogin" data-bs-toggle="modal">Login</Link>
 								<span>/</span>
 								<Link href="#modalRegister" data-bs-toggle="modal">Register</Link>
-							</div>
+							</div> */}
 							<MobileMenu />
-							<div className="button-mobi-sell">
+							{/* <div className="button-mobi-sell">
 								<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
-							</div>
+							</div> */}
 							<div className="mobi-icon-box">
 								<div className="box d-flex align-items-center">
 									<span className="icon icon-phone2" />
