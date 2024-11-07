@@ -52,7 +52,7 @@ export default function Sidebar() {
 							<Link className="nav-menu-link" href="/my-property"><span className="icon icon-list-dashes" />Developers </Link>
 							<ul style={{ display: `${isAccordion  == 5 ? "block" : "none"}` }}>
 								<li className={`${checkCurrentMenuItem("/add-property")}`}>
-									<Link href="/add-property">Create Developers</Link>
+									<Link href="/create-developer">Create Developers</Link>
 								</li>
 								<li className={`${checkCurrentMenuItem("/my-property")}`}>
 									<Link href="/my-property">Developers List</Link>

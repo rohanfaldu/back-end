@@ -10186,6 +10186,10 @@ tr {
     top: 48px;
     right: 0px;
   }
+  .show-password{
+    padding-top: 55px;
+    right: 50px;
+  }
 }
 
 @media only screen and (max-width: 767px) {
@@ -10193,4 +10197,25 @@ tr {
     top: 44px;
     right: 0px;
   }
+}
+@media only screen and (min-width: 1024px) {
+  .show-password{
+    padding-top: 50px;
+    right: 80px;
+  }
+}
+.error{
+  color: #ff0000e3;
+  font-size: 12px;
+}
+
+.show-password{
+    position: absolute;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: rgb(102, 102, 102);
+}
+.show-password img{
+  width: 20px;
 }

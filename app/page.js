@@ -10,6 +10,7 @@ import Service1 from "@/components/sections/Service1"
 import Slider1 from "@/components/sections/Slider1"
 import Testimonial1 from "@/components/sections/Testimonial1"
 import Login from "@/app/login/page"
+
 export default function Home() {
 
 	return (
