@@ -119,7 +119,7 @@ export default function Login() {
 												<Field type="text" id="email_address" name="email_address" className="form-control style-1" />
 												<ErrorMessage name="email_address" component="div" className="error" />
 											</fieldset>
-											<fieldset className="box-fieldset">
+											<fieldset className="box-fieldset admin-login-password">
 												<label htmlFor="pass">Password<span>*</span>:</label>
 												<Field 
 													type={showPassword ? "text" : "password"}

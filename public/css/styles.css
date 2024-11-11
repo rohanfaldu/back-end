@@ -10247,3 +10247,9 @@ tr {
   color: #198754;
   font-size: 12px;
 }
+.admin-login-password{
+  position: relative;
+}
+.admin-login-password .show-password{
+  right: 20px;
+}
