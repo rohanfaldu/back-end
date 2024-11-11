@@ -125,7 +125,7 @@ export default function AddProperty() {
                                             onClick={() => setShowPassword((prev) => !prev)}
                                             className="show-password"
                                             >
-                                            {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
+                                            {showPassword ? <img src="/images/favicon/password-show.png" /> : <img src="/images/favicon/password-hide.png" /> }
                                         </span>
                                         <ErrorMessage name="password" component="div" className="error" />
                                     </fieldset>
