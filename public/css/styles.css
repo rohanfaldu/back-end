@@ -10219,3 +10219,31 @@ tr {
 .show-password img{
   width: 20px;
 }
+.user-charcter{
+	text-align: center;
+  padding-top: 3px;
+  padding-right: 2px;
+  top: 4px;
+  font-size: 25px;
+  font-weight: 500;
+  width: 45px;
+  height: 45px;
+  color: #fff;
+  margin: 0px auto;
+  border-radius: 50%;
+  background-color: #00a8c1;
+  border: 5px solid #00a8c1;
+}
+
+.admin-login{
+  background-color: #fff;
+}
+
+.error{
+  color: #ff0000e3;
+  font-size: 12px;
+}
+.success{
+  color: #198754;
+  font-size: 12px;
+}

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
 	const pathname = usePathname()
@@ -20,7 +21,14 @@ export default function Sidebar() {
 	const handleAccordion = (key) => {
 		setIsAccordion(prevState => prevState === key ? null : key)
 	}
-
+	const router = useRouter();
+	const handleLogout = () => {
+		localStorage.removeItem('token');
+		localStorage.removeItem('user');
+		localStorage.removeItem('tokenExpiration');
+		localStorage.removeItem('isLoggedIn');
+		router.push('/');
+	}
 	return (
 		<>
 		
@@ -37,7 +45,7 @@ export default function Sidebar() {
 							Agency</Link>
 							<ul style={{ display: `${isAccordion  == 3 ? "block" : "none"}` }}>
 								<li className={`${checkCurrentMenuItem("/add-property")}`}>
-									<Link href="/add-property">Create Agnecy</Link>
+									<Link href="/create-agency">Create Agnecy</Link>
 								</li>
 								<li className={`${checkCurrentMenuItem("/my-property")}`}>
 									<Link href="/my-property">Agnecy List</Link>
@@ -94,7 +102,7 @@ export default function Sidebar() {
 						<Link className="nav-menu-link" href="/my-profile"><span className="icon icon-profile" /> My Profile</Link>
 					</li>
 					<li className={`nav-menu-item ${pathname === '/' ? 'active' : ''}`}>
-						<Link className="nav-menu-link" href="/"><span className="icon icon-sign-out" /> Logout</Link>
+						<Link className="nav-menu-link" href="/" onClick={handleLogout}><span className="icon icon-sign-out" /> Logout</Link>
 					</li>
 				</ul>
 			</div>

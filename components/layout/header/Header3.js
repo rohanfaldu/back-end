@@ -1,12 +1,33 @@
 'use client'
 import Link from "next/link"
-import { useState } from "react"
+import React, { useEffect, useState } from 'react';
 import Menu from "../Menu"
 import MobileMenu from "../MobileMenu"
+import { capitalizeFirstChar, getRandomInt } from "../../../components/common/functions"
+import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu, handleMobileMenu }) {
 	const [isToggled, setToggled] = useState(false)
 	const handleToggle = () => setToggled(!isToggled)
+	const [userName, setUserName] = useState('');
+	const [userImage, setUserImage] = useState('');
+	const router = useRouter();
+	useEffect(() => {
+	  const userDetail = JSON.parse(localStorage.getItem('user'));
+	  setUserImage(userDetail.image)
+	  const capitalizedString = capitalizeFirstChar(userDetail.user_name);
+	  setUserName(capitalizedString)
+	}, []);
+	const pathname = usePathname();
+
+	const handleLogout = () => {
+		localStorage.removeItem('token');
+		localStorage.removeItem('user');
+		localStorage.removeItem('tokenExpiration');
+		localStorage.removeItem('isLoggedIn');
+		router.push('/');
+	}
 	return (
 		<>
 
@@ -35,9 +56,9 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 								<div className="header-account">
 									<a onClick={handleToggle} className={`box-avatar dropdown-toggle ${isToggled ? "show" : ""}`}>
 										<div className="avatar avt-40 round">
-											<img src="/images/avatar/avt-2.jpg" alt="avt" />
+											{userImage? <img src={userImage} alt="avt" /> : <div class="user-charcter">{userName.charAt(0)}</div>}
 										</div>
-										<p className="name">Tony Nguyen<span className="icon icon-arr-down" /></p>
+										<p className="name">{userName??""}<span className="icon icon-arr-down" /></p>
 									</a>
 									<div className={`dropdown-menu  ${isToggled ? "show" : ""}`} >
 										<Link className="dropdown-item" href="/my-favorites">My Properties</Link>
@@ -46,7 +67,7 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 										<Link className="dropdown-item" href="/reviews">Reviews</Link>
 										<Link className="dropdown-item" href="/my-profile">My Profile</Link>
 										<Link className="dropdown-item" href="/add-property">Add Property</Link>
-										<Link className="dropdown-item" href="/">Logout</Link>
+										<Link className="dropdown-item" href="/" onClick={handleLogout}>Logout</Link>
 									</div>
 
 									{/* <div className="flat-bt-top">

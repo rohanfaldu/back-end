@@ -39,7 +39,7 @@ export default function AddProperty() {
 			email_address: values.email, 
 			fcm_token: '', 
 			image_url: '', 
-			type: "developer", 
+			type: "agency", 
 			user_login_type	: userType("NONE"),
 			mobile_number: values.phone, 
 			password: values.password
@@ -56,7 +56,6 @@ export default function AddProperty() {
 			resetForm();
 		} 
 		setErrorMessage(response.data.message);
-        console.log("Form data:", values);
         // Here, you can make an API call to submit form data
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
@@ -65,12 +64,14 @@ export default function AddProperty() {
 		const selectedRadioId = event.target.id
 		setSelectedRadio(selectedRadioId)
 	}
+    const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
 
 			{/* <DeleteFile /> */}
 
 			<LayoutAdmin>
+            {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
                 initialValues={{ username: "", email: "", password: "", phone: "" }}
                 validationSchema={validationSchema}
@@ -93,7 +94,7 @@ export default function AddProperty() {
                                 </div>
                             </div> */}
                             <div className="widget-box-2">
-                                <h6 className="title">Developer Information</h6>
+                                <h6 className="title">Agency Information</h6>
                                 <div className="box-info-property">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Name:<span>*</span></label>
@@ -546,7 +547,7 @@ export default function AddProperty() {
                                 </div>
                             </div>
                                 */}
-                            <button type="submit"  className="tf-btn primary" >Add Developer</button>
+                            <button type="submit"  className="tf-btn primary" >Add Agency</button>
                         </div >
                     </Form>
                 )}
