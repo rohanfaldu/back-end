@@ -15,6 +15,7 @@ export default function AddProperty() {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
+    const [filePreview, setFilePreview] = useState(null);
 
     const validationSchema = Yup.object({
         username: Yup.string()
@@ -26,42 +27,65 @@ export default function AddProperty() {
         phone: Yup.string()
             .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
             .required("Phone Number is required"),
+        image: Yup.mixed().required("Image is required"),
     });
 
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
+        console.log(values);
         setErrorMessage('');
-        const userData = {
-			full_name: values.username, 
-			user_name: values.username, 
-			email_address: values.email, 
-			fcm_token: '', 
-			image_url: '', 
-			type: "agency", 
-			user_login_type	: userType("NONE"),
-			phone_number: values.phone.toString(),
-			password: "",
-            user_id: "",
-		}
+        const formData = new FormData();
+        formData.append('image', values.image);
+    
+        try {
+          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+            //console.log(response.data.data.files);
+            const fileUrls = response.data.data.files.map(file => file.url);
 
-        const checkData = {
-			email_address: values.email, 
-			phone_number: parseInt(values.phone,10)
-		}
-	
-		
-        const getUserInfo = await insertData('auth/check/user', checkData);
-        if(getUserInfo.status === false) {
-            const createUserInfo = await insertData('auth/create/user', userData);
-            if(createUserInfo.status === true) {
-            	setSucessMessage(true);
-            	setErrorMessage(createUserInfo.message);
-            	resetForm();
-            } 
-            setErrorMessage(createUserInfo.message);   
-        }else{
-            setErrorMessage(getUserInfo.message);
+            if(fileUrls.length > 0) {
+                console.log(fileUrls);
+                const userData = {
+                    full_name: values.username, 
+                    user_name: values.username, 
+                    email_address: values.email, 
+                    fcm_token: '', 
+                    image_url: fileUrls[0], 
+                    type: "agency", 
+                    user_login_type	: userType("NONE"),
+                    phone_number: values.phone.toString(),
+                    password: "",
+                    user_id: "",
+                }
+        
+                const checkData = {
+                    email_address: values.email, 
+                    phone_number: parseInt(values.phone,10)
+                }
+            
+                
+                const getUserInfo = await insertData('auth/check/user', checkData);
+                if(getUserInfo.status === false) {
+                    const createUserInfo = await insertData('auth/create/user', userData);
+                    if(createUserInfo.status === true) {
+                        setSucessMessage(true);
+                        setErrorMessage("Agency created successfully");
+                        resetForm();
+                    }else{
+                        setErrorMessage(createUserInfo.message);   
+                    } 
+                }else{
+                    setErrorMessage(getUserInfo.message);
+                }
+            }
+        } catch (error) {
+          console.error('Error uploading file:', error);
         }
+
+        
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -78,26 +102,47 @@ export default function AddProperty() {
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ username: "", email: "",  phone: "" }}
+                initialValues={{ username: "", email: "",  phone: "",  image: null  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
+                            <div className="widget-box-2">
                                 <h6 className="title">Upload Media</h6>
                                 <div className="box-uploadfile text-center">
                                     <label className="uploadfile">
-                                        <span className="icon icon-img-2" />
-                                        <div className="btn-upload">
-                                            <Link href="#" className="tf-btn primary">Choose Image</Link>
-                                            <input type="file" className="ip-file" />
-                                        </div>
-                                        <p className="file-name fw-5">Or drop image here to upload</p>
+                                    <span className="icon icon-img-2" />
+                                    <div className="btn-upload">
+                                        <span className="tf-btn primary">Choose Image</span>
+                                        <input
+                                        type="file"
+                                        className="ip-file"
+                                        onChange={(event) => {
+                                            console.log(event.currentTarget);
+                                            const file = event.currentTarget.files[0];
+                                            setFieldValue("image", file);
+                                            setFilePreview(URL.createObjectURL(file));
+                                        }}
+                                        />
+                                    </div>
+                                    {filePreview && (
+                                        <img
+                                        src={filePreview}
+                                        alt="Preview"
+                                        style={{ width: "100px", marginTop: "10px" }}
+                                        />
+                                    )}
+                                    <p className="file-name fw-5">
+                                        Or drop image here to upload
+                                    </p>
                                     </label>
+                                    {errors.image && touched.image && (
+                                    <div className="error">{errors.image}</div>
+                                    )}
                                 </div>
-                            </div> */}
+                            </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Agency Information</h6>
                                 <div className="box-info-property">

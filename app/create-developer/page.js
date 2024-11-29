@@ -54,10 +54,11 @@ export default function AddProperty() {
             const createUserInfo = await insertData('auth/create/user', userData);
             if(createUserInfo.status === true) {
             	setSucessMessage(true);
-            	setErrorMessage(createUserInfo.message);
+            	setErrorMessage("Developer created successfully");
             	resetForm();
+            } else{
+                setErrorMessage(createUserInfo.message);  
             } 
-            setErrorMessage(createUserInfo.message);   
         }else{
             setErrorMessage(getUserInfo.message);
         }
