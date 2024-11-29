@@ -9,6 +9,7 @@ import { userType } from "../../components/common/functions";
 import { useState } from "react"
 import passwordShow from "../../public/images/favicon/password-show.png"; 
 import passwordHide from "../../public/images/favicon/password-hide.png"; 
+import { insertData } from "../../components/api/Axios/Helper";
 export default function AddProperty() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -24,15 +25,11 @@ export default function AddProperty() {
           .required("Email is required"),
         phone: Yup.string()
             .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-            .required("Phone Number is required"),
-        password: Yup.string()
-          .min(6, "Password must be at least 6 characters")
-          .required("Password is required"),
+            .required("Phone Number is required")
     });
 
-    // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
-        console.log(123)
+        setErrorMessage('');
         const userData = {
 			full_name: values.username, 
 			user_name: values.username, 
@@ -41,38 +38,47 @@ export default function AddProperty() {
 			image_url: '', 
 			type: "developer", 
 			user_login_type	: userType("NONE"),
-			mobile_number: values.phone, 
-			password: values.password
+			phone_number: values.phone.toString(),
+			password: "",
+            user_id: "",
 		}
+
+        const checkData = {
+			email_address: values.email, 
+			phone_number: parseInt(values.phone,10)
+		}
+	
 		
-		const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/create-normal/user`, userData, {
-			headers: {
-			"Content-Type": "application/json",
-			},
-		});
-		if(response.data.status === true) {
-			setSucessMessage(true);
-			setErrorMessage(response.data.message);
-			resetForm();
-		} 
-		setErrorMessage(response.data.message);
-        console.log("Form data:", values);
-        // Here, you can make an API call to submit form data
+        const getUserInfo = await insertData('auth/check/user', checkData);
+        if(getUserInfo.status === false) {
+            const createUserInfo = await insertData('auth/create/user', userData);
+            if(createUserInfo.status === true) {
+            	setSucessMessage(true);
+            	setErrorMessage(createUserInfo.message);
+            	resetForm();
+            } 
+            setErrorMessage(createUserInfo.message);   
+        }else{
+            setErrorMessage(getUserInfo.message);
+        }
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
+
 
 	const handleRadioChange = (event) => {
 		const selectedRadioId = event.target.id
 		setSelectedRadio(selectedRadioId)
 	}
+    const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
 
 			{/* <DeleteFile /> */}
 
 			<LayoutAdmin>
+            {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ username: "", email: "", password: "", phone: "" }}
+                initialValues={{ username: "", email: "",phone: "" }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
@@ -110,7 +116,7 @@ export default function AddProperty() {
                                         <Field type="text" id="phone" name="phone" />
                                         <ErrorMessage name="phone" component="div" className="error" />
                                     </fieldset>
-                                    <fieldset className="box-fieldset">
+                                    {/* <fieldset className="box-fieldset">
                                         <label htmlFor="pass">Password<span>*</span>:</label>
                                         <Field 
                                             type={showPassword ? "text" : "password"}
@@ -127,7 +133,7 @@ export default function AddProperty() {
                                             {showPassword ? <img src="/images/favicon/password-show.png" /> : <img src="/images/favicon/password-hide.png" /> }
                                         </span>
                                         <ErrorMessage name="password" component="div" className="error" />
-                                    </fieldset>
+                                    </fieldset> */}
                                     {/*<div className="box grid-3 gap-30">
                                         <fieldset className="box-fieldset">
                                             <label htmlFor="address">
