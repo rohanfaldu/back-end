@@ -49,7 +49,7 @@ export default function Sidebar() {
 									
 								</li>
 								<li className={`${checkCurrentMenuItem("/my-property")}`}>
-									<Link href="/my-property">Agnecy List</Link>
+									<Link href="/agency-listing">Agnecy List</Link>
 								</li>
 								<li className={`${checkCurrentMenuItem("/my-property")}`}>
 									<Link href="/my-property">Sub Agnecy</Link>
