@@ -55,12 +55,18 @@ export const updateData = async (endpoint, data) => {
 };
 
 // Function to handle DELETE requests
-export const deleteData = async (endpoint) => {
+export const deletedData = async (endpoint, data) => {
   try {
-    const response = await axios.delete(`${API_URL}/${endpoint}`);
-    return response.data; // Return a success message or the deleted data
+    const response = await axios.post(`${API_URL}/${endpoint}`, data, {
+			headers: {
+			"Content-Type": "application/json",
+			},
+		});
+    console.log(response);
+    return response.data; // Return the created data
   } catch (error) {
-    console.error('Error deleting data:', error);
-    return false; // Re-throw the error for further handling
+    console.error('Error delete data:', error);
+    throw error; // Re-throw the error for further handling
   }
 };
+

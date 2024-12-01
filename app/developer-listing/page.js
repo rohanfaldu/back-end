@@ -20,7 +20,7 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const type = { type: "agency" };
+        const type = { type: "developer" };
         const getUserInfo = await insertData('auth/getall', type);
         setProperties(getUserInfo.data.user_data); // Save all properties
         setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
@@ -73,7 +73,7 @@ export default function MyProperty() {
     try {
       const deleteData = {
         id: id,
-        type: "agency"
+        type: "developer"
       };
       console.log(deleteData);
       const deleteUserInfo = await deletedData('auth/delete/user', deleteData);
@@ -134,7 +134,7 @@ export default function MyProperty() {
               </div> */}
 
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Listing</h6>
+                <h6 className="title">Developer Listing</h6>
                   {(filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">
@@ -173,7 +173,7 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      <li><Link href={`/edit-agency/${user.id}`} className="item">Edit</Link></li>
+                                      <li><Link href={`/edit-developer/${user.id}`} className="item">Edit</Link></li>
                                       <li><a className="remove-file item" onClick={() => handleDelete(user.id)}>Delete</a></li>
                                     </ul>
                                   </td>
