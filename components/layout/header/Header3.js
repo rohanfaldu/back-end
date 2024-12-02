@@ -72,12 +72,12 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 											<p className="name">{userName??""}<span className="icon icon-arr-down" /></p>
 										</a>
 										<div className={`dropdown-menu  ${isToggled ? "show" : ""}`} >
-											<Link className="dropdown-item" href="/my-favorites">My Properties</Link>
+											{/* <Link className="dropdown-item" href="/my-favorites">My Properties</Link>
 											<Link className="dropdown-item" href="/my-invoices">My Invoices</Link>
 											<Link className="dropdown-item" href="/my-favorites">My Favorites</Link>
 											<Link className="dropdown-item" href="/reviews">Reviews</Link>
 											<Link className="dropdown-item" href="/my-profile">My Profile</Link>
-											<Link className="dropdown-item" href="/add-property">Add Property</Link>
+											<Link className="dropdown-item" href="/add-property">Add Property</Link> */}
 											<Link className="dropdown-item" href="/" onClick={handleLogout}>Logout</Link>
 										</div>
 
@@ -101,11 +101,11 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 								<div className="menu-outer">
 									<div className="navbar-collapse collapse clearfix" id="navbarSupportedContent">
 										<ul className="navigation clearfix">
-											<li><Link href="/my-property">My Properties</Link></li>
+											{/* <li><Link href="/my-property">My Properties</Link></li>
 											<li><Link href="/my-invoices">My Invoices</Link></li>
 											<li><Link href="/my-favorites">My Favorite</Link></li>
 											<li><Link href="/reviews">Reviews</Link></li>
-											<li><Link href="/add-property">Add Property</Link></li>
+											<li><Link href="/add-property">Add Property</Link></li> */}
 											<li><Link href="/">Logout</Link></li>
 										</ul>
 									</div>
