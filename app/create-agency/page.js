@@ -30,6 +30,9 @@ export default function CreateAgency() {
             .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
             .required("Phone Number is required"),
         image: Yup.mixed().required("Image is required"),
+        password: Yup.string()
+          .min(6, "Password must be at least 6 characters")
+          .required("Password is required"),
     });
 
     // Handle form submission
@@ -60,15 +63,15 @@ export default function CreateAgency() {
         if(uploadImage){
             try {
                 const userData = {
-                    full_name: values.username, 
-                    user_name: values.username, 
-                    email_address: values.email, 
+                    full_name: values.username??null, 
+                    user_name: values.username??null, 
+                    email_address: values.email??null, 
                     fcm_token: '', 
                     image_url: uploadImage, 
                     type: "agency", 
                     user_login_type	: userType("NONE"),
                     phone_number: values.phone.toString(),
-                    password: "",
+                    password: values.password??null,
                     user_id: "",
                 }
         
@@ -169,6 +172,24 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">Phone:<span>*</span></label>
                                         <Field type="text" id="phone" name="phone" />
                                         <ErrorMessage name="phone" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="pass">Password<span>*</span>:</label>
+                                        <Field 
+                                            type={showPassword ? "text" : "password"}
+                                            id="password" 
+                                            name="password"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur} 
+                                            style={{ width: "100%", paddingRight: "2.5rem" }}
+                                        />
+                                        <span
+                                            onClick={() => setShowPassword((prev) => !prev)}
+                                            className="show-password"
+                                            >
+                                            {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
+                                        </span>
+                                        <ErrorMessage name="password" component="div" className="error" />
                                     </fieldset>
                                 </div>
                             </div>
