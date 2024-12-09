@@ -29,74 +29,69 @@ export default function CreateDeveloper() {
         phone: Yup.string()
             .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
             .required("Phone Number is required"),
-        image: Yup.mixed().required("Image is required"),
+        //image: Yup.mixed().required("Image is required"),
         password: Yup.string()
           .min(6, "Password must be at least 6 characters")
           .required("Password is required"),
     });
 
     const handleSubmit = async (values, {resetForm}) => {
-        console.log(values);
-        setErrorMessage('');
-        const formData = new FormData();
-        formData.append('image', values.image);
-        if(uploadImage === null) {
-            try {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
-                    headers: {
-                    'Content-Type': 'multipart/form-data',
-                    },
-                });
-                //console.log(response.data.data.files);
-                const fileUrls = response.data.data.files.map(file => file.url);
-                if(fileUrls.length > 0) {
-                    setUploadImage(fileUrls[0]);    
-                } else {
-                    setErrorMessage(fileUrls.message);
-                }   
-            } catch (error) {
-                setErrorMessage(error.message);
-            } 
+        const checkData = {
+            email_address: values.email, 
+            phone_number: parseInt(values.phone,10)
         }
-
-        if(uploadImage){
-            try {
-                const userData = {
-                    full_name: values.username??null, 
-                    user_name: values.username??null, 
-                    email_address: values.email??null, 
-                    fcm_token: null, 
-                    image_url: uploadImage, 
-                    type: "developer", 
-                    user_login_type	: userType("NONE"),
-                    phone_number: values.phone.toString(),
-                    password: values.password??null,
-                    user_id: null,
-                }
-        
-                const checkData = {
-                    email_address: values.email, 
-                    phone_number: parseInt(values.phone,10)
-                }
-            
-                const getUserInfo = await insertData('auth/check/user', checkData);
-                if(getUserInfo.status === false) {
-                    const createUserInfo = await insertData('auth/create/user', userData);
-                    if(createUserInfo.status === true) {
-                        setSucessMessage(true);
-                        setErrorMessage("Developer created successfully");
-                        resetForm();
-                        router.push('/developer-listing');
-                    }else{
-                        setErrorMessage(createUserInfo.message);   
+    
+        const getUserInfo = await insertData('auth/check/user', checkData, false);
+            if(getUserInfo.status === false) {
+                const formDataData = new FormData();
+                formDataData.append('image', values.image);
+                // console.log('file data parameter');
+                // for (let [key, value] of formDataData.entries()) {
+                //     console.log(`${key}:`, value);
+                //   }
+                // console.log(formDataData);
+                // const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formDataData, {
+                //     headers: {
+                //     'Content-Type': 'multipart/form-data',
+                //     },
+                // });
+                // const fileUrls = response.data.data.files.map(file => file.url);
+                // if(fileUrls.length > 0) {
+                //     const image_info = response.data.data.files[0].url;
+                    try {
+                        const userData = {
+                            full_name: values.username??null, 
+                            user_name: values.username??null, 
+                            email_address: values.email??null, 
+                            fcm_token: '', 
+                            image_url: null, 
+                            type: "developer", 
+                            user_login_type	: userType("NONE"),
+                            phone_number: values.phone.toString(),
+                            password: values.password??null,
+                            user_id: null,
+                            device_type:"web",
+                            social_id: null
+                        }
+                        const createUserInfo = await insertData('auth/create/user', userData, false);
+                        if(createUserInfo.status === true) {
+                            setSucessMessage(true);
+                            setErrorMessage("Developer created successfully");
+                            resetForm();
+                            router.push('/developer-listing');
+                        }else{
+                            setErrorMessage(createUserInfo.message);   
+                        } 
+                    } catch (error) {
+                        setErrorMessage(error.message);
                     } 
-                }else{
-                    setErrorMessage(getUserInfo.message);
-                }
-            } catch (error) {
-                setErrorMessage(error.message);
+                // } else {
+                //     setErrorMessage(fileUrls.message);
+                // }
+                
+            }else{
+                setErrorMessage(getUserInfo.message);
             }
-        }
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -121,7 +116,7 @@ export default function CreateDeveloper() {
                 {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
                     <Form>
                         <div>
-                            <div className="widget-box-2">
+                            {/* <div className="widget-box-2">
                                 <h6 className="title">Upload Media</h6>
                                 <div className="box-uploadfile text-center">
                                     <label className="uploadfile">
@@ -154,7 +149,7 @@ export default function CreateDeveloper() {
                                     <div className="error">{errors.image}</div>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="widget-box-2">
                                 <h6 className="title">Developer Information</h6>
                                 <div className="box-info-property">

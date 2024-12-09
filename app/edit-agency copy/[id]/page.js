@@ -27,7 +27,7 @@ export default function EditAgency({params}) {
         const fetchData = async () => {
 		try {
             const type = { type: "agency" };
-            const getUserInfo = await insertData('auth/getall', type);
+            const getUserInfo = await insertData('auth/getall', type, false);
             const allUsersList = getUserInfo.data.user_data;
 			const specifcUserDetail = allUsersList.find(item => item.id === id);
 			setUserDetail(specifcUserDetail);
@@ -61,7 +61,7 @@ export default function EditAgency({params}) {
     const handleDelete = async (id) => {
         const deleteData = { user_id: id, is_deleted: true };
         try {
-            const deleteUserInfo = await insertData('auth/update/user', deleteData);
+            const deleteUserInfo = await insertData('auth/update/user', deleteData, false);
             if(deleteUserInfo.status === true) {
                 setSucessMessage(true);
                 setErrorMessage(createUserInfo.message);
@@ -115,9 +115,9 @@ export default function EditAgency({params}) {
                 }
             
                 
-                const getUserInfo = await insertData('auth/check/user', checkData);
+                const getUserInfo = await insertData('auth/check/user', checkData, false);
                 if(getUserInfo.status === false) {
-                    const createUserInfo = await insertData('auth/update/user', userData);
+                    const createUserInfo = await insertData('auth/update/user', userData, false);
                     if(createUserInfo.status === true) {
                         setSucessMessage(true);
                         setErrorMessage(createUserInfo.message);

@@ -33,7 +33,7 @@ export default function Login() {
 			if(response.data.status === true) {
 				if(response.data.data.userProfile.roles.name === 'admin') {
 					setSucessMessage(true);	
-					localStorage.setItem('token', response.data.token);
+					localStorage.setItem('token', response.data.data.token);
 					localStorage.setItem('user', JSON.stringify(response.data.data.userProfile));
 
 					// Set the token to expire in 1 hour (3600 seconds)

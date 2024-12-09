@@ -1,6 +1,7 @@
 // apiService.js
+'use client'
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
 const API_URL = process.env.NEXT_PUBLIC_API_URL; // Replace with your base API URL
 
 // Function to handle GET requests
@@ -15,14 +16,41 @@ export const getData = async (endpoint) => {
 };
 
 // Function to handle POST requests
-export const insertData = async (endpoint, data) => {
-  console.log(API_URL);
-  console.log(`${API_URL}/${endpoint}`);
-  console.log(data);  
+export const insertData = async (endpoint, data, flag) => {
   try {
-    const response = await axios.post(`${API_URL}/${endpoint}`, data, {
+    //const router = useRouter();
+    let header;
+    if(flag){
+      const token = localStorage.getItem('token');
+      if(!token){
+        router.push('/');
+      }
+      header = { headers: { "Content-Type": "application/json", "Authorization":  `Bearer ${token}` }};
+    } else{
+      header = { headers: { "Content-Type": "application/json" }};
+    }
+    const response = await axios.post(`${API_URL}/${endpoint}`, data, header);
+    return response.data; // Return the created data
+  } catch (error) {
+      // console.log("Error Response:", error.response.status); 
+      // console.error('Error inserting data:', error.status);
+      // throw error; // Re-throw the error for further handling
+    if(error.status === 401){
+      localStorage.clear();
+      router.push('/');
+    }else{
+      console.log("Error Response:", error.response.status); 
+      console.error('Error inserting data:', error);
+      throw error; // Re-throw the error for further handling
+    }
+  }
+};
+
+export const insertImageData = async (data) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/images/upload/single`, data, {
 			headers: {
-			"Content-Type": "application/json",
+			"Content-Type": "multipart/form-data",
 			},
 		});
     console.log(response);

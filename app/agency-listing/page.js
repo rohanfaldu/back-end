@@ -21,7 +21,7 @@ export default function MyProperty() {
     const fetchData = async () => {
       try {
         const type = { type: "agency" };
-        const getUserInfo = await insertData('auth/getall', type);
+        const getUserInfo = await insertData('auth/getall', type, false);
         setProperties(getUserInfo.data.user_data); // Save all properties
         setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
         setLoading(false); // Stop loading

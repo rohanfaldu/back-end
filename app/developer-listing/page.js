@@ -21,7 +21,8 @@ export default function MyProperty() {
     const fetchData = async () => {
       try {
         const type = { type: "developer" };
-        const getUserInfo = await insertData('auth/getall', type);
+        const getUserInfo = await insertData('auth/getall', type, false);
+        console.log(getUserInfo);
         setProperties(getUserInfo.data.user_data); // Save all properties
         setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
         setLoading(false); // Stop loading
@@ -34,7 +35,8 @@ export default function MyProperty() {
 
     fetchData(); // Fetch data on component mount
   }, []);
-
+  // console.log('filteredProperties');
+  // console.log(filteredProperties.length);
   useEffect(() => {
     filterAndPaginateData(); // Apply filter and pagination whenever inputs change
   }, [searchTerm, statusFilter, currentPage, properties]);
@@ -135,7 +137,7 @@ export default function MyProperty() {
 
               <div className="widget-box-2 wd-listing">
                 <h6 className="title">Developer Listing</h6>
-                  {(filteredProperties.length > 0)?
+                  {(Array.isArray(filteredProperties) && filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">
                         <div className="table-responsive">

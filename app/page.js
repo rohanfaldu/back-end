@@ -12,7 +12,7 @@ import Testimonial1 from "@/components/sections/Testimonial1"
 import Login from "@/app/login/page"
 
 export default function Home() {
-
+	
 	return (
 		<>
 

@@ -14,17 +14,38 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 	const [userName, setUserName] = useState('');
 	const [userImage, setUserImage] = useState('');
 	const router = useRouter();
+
 	useEffect(() => {
-	  	const userDetail = JSON.parse(localStorage.getItem('user'));
-		console.log(userDetail);
-	  	if(userDetail === null){
-			setLoading(true);
-	  	} else {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/"); // Redirect to home page
+			return false;
+        }
+		const userDetail = JSON.parse(localStorage.getItem('user'));
+	  	
+		if(userDetail !== null){
 			setLoading(false);
 	  		setUserImage(userDetail.image);
 	  		setUserName(capitalizeFirstChar(userDetail.user_name));
 		}
-	}, []);
+
+    }, [router]);
+
+	// useEffect(() => {
+	//   	const userDetail = JSON.parse(localStorage.getItem('user'));
+	// 	console.log(userDetail);
+	//   	if(userDetail === null){
+	// 		router.push('/');
+	// 		setLoading(true);
+	// 		return false;
+	//   	} 
+		
+	// 	if(userDetail !== null){
+	// 		setLoading(false);
+	//   		setUserImage(userDetail.image);
+	//   		setUserName(capitalizeFirstChar(userDetail.user_name));
+	// 	}
+	// }, []);
 	const pathname = usePathname();
 
 	const handleLogout = () => {
