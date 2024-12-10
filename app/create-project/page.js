@@ -56,6 +56,7 @@ export default function CreateAgency() {
                 if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
+                    console.log(getStateInfo);
                     if(getStateInfo) {
                         setStateList(getStateInfo.data);
                     }
@@ -84,6 +85,7 @@ export default function CreateAgency() {
             }
         };
         fetchData();
+        console.log(stateList);
     });
     const handleStateChange = async (stateId) => {
         console.log('State ID:', stateId);
