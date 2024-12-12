@@ -4,30 +4,26 @@ import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
-import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../public/images/favicon/password-hide.png"; 
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload"
-export default function CreateAgency() {
-    const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+import { insertMultipleUploadImage } from "../../components/common/imageUpload";
+import { capitalizeFirstChar } from "../../components/common/functions"
+export default function CreateProperty() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
-    const [filePreview, setFilePreview] = useState(null);
+	const [propertyMeta, setPropertyMeta] = useState(false);
     const [filePictureImg, setFilePictureImg] = useState(null);
-    const [fileCoverImg, setFileCoverImg] = useState(null);
-    const [uploadImage, setUploadImage] = useState(null);
-    const [uploadFile, setUploadFile] = useState(null);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
+    const [userList, setUserList] = useState([]);
     const [districtList, setDistrictList] = useState([]);
+    const [projectOfListing, setProjectOfListing] = useState([]);
     const [projectOfNumberListing, setProjectOfNumberListing] = useState([]);
+    const [propertyofTypesListing, setpropertyofTypesListing] = useState([]);
     const [projectOfBooleanListing, setProjectOfBooleanListing] = useState([]);
     const [checkedItems, setCheckedItems] = useState({});
+    const [propertyOfMetaNumberValue, setPropertyOfMetaNumberValue] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -47,9 +43,13 @@ export default function CreateAgency() {
         video: Yup.mixed().required("Video is required"),
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
+        transaction_type: Yup.string().required("Transaction type is required"),
+        property_type: Yup.string().required("Property type is required"),
+        user_id: Yup.string().required("User is required"),
     });
     useEffect(() => {
         const fetchData = async () => {
+            // console.log('propertyofTypes');
             try {
                 if(stateList.length === 0){
                     const stateObj = {};
@@ -59,25 +59,51 @@ export default function CreateAgency() {
                         setStateList(getStateInfo.data);
                     }
                 }
+                // console.log('cityList');
+                // console.log(cityList.length);
+                // if(cityList.length === 0){
+                //     const stateObj = {};
+                //     const getCityInfo = await insertData('api/city', stateObj, true);
+                //     console.log(getCityInfo);
+                //     if(getCityInfo) {
+                //         setCityList(getCityInfo.data);
+                //     }
+                // }
 
-                if(cityList.length === 0){
-                    const stateObj = {};
-                    const getCityInfo = await insertData('api/city', stateObj, true);
-                    if(getCityInfo) {
-                        setCityList(getCityInfo.data);
+                if(userList.length === 0){
+                    const getUsersInfo = await insertData('auth/get/agency-developer', {}, false);
+                    if(getUsersInfo.status) {
+                        setUserList(getUsersInfo.data.user_data);
                     }
                 }
-                if(projectOfNumberListing.length === 0){
-                    const stateObj = {};
-                    const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
-                    console.log(getProjectListingInfo);
-                    if(getProjectListingInfo) {
-                        const projectOfNumberType = getProjectListingInfo.data.list.filter(item => item.type === "number");
-                        const projectOfBlooeanType = getProjectListingInfo.data.list.filter(item => item.type === "boolean");
+                
+                if(propertyofTypesListing.length === 0){
+                    const getPropertyTypeInfo = await insertData('api/property-type/', {page: 1, limit: 100}, true);
+                    if(getPropertyTypeInfo.status) {
+                        console.log(getPropertyTypeInfo.data.list);
+                        setpropertyofTypesListing(getPropertyTypeInfo.data.list);
+                    }
+                }
+
+                if(projectOfListing.length === 0){
+                    const getProjectListInfo = await insertData('api/projects/', {}, true);
+                    if(getProjectListInfo.status) {
+                        setProjectOfListing(getProjectListInfo.data);
+                    }
+                }
+                
+                if(!propertyMeta){
+                    const projectMetaObj = { page: 1, limit: 100 };
+                    const getPropertyInfo = await insertData('api/property-type-listings', projectMetaObj, true);
+                    if(getPropertyInfo) {
+                        const projectOfNumberType = getPropertyInfo.data.list.filter(item => item.type === "number");
+                        const projectOfBlooeanType = getPropertyInfo.data.list.filter(item => item.type === "boolean");
                         setProjectOfNumberListing(projectOfNumberType);
                         setProjectOfBooleanListing(projectOfBlooeanType);
                     }
+                    setPropertyMeta(true);
                 }
+                //console.log(propertyofTypes)
             } catch (error) {
                 console.error(error);
             }
@@ -85,6 +111,7 @@ export default function CreateAgency() {
         fetchData();
         console.log(stateList);
     });
+
     const handleStateChange = async (stateId) => {
         console.log('State ID:', stateId);
 
@@ -138,6 +165,20 @@ export default function CreateAgency() {
         }
     };
 
+    const handleNumberChange = (id, value) => {
+        setPropertyOfMetaNumberValue((prev) => {
+          const propertyOfMetaNumberValue = [...prev];
+          const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
+          if (index > -1) {
+            propertyOfMetaNumberValue[index].value = value;
+          } else {
+            const propertyOfMetaNumberObj = {property_type_id: id, value: value};
+            propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
+          }
+          return propertyOfMetaNumberValue;
+        });
+    };
+
     const handleDragOver = (e) => {
         e.preventDefault(); // Prevent default behavior to enable drop
     };
@@ -155,73 +196,61 @@ export default function CreateAgency() {
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
         console.log(values);
-
         const selectedAmenities = projectOfBooleanListing
-        .filter((project) => checkedItems[project.key])
-        .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-  
-      console.log('Selected Amenities:', selectedAmenities);
+            .filter((project) => checkedItems[project.key])
+            .map((project) => ({ property_type_id: project.id, value: "true" }));
+    
+        console.log('Selected Amenities:', selectedAmenities);
+        console.log('Selected Badroom:', propertyOfMetaNumberValue);
 
-       
-        setErrorMessage('');
-        console.log(values);
-        // const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
-        // const getUserInfo = await insertData('auth/check/user', checkData, false);
-        // if(getUserInfo.status === false) {
-            /********* upload image ***********/
-            const uploadImageObj = [values.picture_img, values.video];
-            const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
+        const uploadImageObj = [values.picture_img, values.video];
+        const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
+        if(uploadImageUrl.files.length > 0) {
+            const fileUrls = uploadImageUrl.files.map(file => file.url);
+            let pictureUrl = null;
+            let videoUrl = null;
             if(uploadImageUrl.files.length > 0) {
-                const fileUrls = uploadImageUrl.files.map(file => file.url);
-                let pictureUrl = null;
-                let videoUrl = null;
-                if(uploadImageUrl.files.length > 0) {
-                    pictureUrl = fileUrls[0];
-                    videoUrl = fileUrls[1];
-                }
-                /********* create user ***********/
-                try {
-                    const projectData = {
-                        title_en: values.title_en,
-                        title_fr: values.title_fr,
-                        description_en: values.description_en??null,
-                        description_fr: values.description_fr??null,
-                        price: parseInt(values.price)??0,
-                        vr_link: values.vr_link??null,
-                        picture: pictureUrl,
-                        video: videoUrl,
-                        user_id: "a82bd015-d657-4422-9d1a-d54aaacbedf0",
-                        link_uuid: values.link_uuid??null,
-                        state_id: values.state_id,
-                        city_id: values.city_id,
-                        district_id: values.districts_id,
-                        latitude: values.latitude,
-                        longitude: values.longitude,
-                        meta_details:selectedAmenities,
-                        latitude: "34.092809",
-                        longitude: "-118.328661"
-                    }
-                    console.log('projectData');
-                    console.log(projectData);
-                    const createUserInfo = await insertData('api/projects/create', projectData, true);
-                    console.log('status');
-                    console.log(createUserInfo);
-                    if(createUserInfo.status) {
-                        setSucessMessage(true);
-                        setErrorMessage("Project created successfully");
-                        
-                    }else{
-                        setErrorMessage(createUserInfo.message);   
-                    } 
-                } catch (error) {
-                    setErrorMessage(error.message);
-                } 
-            } else {
-               setErrorMessage('File not uploaded');
+                pictureUrl = fileUrls[0];
+                videoUrl = fileUrls[1];
             }
-        // }else{
-        //     setErrorMessage(getUserInfo.message);
-        // }
+            /********* create user ***********/
+            try {
+                const propertData = {
+                    title_en: values.title_en,
+                    title_fr: values.title_fr,
+                    description_en: values.description_en??null,
+                    description_fr: values.description_fr??null,
+                    price: parseInt(values.price)??0,
+                    vr_link: values.vr_link??null,
+                    picture: pictureUrl,
+                    video: videoUrl,
+                    user_id: values.user_id,
+                    link_uuid: values.link_uuid??null,
+                    state_id: values.state_id,
+                    city_id: values.city_id,
+                    district_id: values.districts_id,
+                    latitude: values.latitude,
+                    transaction: values.transaction_type,
+                    longitude: values.longitude,
+                    type_id: values.property_type,
+                    size: parseInt(values.size_sqft)??0,
+                    meta_details:propertyOfMetaNumberValue,
+                    latitude: "34.092809",
+                    longitude: "-118.328661"
+                }
+                const createPrpertyInfo = await insertData('api/property/create', propertData, true);
+                if(createPrpertyInfo.status) {
+                    setSucessMessage(true);
+                    setErrorMessage("Property created successfully");
+                }else{
+                    setErrorMessage(createPrpertyInfo.message);   
+                } 
+            } catch (error) {
+                setErrorMessage(error.message);
+            } 
+        } else {
+            setErrorMessage('File not uploaded');
+        }
     };
 
     const handleCheckboxChange = (key) => {
@@ -260,6 +289,9 @@ export default function CreateAgency() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
+                    transaction_type: "",
+                    property_type: "",
+                    user_id: "",
                  }}  
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -293,7 +325,7 @@ export default function CreateAgency() {
                                 </div>
                             </div> */}
                             <div className="widget-box-2">
-                                <h6 className="title">Project Information</h6>
+                                <h6 className="title">Property Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
@@ -323,6 +355,79 @@ export default function CreateAgency() {
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Other Information</h6>
+                                <div className="box grid-2 gap-30">
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Transaction Type:<span>*</span></label>
+                                        <Field as="select" name="transaction_type" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("transaction_type", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Transaction Type</option>
+                                            <option value="sale">Fore Sale</option>
+                                            <option value="rental">For Rental</option>
+                                        </Field>
+                                        <ErrorMessage name="transaction_type" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Property Type:<span>*</span></label>
+                                        <Field as="select" name="property_type" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("property_type", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Property Type</option>
+                                            {propertyofTypesListing && propertyofTypesListing.length > 0 ? (
+                                                propertyofTypesListing.map((property) => (
+                                                    <option key={property.id} value={property.id}>{capitalizeFirstChar(property.title)}</option> 
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        <ErrorMessage name="property_type" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Project Listing:<span>*</span></label>
+                                        <Field as="select" name="property_listing" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("property_listing", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Project Listing</option>
+                                            {projectOfListing && projectOfListing.length > 0 ? (
+                                                projectOfListing.map((propertyList) => (
+                                                    <option key={propertyList.id} value={propertyList.id}>{capitalizeFirstChar(propertyList.title)}</option> 
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        <ErrorMessage name="property_listing" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">User Listing:</label>
+                                        <Field as="select" name="user_id" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("user_id", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select User Listing</option>
+                                            {userList && userList.length > 0 ? (
+                                                userList.map((user) => (
+                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></> 
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        <ErrorMessage name="user_id" component="div" className="error" />
+                                    </fieldset>
+                                </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Price:<span>*</span></label>
@@ -351,12 +456,24 @@ export default function CreateAgency() {
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         <ErrorMessage name="credit" component="div" className="error" />
                                     </fieldset>
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="description">Size of sqft:<span>*</span></label>
+                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
+                                        <ErrorMessage name="size_sqft" component="div" className="error" />
+                                    </fieldset>
+                                </div>
+                                <div className="box grid-3 gap-30">
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" />
-                                                    <ErrorMessage name={project.key} component="div" className="error" />
+                                                        <Field 
+                                                            type="number" 
+                                                            name={project.id} 
+                                                            className="box-fieldset" 
+                                                            onChange={(e) => handleNumberChange(project.id, e.target.value)}
+                                                        />
+                                                        <ErrorMessage name={project.key} component="div" className="error" />
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -499,7 +616,7 @@ export default function CreateAgency() {
                                 <h6 className="title">Amenities </h6>
                                 <div className="box-amenities-property">
                                     <div className="box-amenities">
-                                    {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
+                                        {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
                                             projectOfBooleanListing.map((project) => (
                                                 <fieldset className="amenities-item">
                                                     <Field 
@@ -518,7 +635,7 @@ export default function CreateAgency() {
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" >Add Project</button>
+                            <button type="submit"  className="tf-btn primary" >Add Property</button>
                         </div >
                     </Form>
                 )}

@@ -32,17 +32,11 @@ export const insertData = async (endpoint, data, flag) => {
     const response = await axios.post(`${API_URL}/${endpoint}`, data, header);
     return response.data; // Return the created data
   } catch (error) {
-      // console.log("Error Response:", error.response.status); 
-      // console.error('Error inserting data:', error.status);
-      // throw error; // Re-throw the error for further handling
-    if(error.status === 401){
-      localStorage.clear();
-      router.push('/');
-    }else{
-      console.log("Error Response:", error.response.status); 
-      console.error('Error inserting data:', error);
-      throw error; // Re-throw the error for further handling
-    }
+    localStorage.clear();
+    router.push('/');
+    console.log("Error Response:", error.response.status); 
+    console.error('Error inserting data:', error);
+    throw error; // Re-throw the error for further handling
   }
 };
 
@@ -95,6 +89,29 @@ export const deletedData = async (endpoint, data) => {
   } catch (error) {
     console.error('Error delete data:', error);
     throw error; // Re-throw the error for further handling
+  }
+};
+
+export const deletedRecord = async (endpoint, data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if(!token){
+      router.push('/');
+    }
+    console.log(token);
+    const response = await axios.delete(`${API_URL}/api/projects/38cd3335-f837-472e-ab07-f8efb6632331`, data, {
+			headers: { "Content-Type": "application/json", "Authorization":  `Bearer ${token}` },
+		});
+    console.log(response);
+    return response.data; // Return the created data
+  } catch (error) {
+    if(error.response.status === 401){
+      localStorage.clear();
+      router.push('/');
+    }else{
+      console.error('Error delete data:', error);
+      throw error; // Re-throw the error for further handling
+    }
   }
 };
 
