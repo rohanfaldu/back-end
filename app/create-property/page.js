@@ -46,6 +46,7 @@ export default function CreateProperty() {
         transaction_type: Yup.string().required("Transaction type is required"),
         property_type: Yup.string().required("Property type is required"),
         user_id: Yup.string().required("User is required"),
+        size_sqft: Yup.string().required("Size is required"),
     });
     useEffect(() => {
         const fetchData = async () => {
@@ -71,10 +72,12 @@ export default function CreateProperty() {
                 // }
 
                 if(userList.length === 0){
-                    const getUsersInfo = await insertData('auth/get/agency-developer', {}, false);
-                    if(getUsersInfo.status) {
-                        setUserList(getUsersInfo.data.user_data);
-                    }
+                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
+                    const developerList = getUsersDeveloperInfo.data.user_data;
+                    const getUsersAgencyInfo = await insertData('auth/get/agency', {}, false);
+                    const agencyList = getUsersAgencyInfo.data.user_data;
+                    const getalluserInfo = developerList.concat(agencyList);
+                    setUserList(getalluserInfo);
                 }
                 
                 if(propertyofTypesListing.length === 0){
@@ -199,10 +202,11 @@ export default function CreateProperty() {
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ property_type_id: project.id, value: "true" }));
-    
+            if(propertyOfMetaNumberValue.length > 0) {
+                selectedAmenities.push(...propertyOfMetaNumberValue);
+            }
+        //const allAminities = [...selectedAmenities, ...propertyOfMetaNumberValue];
         console.log('Selected Amenities:', selectedAmenities);
-        console.log('Selected Badroom:', propertyOfMetaNumberValue);
-
         const uploadImageObj = [values.picture_img, values.video];
         const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
         if(uploadImageUrl.files.length > 0) {
@@ -234,7 +238,8 @@ export default function CreateProperty() {
                     longitude: values.longitude,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft)??0,
-                    meta_details:propertyOfMetaNumberValue,
+                    meta_details:selectedAmenities,
+                    project_id: values.project_id??null,
                     latitude: "34.092809",
                     longitude: "-118.328661"
                 }
@@ -242,6 +247,7 @@ export default function CreateProperty() {
                 if(createPrpertyInfo.status) {
                     setSucessMessage(true);
                     setErrorMessage("Property created successfully");
+                    router.push('/property-listing');  
                 }else{
                     setErrorMessage(createPrpertyInfo.message);   
                 } 
@@ -292,6 +298,7 @@ export default function CreateProperty() {
                     transaction_type: "",
                     property_type: "",
                     user_id: "",
+                    size_sqft: "",
                  }}  
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -391,10 +398,10 @@ export default function CreateProperty() {
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
-                                        <Field as="select" name="property_listing" className="nice-select country-code"
+                                        <Field as="select" name="project_id" className="nice-select country-code"
                                                 onChange={(e) => {
                                                     const selectedState = e.target.value;
-                                                    setFieldValue("property_listing", selectedState);
+                                                    setFieldValue("project_id", selectedState);
                                                 }}
                                             >
                                             <option value="">Select Project Listing</option>
@@ -406,7 +413,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="property_listing" component="div" className="error" />
+                                        <ErrorMessage name="project_id" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>

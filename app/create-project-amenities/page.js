@@ -58,6 +58,7 @@ export default function CreateProjectAmenities() {
                     if(createPrpertyInfo.status) {
                         setSucessMessage(true);
                         setErrorMessage("Project of Amenities created successfully");
+                        router.push('/project-amenities-listing');
                     }else{
                         setErrorMessage(createPrpertyInfo.message);   
                     } 

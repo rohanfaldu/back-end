@@ -1,51 +1,56 @@
 'use client'
-import PropertyMap from "@/components/elements/PropertyMap"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
 import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../public/images/favicon/password-hide.png"; 
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
+import { allCountries } from "country-telephone-data"; 
 import { insertUploadImage } from "../../components/common/imageUpload"
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
     const [filePreview, setFilePreview] = useState(null);
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [fileCoverImg, setFileCoverImg] = useState(null);
-    const [uploadImage, setUploadImage] = useState(null);
-    const [uploadFile, setUploadFile] = useState(null);
+    const [selectedCode, setSelectedCode] = useState("+33");
+    const [agencyPackageList, setAgencyPackageList] = useState([]);
+    const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const router = useRouter();
     const validationSchema = Yup.object({
-        username: Yup.string()
-          .min(3, "User name must be at least 3 characters")
-          .required("User name is required"),
-        fullname: Yup.string().min(5, "Full name must be at least 5 characters")
-        .required("Full name is required"),
-        email: Yup.string()
-          .email("Invalid email format")
-          .required("Email is required"),
-        countryCode: Yup.string().required("Country code is required"),
-        phone: Yup.string()
-            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-            .required("Phone Number is required"),
+        username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
+        fullname: Yup.string().min(5, "Full name must be at least 5 characters") .required("Full name is required"),
+        email: Yup.string() .email("Invalid email format") .required("Email is required"),
+        country_code: Yup.string().required("Country code is required"),
+        whatsup_country_code: Yup.string().required("Country code is required"),
+        phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
         image: Yup.mixed().required("Image is required"),
-        password: Yup.string()
-          .min(6, "Password must be at least 6 characters")
-          .required("Password is required"),
+        password: Yup.string() .min(6, "Password must be at least 6 characters") .required("Password is required"),
         facebook_link: Yup.string().url("Invalid URL").nullable(),
         twitter_link: Yup.string().url("Invalid URL").nullable(),
         youtube_link: Yup.string().url("Invalid URL").nullable(),
         pinterest_link: Yup.string().url("Invalid URL").nullable(),
         linkedin_link: Yup.string().url("Invalid URL").nullable(),
         instagram_link: Yup.string().url("Invalid URL").nullable()
+    });
+
+    useEffect (() => {
+        const fetchData = async () => {
+            try{
+                if(agencyPackageList.length === 0){
+                    const getAgencyPackageListInfo = await insertData('api/agency-packages/', {page: 1, limit: 100}, true);
+                    if(getAgencyPackageListInfo) {
+                        setAgencyPackageList(getAgencyPackageListInfo.data.list);
+                    }
+                }
+            }catch (error) {
+                console.error('Error inserting data:', error);
+            }
+        }
+        fetchData();
     });
 
     // Handle form submission
@@ -97,9 +102,11 @@ export default function CreateAgency() {
                             service_area:  values.service_area??null,
                             tax_number:  values.tax_number??null,
                             license_number:  values.license_number??null,
-                            picture: "urltopicture.jpg",
-                            cover: "urltocoverimage.jpg"
+                            agency_packages:  values.agency_packages??null,
+                            picture: null,
+                            cover: null
                         };
+                        console.log(agencyData);
                         const createAgencyInfo = await insertData('api/agencies/create', agencyData, true);
                         if(createAgencyInfo.status === true) {
                             resetForm();
@@ -126,6 +133,7 @@ export default function CreateAgency() {
 		const selectedRadioId = event.target.id
 		setSelectedRadio(selectedRadioId)
 	}
+
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
@@ -156,7 +164,8 @@ export default function CreateAgency() {
                     pinterest_link: "", 
                     linkedin_link: "",  
                     instagram_link: "",  
-                    countryCode: "+1",
+                    country_code: "+33",
+                    whatsup_country_code: "+33",
                  }}  
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -202,20 +211,35 @@ export default function CreateAgency() {
                                         <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
                                         <ErrorMessage name="fullname" component="div" className="error" />
                                     </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Phone:<span>*</span></label>
-                                        <div className="phone-field box box-fieldset">
-                                            <Field as="select" name="countryCode" className="nice-select country-code">
-                                                <option value="+1">+1 (US)</option>
-                                                <option value="+91">+91 (India)</option>
-                                                <option value="+44">+44 (UK)</option>
-                                                <option value="+33">+33 (France)</option>
-                                                {/* Add more country codes as needed */}
-                                            </Field>
-                                            <Field name="phone" className="phone-number" />
-                                        </div>
-                                        <ErrorMessage name="countryCode" component="div" className="error" />
+                                    <fieldset className="box-fieldset ">
+                                        <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                            <div className="phone-and-country-code">
+                                                <Field as="select" name="country_code" className="nice-select country-code"
+                                                    id="country-code"
+                                                    value={selectedCode}
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setSelectedCode(selectedState);
+                                                        setFieldValue("country_code", selectedState);
+                                                        //handleCityChange(selectedState);
+                                                    }}
+                                                >
+                                                    <option value="">Select Country Code</option>
+                                                    {allCountries && allCountries.length > 0 ? (
+                                                        allCountries
+                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
+                                                        .map((country, index) =>(
+                                                            <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                                <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                            </div>
                                         <ErrorMessage name="phone" component="div" className="error" />
+                                        <ErrorMessage name="country_code" component="div" className="error" />
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
@@ -256,7 +280,32 @@ export default function CreateAgency() {
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Whatsup number:</label>
-                                        <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
+                                            <div className="phone-and-country-code">
+                                                <Field as="select" name="whatsup_country_code" className="nice-select country-code"
+                                                    id="country-code"
+                                                    value={selectedCode}
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setSelectedWhatsupCode(selectedState);
+                                                        setFieldValue("whatsup_country_code", selectedState);
+                                                        //handleCityChange(selectedState);
+                                                    }}
+                                                >
+                                                    <option value="">Select Country Code</option>
+                                                    {allCountries && allCountries.length > 0 ? (
+                                                        allCountries
+                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
+                                                        .map((country, index) =>(
+                                                            <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                                <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
+                                            </div>
+                                        <ErrorMessage name="whatsup_country_code" component="div" className="error" />
                                         <ErrorMessage name="whatsup_number" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
@@ -280,6 +329,28 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         <ErrorMessage name="credit" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Agency Packages:</label>
+                                            <Field as="select" name="agency_packages" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("agency_packages", selectedState);
+                                                    //handleAgencyPackageChange(selectedState);
+                                                }}
+                                            >
+                                                <option value="">Select Agency Packages</option>
+                                                {agencyPackageList && agencyPackageList.length > 0 ? (
+                                                    agencyPackageList.map((agency) => (
+                                                        <option key={agency.id} value={agency.id}>
+                                                            {agency.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </Field>
+                                        <ErrorMessage name="agency_packages" component="div" className="error" />
                                     </fieldset>
                                 </div>
                                 <div className="grid-2 box gap-30">

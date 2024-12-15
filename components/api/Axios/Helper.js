@@ -32,9 +32,10 @@ export const insertData = async (endpoint, data, flag) => {
     const response = await axios.post(`${API_URL}/${endpoint}`, data, header);
     return response.data; // Return the created data
   } catch (error) {
-    localStorage.clear();
-    router.push('/');
-    console.log("Error Response:", error.response.status); 
+    if(error.status === 401){
+      localStorage.clear();
+      window.location.href = '/'; 
+    }
     console.error('Error inserting data:', error);
     throw error; // Re-throw the error for further handling
   }
@@ -79,15 +80,32 @@ export const updateData = async (endpoint, data) => {
 // Function to handle DELETE requests
 export const deletedData = async (endpoint, data) => {
   try {
-    const response = await axios.post(`${API_URL}/${endpoint}`, data, {
-			headers: {
-			"Content-Type": "application/json",
-			},
-		});
-    console.log(response);
-    return response.data; // Return the created data
+    const token = localStorage.getItem('token');
+    console.log(token);
+    if(!token){
+      router.push('/');
+      window.location.href = '/';
+      return false;
+    }
+
+    const options = {
+      method: 'DELETE',
+      url: `${API_URL}/${endpoint}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'content-type': 'application/json'
+      }
+    };
+
+    const { data } = await axios.request(options);
+    console.log(data);
+    return data; // Return the created data
   } catch (error) {
     console.error('Error delete data:', error);
+    if(error.status === 401){
+      localStorage.clear();
+      window.location.href = '/'; 
+    }
     throw error; // Re-throw the error for further handling
   }
 };

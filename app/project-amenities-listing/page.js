@@ -3,10 +3,12 @@
 import DeleteFile from "@/components/elements/DeleteFile";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
 import Link from "next/link";
-import { insertData, deletedRecord } from "../../components/api/Axios/Helper";
+import { insertData, deletedData } from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
-
+import Image from 'next/image';
+import EditIcon from "../../public/images/favicon/edit.png";
+import DeleteIcon from "../../public/images/favicon/delete.png";
 export default function ProjectAmenitiesListing() {
   const [properties, setProperties] = useState([]); // Store all fetched properties
   const [filteredPropertysofamenities, setfilteredPropertysofamenities] = useState([]); // Store filtered properties
@@ -72,15 +74,21 @@ export default function ProjectAmenitiesListing() {
   const handleDelete = async (id) => {
     console.log(id);
     try {
-      const deleteObject = { project_id: id };
-      const deleteUserInfo = await deletedRecord(`api/projects/${id}`, deleteObject);
-      crossOriginIsolated.log(deleteUserInfo);
+      const data = { id: id };
+      const deleteUserInfo = await deletedData(`api/project-type-listings/${id}`, data);
+      if(deleteUserInfo.status){
+        const filteredData = filteredPropertysofamenities.filter((item) => item.id !== id);
+        setProperties(filteredData); // Save all properties
+        setfilteredPropertysofamenities(filteredData); // Initially display all properties
+        setLoading(false); // Stop loading
+        setError(null); // Clear errors
+      }else{
+        alert(deleteUserInfo.message);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred'); // Handle error
       setLoading(false); // Stop loading
     }
-    // setSearchTerm(e.target.value);
-    // setCurrentPage(1); // Reset to first page on search
   };
 
   // Handle status filter change
@@ -88,7 +96,7 @@ export default function ProjectAmenitiesListing() {
     setStatusFilter(e.target.value);
     setCurrentPage(1); // Reset to first page on filter
   };
-
+  console.log(filteredPropertysofamenities);
   return (
     <>
       {loading ? (
@@ -126,7 +134,7 @@ export default function ProjectAmenitiesListing() {
               </div> */}
 
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Property Listing</h6>
+                <h6 className="title">Project Aminities Listing</h6>
                   {(filteredPropertysofamenities.length > 0)?
                     <>
                       <div className="wrap-table">
@@ -164,8 +172,26 @@ export default function ProjectAmenitiesListing() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li><Link href={`/edit-agency/${property.id}`} className="item">Edit</Link></li>
-                                      <li><a className="remove-file item" onClick={() => handleDelete(property.id)}>Delete</a></li> */}
+                                      {/* <li className="edit">
+                                        <Link href={`/edit-agency/${property.id}`} className="item">
+                                          <Image 
+                                            src={EditIcon} // Imported image object or static path
+                                            alt="Edit icon" 
+                                            width={25} 
+                                            height={25} 
+                                          />
+                                        </Link>
+                                      </li> */}
+                                      <li className="delete">
+                                        <a className="remove-file item" onClick={() => handleDelete(property.id)}>
+                                          <Image 
+                                              src={DeleteIcon} // Imported image object or static path
+                                              alt="Delete icon" 
+                                              width={25} 
+                                              height={25} 
+                                            />
+                                        </a>
+                                      </li>                                        
                                     </ul>
                                   </td>
                                 </tr>

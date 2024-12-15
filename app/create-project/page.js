@@ -11,7 +11,8 @@ import { useRouter } from 'next/navigation';
 import passwordShow from "../../public/images/favicon/password-show.png"; 
 import passwordHide from "../../public/images/favicon/password-hide.png"; 
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload"
+import { insertMultipleUploadImage } from "../../components/common/imageUpload";
+import { capitalizeFirstChar } from "../../components/common/functions";
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,6 +24,7 @@ export default function CreateAgency() {
     const [uploadImage, setUploadImage] = useState(null);
     const [uploadFile, setUploadFile] = useState(null);
     const [stateList, setStateList] = useState([]);
+    const [developerList, setDeveloperList] = useState([]);
     const [cityList, setCityList] = useState([]);
     const [districtList, setDistrictList] = useState([]);
     const [projectOfNumberListing, setProjectOfNumberListing] = useState([]);
@@ -31,12 +33,8 @@ export default function CreateAgency() {
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const router = useRouter();
     const validationSchema = Yup.object({
-        title_en: Yup.string()
-            .min(3, "Title must be at least 3 characters")
-            .required("Title is required"),
-        title_fr: Yup.string()
-            .min(3, "Title must be at least 3 characters")
-            .required("Title is required"),
+        title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
+        title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
         description_en: Yup.string().required("Description is required"),
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
@@ -47,7 +45,9 @@ export default function CreateAgency() {
         video: Yup.mixed().required("Video is required"),
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
+        user_id: Yup.string().required("Developer is required"),
     });
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -76,6 +76,13 @@ export default function CreateAgency() {
                         const projectOfBlooeanType = getProjectListingInfo.data.list.filter(item => item.type === "boolean");
                         setProjectOfNumberListing(projectOfNumberType);
                         setProjectOfBooleanListing(projectOfBlooeanType);
+                    }
+                }
+                if(developerList.length === 0){ 
+                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
+                    const developerList = getUsersDeveloperInfo.data.user_data;
+                    if(developerList.length) {
+                        setDeveloperList(developerList);
                     }
                 }
             } catch (error) {
@@ -160,7 +167,7 @@ export default function CreateAgency() {
         .filter((project) => checkedItems[project.key])
         .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
   
-      console.log('Selected Amenities:', selectedAmenities);
+        console.log('Selected Amenities:', selectedAmenities);
 
        
         setErrorMessage('');
@@ -190,7 +197,7 @@ export default function CreateAgency() {
                         vr_link: values.vr_link??null,
                         picture: pictureUrl,
                         video: videoUrl,
-                        user_id: "a82bd015-d657-4422-9d1a-d54aaacbedf0",
+                        user_id: values.user_id,
                         link_uuid: values.link_uuid??null,
                         state_id: values.state_id,
                         city_id: values.city_id,
@@ -209,7 +216,7 @@ export default function CreateAgency() {
                     if(createUserInfo.status) {
                         setSucessMessage(true);
                         setErrorMessage("Project created successfully");
-                        
+                        router.push('/project-listing');  
                     }else{
                         setErrorMessage(createUserInfo.message);   
                     } 
@@ -260,6 +267,7 @@ export default function CreateAgency() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
+                    user_id: "",
                  }}  
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -335,7 +343,7 @@ export default function CreateAgency() {
                                         <ErrorMessage name="vr_link" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:</label>
+                                        <label htmlFor="desc">Link UUID:<span>*</span></label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
                                         <ErrorMessage name="link_uuid" component="div" className="error" />
                                     </fieldset>
@@ -350,6 +358,25 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         <ErrorMessage name="credit" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">User Listing:</label>
+                                        <Field as="select" name="user_id" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("user_id", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select User Listing</option>
+                                            {developerList && developerList.length > 0 ? (
+                                                developerList.map((user) => (
+                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></> 
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        <ErrorMessage name="user_id" component="div" className="error" />
                                     </fieldset>
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (

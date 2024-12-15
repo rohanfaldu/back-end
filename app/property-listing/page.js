@@ -3,9 +3,12 @@
 import DeleteFile from "@/components/elements/DeleteFile";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
 import Link from "next/link";
-import { insertData, deletedRecord } from "../../components/api/Axios/Helper";
+import { insertData, deletedData } from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import EditIcon from "../../public/images/favicon/edit.png";
+import DeleteIcon from "../../public/images/favicon/delete.png";
 
 export default function PropertyListing() {
   const [properties, setProperties] = useState([]); // Store all fetched properties
@@ -70,17 +73,23 @@ export default function PropertyListing() {
   };
 
   const handleDelete = async (id) => {
-    console.log(id);
+    console.log(id)
     try {
-      const deleteObject = { project_id: id };
-      const deleteUserInfo = await deletedRecord(`api/projects/${id}`, deleteObject);
-      crossOriginIsolated.log(deleteUserInfo);
+      const data = { propertyId: id };
+      const deleteUserInfo = await deletedData(`api/property/${id}`, data);
+      if(deleteUserInfo.status){
+        const filteredData = filteredPropertys.filter((item) => item.id !== id);
+        setProperties(filteredData); // Save all properties
+        setfilteredPropertys(filteredData); // Initially display all properties
+        setLoading(false); // Stop loading
+        setError(null); // Clear errors
+      }else{
+        alert(deleteUserInfo.message);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred'); // Handle error
       setLoading(false); // Stop loading
     }
-    // setSearchTerm(e.target.value);
-    // setCurrentPage(1); // Reset to first page on search
   };
 
   // Handle status filter change
@@ -154,7 +163,7 @@ export default function PropertyListing() {
                                   </td>
                                   <td>{property.title}</td>
                                   <td>
-                                    {property.user_name}
+                                    ${property.price}
                                   </td>
                                   <td>{new Date(property.created_at).toLocaleDateString()}</td>
                                   <td>
@@ -163,11 +172,29 @@ export default function PropertyListing() {
                                     </div>
                                   </td>
                                   <td>
-                                    <ul className="list-action">
-                                      {/* <li><Link href={`/edit-agency/${property.id}`} className="item">Edit</Link></li>
-                                      <li><a className="remove-file item" onClick={() => handleDelete(property.id)}>Delete</a></li> */}
-                                    </ul>
-                                  </td>
+                                      <ul className="list-action">
+                                        {/* <li className="edit">
+                                          <Link href={`/edit-agency/${property.id}`} className="item">
+                                            <Image 
+                                              src={EditIcon} // Imported image object or static path
+                                              alt="Edit icon" 
+                                              width={25} 
+                                              height={25} 
+                                            />
+                                          </Link>
+                                        </li> */}
+                                        <li className="delete">
+                                          <a className="remove-file item" onClick={() => handleDelete(property.id)}>
+                                            <Image 
+                                                src={DeleteIcon} // Imported image object or static path
+                                                alt="Delete icon" 
+                                                width={25} 
+                                                height={25} 
+                                              />
+                                          </a>
+                                        </li>                                        
+                                      </ul>
+                                    </td>
                                 </tr>
                               ))}
                             </tbody>

@@ -8739,6 +8739,9 @@ label {
 .layout-wrap .wrap-table .listing-box .content .text-date {
   margin-bottom: 8px;
 }
+.layout-wrap .wrap-table .status-wrap.inactive .btn-status {
+  background-color: #004169;
+}
 .layout-wrap .wrap-table .status-wrap .btn-status {
   padding: 2px 8px;
   border-radius: 4px;
@@ -8746,7 +8749,7 @@ label {
   line-height: 24px;
   font-weight: 500;
   color: #ffffff;
-  background-color: #198754;
+  background-color: #00a8c1;
 }
 .layout-wrap .wrap-table .list-action li:not(:last-child) {
   margin-bottom: 8px;
@@ -10292,4 +10295,19 @@ tr {
 .error-message li {
   list-style-type: none;
   margin-bottom: 5px;
+}
+
+.phone-and-country-code .country-code{
+  width: 50%;
+  margin-right: 15px;
+}
+.phone-and-country-code{
+  display: flex;
+}
+
+.file-delete .list-action{
+  display: flex;
+}
+.list-action .edit{
+  margin-right: 10px;
 }

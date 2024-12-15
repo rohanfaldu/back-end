@@ -3,10 +3,7 @@ import { insertImageData } from "../../components/api/Axios/Helper";
 
 export async function insertUploadImage(name, images) {
     const formDataData = new FormData();
-    images.forEach((image) => {
-        console.log(image);
-        formDataData.append('image', image); // Use the same key for all images
-    });
+    formDataData.append('image', images); 
     //formDataData.append(images);
     const response = await insertImageData(formDataData);
     console.log(response.status);

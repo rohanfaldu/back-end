@@ -38,8 +38,9 @@ export default function CreatePropertyType() {
           
           const createPrpertyInfo = await insertData('api/property-type/create', propertData, true);
           if(createPrpertyInfo.status) {
-              setSucessMessage(true);
-              setErrorMessage("Property of Type created successfully");
+                setSucessMessage(true);
+                setErrorMessage("Property of Type created successfully");
+                router.push('/property-type-listing');
           }else{
               setErrorMessage(createPrpertyInfo.message);   
           } 

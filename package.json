@@ -15,6 +15,7 @@
         "@react-spring/web": "^9.7.5",
         "axios": "^1.7.7",
         "chart.js": "^4.4.2",
+        "country-telephone-data": "^0.6.3",
         "formik": "^2.4.6",
         "leaflet": "^1.9.4",
         "next": "14.1.4",

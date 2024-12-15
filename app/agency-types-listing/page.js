@@ -3,15 +3,16 @@
 import DeleteFile from "@/components/elements/DeleteFile";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
 import Link from "next/link";
+import Image from 'next/image';
 import { insertData, deletedData } from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
-export default function MyProperty() {
+export default function ProjectAmenitiesListing() {
+  console.log(EditIcon);
   const [properties, setProperties] = useState([]); // Store all fetched properties
-  const [filteredProperties, setFilteredProperties] = useState([]); // Store filtered properties
+  const [filteredPropertysofamenities, setfilteredPropertysofamenities] = useState([]); // Store filtered properties
   const [loading, setLoading] = useState(true); // Manage loading state
   const [error, setError] = useState(null); // Manage error state
   const [searchTerm, setSearchTerm] = useState(''); // Store search input
@@ -22,11 +23,8 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const type = {};
-        const getUserInfo = await insertData('api/projects', type, true);
-        console.log(getUserInfo);
-        setProperties(getUserInfo.data); // Save all properties
-        setFilteredProperties(getUserInfo.data); // Initially display all properties
+        const getUserInfo = await insertData('api/agency-packages', { page: 1, limit: 10 }, true);
+        setfilteredPropertysofamenities(getUserInfo.data.list); // Initially display all properties
         setLoading(false); // Stop loading
         setError(null); // Clear errors
       } catch (err) {
@@ -36,16 +34,13 @@ export default function MyProperty() {
     };
 
     fetchData(); // Fetch data on component mount
-  }, []);
-
-  useEffect(() => {
-    filterAndPaginateData(); // Apply filter and pagination whenever inputs change
+    filterAndPaginateData();
   }, [searchTerm, statusFilter, currentPage, properties]);
 
   // Filter and paginate properties
   const filterAndPaginateData = () => {
-    let filtered = properties;
-
+    let filtered = filteredPropertysofamenities;
+    console.log(filtered);
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(property =>
@@ -62,7 +57,7 @@ export default function MyProperty() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
 
-    setFilteredProperties(paginated);
+    setfilteredPropertysofamenities(paginated);
   };
 
   // Handle search input
@@ -72,27 +67,24 @@ export default function MyProperty() {
   };
 
   const handleDelete = async (id) => {
-    console.log(id);
     try {
-      const data = { project_id: id };
-      const deleteUserInfo = await deletedData(`api/projects/${id}`, data);
-      console.log('deleteUserInfo');
-      console.log(deleteUserInfo);
+      const deleteObject = { project_id: id };
+      const deleteUserInfo = await deletedData(`api/agency-packages/${id}`, deleteObject);
       if(deleteUserInfo.status){
-        const filteredData = filteredProperties.filter((item) => item.id !== id);
+        const filteredData = filteredPropertysofamenities.filter((item) => item.id !== id);
+        console.log(filteredData);
         setProperties(filteredData); // Save all properties
-        setFilteredProperties(filteredData); // Initially display all properties
+        setfilteredPropertysofamenities(filteredData); // Initially display all properties
         setLoading(false); // Stop loading
         setError(null); // Clear errors
       }else{
         alert(deleteUserInfo.message);
       }
+      
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred'); // Handle error
       setLoading(false); // Stop loading
     }
-    // setSearchTerm(e.target.value);
-    // setCurrentPage(1); // Reset to first page on search
   };
 
   // Handle status filter change
@@ -138,35 +130,27 @@ export default function MyProperty() {
               </div> */}
 
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Project Listing</h6>
-                  {(filteredProperties.length > 0)?
+                <h6 className="title">Agency Packages Listing</h6>
+                  {(filteredPropertysofamenities.length > 0)?
                     <>
                       <div className="wrap-table">
                         <div className="table-responsive">
                           <table>
                             <thead>
                               <tr>
-                                <th>Image</th>
                                 <th>Title</th>
-                                <th>User name</th>
+                                <th>Type</th>
                                 <th>Date Published</th>
                                 <th>Status</th>
                                 <th>Action</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {filteredProperties.map(property => (
+                              {filteredPropertysofamenities.map(property => (
                                 <tr key={property.id} className="file-delete">
+                                  <td>{property.name}</td>
                                   <td>
-                                    <div className="listing-box">
-                                      <div className="images">
-                                        <img src={property.picture || '/images/avatar/user-image.png'} alt="images" />
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td>{property.title}</td>
-                                  <td>
-                                    {property.user_name}
+                                    {property.type}
                                   </td>
                                   <td>{new Date(property.created_at).toLocaleDateString()}</td>
                                   <td>
@@ -223,9 +207,8 @@ export default function MyProperty() {
                           <table>
                             <thead>
                               <tr>
-                                <th>Image</th>
                                 <th>Title</th>
-                                <th>User name</th>
+                                <th>Type</th>
                                 <th>Date Published</th>
                                 <th>Status</th>
                                 <th>Action</th>

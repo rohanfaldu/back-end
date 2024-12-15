@@ -57,7 +57,8 @@ export default function CreatePropertyAmenities() {
                     const createPrpertyInfo = await insertData('api/property-type-listings/create', propertData, true);
                     if(createPrpertyInfo.status) {
                         setSucessMessage(true);
-                        setErrorMessage("Property of Amenities created successfully");
+                        setErrorMessage("Project of Amenities created successfully");
+                        router.push('/property-amenities-listing');
                     }else{
                         setErrorMessage(createPrpertyInfo.message);   
                     } 

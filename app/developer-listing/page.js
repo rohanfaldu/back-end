@@ -3,10 +3,12 @@
 import DeleteFile from "@/components/elements/DeleteFile";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
 import Link from "next/link";
+import Image from 'next/image';
 import { insertData, deletedData } from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
-
+import EditIcon from "../../public/images/favicon/edit.png";
+import DeleteIcon from "../../public/images/favicon/delete.png";
 export default function MyProperty() {
   const [properties, setProperties] = useState([]); // Store all fetched properties
   const [filteredProperties, setFilteredProperties] = useState([]); // Store filtered properties
@@ -71,27 +73,26 @@ export default function MyProperty() {
   };
 
   const handleDelete = async (id) => {
-    console.log(id);
-    try {
-      const deleteData = {
-        id: id,
-        type: "developer"
-      };
-      console.log(deleteData);
-      const deleteUserInfo = await deletedData('auth/delete/user', deleteData);
-      console.log(deleteUserInfo);   
-      // setProperties(getUserInfo.data.user_data); // Save all properties
-      // setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
-      // setLoading(false); // Stop loading
-      // setError(null); // Clear errors
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred'); // Handle error
-      setLoading(false); // Stop loading
-    }
-    console.log(id);
-    // setSearchTerm(e.target.value);
-    // setCurrentPage(1); // Reset to first page on search
-  };
+      console.log(id);
+      try {
+        const deleteData = { id: id, type: "developer" };
+        console.log(deleteData);
+        const deleteUserInfo = await insertData('auth/delete/user', deleteData);
+        if(deleteUserInfo.status){
+          const filteredData = filteredProperties.filter((item) => item.id !== id);
+          console.log(filteredData);
+          setProperties(filteredData); // Save all properties
+          setFilteredProperties(filteredData); // Initially display all properties
+          setLoading(false); // Stop loading
+          setError(null); // Clear errors
+        }else{
+          alert(deleteUserInfo.message);
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || 'An error occurred'); // Handle error
+        setLoading(false); // Stop loading
+      }
+    };
 
   // Handle status filter change
   const handleStatusChange = (e) => {
@@ -175,8 +176,26 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      <li><Link href={`/edit-developer/${user.id}`} className="item">Edit</Link></li>
-                                      <li><a className="remove-file item" onClick={() => handleDelete(user.id)}>Delete</a></li>
+                                      {/* <li className="edit">
+                                        <Link href={`/edit-agency/${user.id}`} className="item">
+                                          <Image 
+                                            src={EditIcon} // Imported image object or static path
+                                            alt="Edit icon" 
+                                            width={25} 
+                                            height={25} 
+                                          />
+                                        </Link>
+                                      </li> */}
+                                      <li className="delete">
+                                        <a className="remove-file item" onClick={() => handleDelete(user.id)}>
+                                          <Image 
+                                              src={DeleteIcon} // Imported image object or static path
+                                              alt="Delete icon" 
+                                              width={25} 
+                                              height={25} 
+                                            />
+                                        </a>
+                                      </li>                                        
                                     </ul>
                                   </td>
                                 </tr>
