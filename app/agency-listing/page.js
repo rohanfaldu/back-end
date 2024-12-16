@@ -169,7 +169,7 @@ export default function MyProperty() {
                                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                   <td>
                                     <div className="status-wrap">
-                                      <Link href="#" className="btn-status">{user.status? 'Active':'Inactive'}</Link>
+                                      <Link href="#" className="btn-status">{user.status? 'Inactive': 'Active'}</Link>
                                     </div>
                                   </td>
                                   <td>

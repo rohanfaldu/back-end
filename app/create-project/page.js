@@ -46,6 +46,7 @@ export default function CreateAgency() {
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
         user_id: Yup.string().required("Developer is required"),
+        link_uuid: Yup.string().required("Link uuid is required"),
     });
     
     useEffect(() => {
@@ -268,6 +269,7 @@ export default function CreateAgency() {
                     city_id: "",
                     districts_id: "",
                     user_id: "",
+                    link_uuid: "",
                  }}  
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
