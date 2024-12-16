@@ -142,7 +142,7 @@ export default function ProjectAmenitiesListing() {
                           <table>
                             <thead>
                               <tr>
-                                <th>Image</th>
+                                {/* <th>Image</th> */}
                                 <th>Title</th>
                                 <th>Price / Transaction</th>
                                 <th>Date Published</th>
@@ -153,13 +153,13 @@ export default function ProjectAmenitiesListing() {
                             <tbody>
                               {filteredPropertysofamenities.map(property => (
                                 <tr key={property.id} className="file-delete">
-                                  <td>
+                                  {/* <td>
                                     <div className="listing-box">
                                       <div className="images">
                                         <img src={property.icon || '/images/avatar/user-image.png'} alt="images" />
                                       </div>
                                     </div>
-                                  </td>
+                                  </td> */}
                                   <td>{property.name}</td>
                                   <td>
                                     {property.type}
