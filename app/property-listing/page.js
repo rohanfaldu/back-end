@@ -145,7 +145,7 @@ export default function PropertyListing() {
                               <tr>
                                 <th>Image</th>
                                 <th>Title</th>
-                                <th>Price / Transaction</th>
+                                <th>Price / User Name</th>
                                 <th>Date Published</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -163,7 +163,8 @@ export default function PropertyListing() {
                                   </td>
                                   <td>{property.title}</td>
                                   <td>
-                                    ${property.price}
+                                    ${property.price}<br/>
+                                    {property.user_name}
                                   </td>
                                   <td>{new Date(property.created_at).toLocaleDateString()}</td>
                                   <td>
