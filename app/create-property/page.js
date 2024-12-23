@@ -1,5 +1,6 @@
 'use client'
 import PropertyMap from "@/components/elements/PropertyMap"
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -464,7 +465,7 @@ export default function CreateProperty() {
                                         <ErrorMessage name="credit" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Size of sqft:<span>*</span></label>
+                                        <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
                                         <ErrorMessage name="size_sqft" component="div" className="error" />
                                     </fieldset>
@@ -616,7 +617,7 @@ export default function CreateProperty() {
                                         <input type="text" className="form-control style-1" name="address" />
                                         <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
                                     </div>
-                                    <PropertyMap singleMap />
+                                    <PropertyMapMarker />
                                 </div>
                             </div>
                             <div className="widget-box-2">

@@ -12,11 +12,13 @@
     "dependencies": {
         "@babel/runtime": "^7.24.5",
         "@headlessui/react": "^2.0.3",
+        "@react-google-maps/api": "^2.20.3",
         "@react-spring/web": "^9.7.5",
         "axios": "^1.7.7",
         "chart.js": "^4.4.2",
         "country-telephone-data": "^0.6.3",
         "formik": "^2.4.6",
+        "google-maps-react-markers": "^2.0.11",
         "leaflet": "^1.9.4",
         "next": "14.1.4",
         "react": "^18.3.1",

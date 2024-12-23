@@ -260,7 +260,7 @@ export default function CreateAgency() {
                     title_fr: "",
                     description_en: "",
                     description_fr: "",
-                    price: "",
+                    price: 0,
                     vr_link: "",
                     picture_img: null, // Use `null` for file inputs
                     video: null, // Use `null` for file inputs
@@ -334,11 +334,11 @@ export default function CreateAgency() {
                             <div className="widget-box-2">
                                 <h6 className="title">Other Information</h6>
                                 <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Price:<span>*</span></label>
-                                        <Field type="text" id="price" name="price" className="box-fieldset" />
+                                        <Field type="number" id="price" name="price" className="box-fieldset" />
                                         <ErrorMessage name="price" component="div" className="error" />
-                                    </fieldset>
+                                    </fieldset> */}
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
