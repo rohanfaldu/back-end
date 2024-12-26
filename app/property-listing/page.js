@@ -157,7 +157,10 @@ export default function PropertyListing() {
                                   <td>
                                     <div className="listing-box">
                                       <div className="images">
-                                        <img src={property.picture || '/images/avatar/user-image.png'} alt="images" />
+                                        <img
+                                            src={(property.picture?.split(',')[0].trim()) || '/images/avatar/user-image.png'}
+                                            alt="images"
+                                        />
                                       </div>
                                     </div>
                                   </td>
@@ -176,24 +179,24 @@ export default function PropertyListing() {
                                       <ul className="list-action">
                                         {/* <li className="edit">
                                           <Link href={`/edit-agency/${property.id}`} className="item">
-                                            <Image 
+                                            <Image
                                               src={EditIcon} // Imported image object or static path
-                                              alt="Edit icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Edit icon"
+                                              width={25}
+                                              height={25}
                                             />
                                           </Link>
                                         </li> */}
                                         <li className="delete">
                                           <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                            <Image 
+                                            <Image
                                                 src={DeleteIcon} // Imported image object or static path
-                                                alt="Delete icon" 
-                                                width={25} 
-                                                height={25} 
+                                                alt="Delete icon"
+                                                width={25}
+                                                height={25}
                                               />
                                           </a>
-                                        </li>                                        
+                                        </li>
                                       </ul>
                                     </td>
                                 </tr>
@@ -239,7 +242,7 @@ export default function PropertyListing() {
                       </div>
                     </>
                   }
-                
+
               </div>
             </div>
           </LayoutAdmin>
