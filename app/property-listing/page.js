@@ -158,7 +158,7 @@ export default function PropertyListing() {
                                     <div className="listing-box">
                                       <div className="images">
                                         <img
-                                            src={(property.picture?.split(',')[0].trim()) || '/images/avatar/user-image.png'}
+                                            src={(property.picture[0]) || '/images/avatar/user-image.png'}
                                             alt="images"
                                         />
                                       </div>
