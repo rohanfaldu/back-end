@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
-import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
+// import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 
 import  "../../components/ErrorPopup/ErrorPopup.css";
@@ -55,7 +55,7 @@ export default function CreateProperty() {
         description_en: Yup.string().required("Description is required"),
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
-        vr_link: Yup.string().url("Invalid URL").nullable(),
+        // vr_link: Yup.string().url("Invalid URL").nullable(),
         picture_img: Yup.array().min(1, "At least one image is required").required("Image is required"),
         credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
@@ -412,7 +412,7 @@ export default function CreateProperty() {
                     description_en: "",
                     description_fr: "",
                     price: "",
-                    vr_link: "",
+//                    vr_link: "",
                     picture_img: [], // Set this to an empty array for multiple files
                     video: null, // Use `null` for file inputs
                     video_link: "", // Add this for YouTube video link
@@ -567,7 +567,7 @@ export default function CreateProperty() {
                                         <Field type="text" id="price" name="price" className="box-fieldset" />
                                         <ErrorMessage name="price" component="div" className="error" />
                                     </fieldset>
-                                    <fieldset className="box box-fieldset">
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
                                         <ErrorMessage name="vr_link" component="div" className="error" />
@@ -576,7 +576,7 @@ export default function CreateProperty() {
                                         <label htmlFor="desc">Link UUID:</label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
                                         <ErrorMessage name="link_uuid" component="div" className="error" />
-                                    </fieldset>
+                                    </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
@@ -663,21 +663,14 @@ export default function CreateProperty() {
 
                                     {/* Video Option Radio Buttons */}
                                     <div>
-                                        <label>
-                                            <Field
-                                                type="radio"
-                                                name="videoOption"
-                                                className="tf-radio"
-                                                value="upload"
-                                                onChange={() => {
+                                    <fieldset className="fieldset-radio">
+                                            <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
                                                     setIsVideoUpload(true); // Update the state for conditional rendering
                                                     setFieldValue("video", null); // Reset the file field in Formik state
-                                                }}
-                                            />
-                                            Upload Video
-                                        </label>
-                                        <label>
-                                            <Field
+                                                }} defaultChecked />
+                                            <label htmlFor="upload" className="text-radio">Upload Video</label>
+                                       
+                                            <input
                                                 type="radio"
                                                 className="tf-radio"
                                                 name="videoOption"
@@ -687,8 +680,8 @@ export default function CreateProperty() {
                                                     setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
                                                 }}
                                             />
-                                            YouTube Link
-                                        </label>
+                                             <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
+                                             </fieldset>
                                     </div>
 
                                     {/* Conditional Fields */}
@@ -814,19 +807,19 @@ export default function CreateProperty() {
                                     value={address}
                                     readOnly
                                     />  
-                                    <ReactGooglePlacesAutocomplete
+                                    {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
                                         }}
-                                    />                                      
+                                    />                                       */}
                                     <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
                                     </div>
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
-                                        zoom={10}
+
                                     />
                                 </div>
                             </div>

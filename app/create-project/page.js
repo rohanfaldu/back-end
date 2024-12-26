@@ -55,15 +55,18 @@ export default function CreateAgency() {
                 if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo);
+                    console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
-                        setStateList(getStateInfo.data);
+                        setStateList(getStateInfo.data.states);
                     }
                 }
 
                 if(cityList.length === 0){
                     const stateObj = {};
                     const getCityInfo = await insertData('api/city', stateObj, true);
+                    console.log('getCityInfo');
+                    console.log(getCityInfo);
+
                     if(getCityInfo) {
                         setCityList(getCityInfo.data);
                     }
@@ -101,10 +104,12 @@ export default function CreateAgency() {
             return;
         }
         try {
-            const cityObj = { state_id: stateId };
+            const cityObj = { state_id: stateId,  lang: "en"};
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                setCityList(getCityInfo.data);
+                console.log("test");
+                console.log(getCityInfo);
+                setCityList(getCityInfo.data.cities);
             } else {
                 setCityList([]);
             }
@@ -121,10 +126,10 @@ export default function CreateAgency() {
             return;
         }
         try {
-            const districtObj = { city_id: cityId };
+            const districtObj = { city_id: cityId ,lang:"en"};
             const getDistrictInfo = await insertData('api/district', districtObj, true);
             if (getDistrictInfo.status) {
-                setDistrictList(getDistrictInfo.data);
+                setDistrictList(getDistrictInfo.data.districts);
             } else {
                 setDistrictList([]);
             }
@@ -489,7 +494,7 @@ export default function CreateAgency() {
                                                 {cityList && cityList.length > 0 ? (
                                                     cityList.map((cities) => (
                                                         <option key={cities.id} value={cities.id}>
-                                                            {cities.name}
+                                                            {cities.city_name}
                                                         </option>
                                                     ))
                                                 ) : (
@@ -505,7 +510,7 @@ export default function CreateAgency() {
                                                 {districtList && districtList.length > 0 ? (
                                                     districtList.map((districts) => (
                                                         <option key={districts.id} value={districts.id}>
-                                                            {districts.name}
+                                                            {districts.district_name}
                                                         </option>
                                                     ))
                                                 ) : (
