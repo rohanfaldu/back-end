@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
+import GooglePlacesAutocomplete from "@/components/elements/GooglePlacesAutocomplete"; // Adjust the path based on your project structure
+
 // import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 
@@ -25,6 +27,7 @@ export default function CreateProperty() {
     const [cityList, setCityList] = useState([]);
     const [userList, setUserList] = useState([]);
     const [districtList, setDistrictList] = useState([]);
+    const [neighborhoodList, setNeighborhoodList] = useState([]);
     const [projectOfListing, setProjectOfListing] = useState([]);
     const [projectOfNumberListing, setProjectOfNumberListing] = useState([]);
     const [propertyofTypesListing, setpropertyofTypesListing] = useState([]);
@@ -62,6 +65,7 @@ export default function CreateProperty() {
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
+        neighborhood_id: Yup.string().required("Neighborhood is required"),
         transaction_type: Yup.string().required("Transaction type is required"),
         property_type: Yup.string().required("Property type is required"),
         user_id: Yup.string().required("User is required"),
@@ -78,7 +82,7 @@ export default function CreateProperty() {
                     const getStateInfo = await insertData('api/state', stateObj, true);
                     console.log(getStateInfo);
                     if(getStateInfo) {
-                        setStateList(getStateInfo.data);
+                        setStateList(getStateInfo.data.states);
                     }
                 }
                 // console.log('cityList');
@@ -139,21 +143,21 @@ export default function CreateProperty() {
     const handleStateChange = async (stateId) => {
         console.log('State ID:', stateId);
         const selectedState = stateList.find((state) => state.id === stateId);
-        console.log('selectedState ID:', selectedState);
+        console.log('selectedState ID:', selectedState.latitude);
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
-            latitude: 31.968599,
-            longitude: -99.901810
+            latitude: latitude,
+            longitude: longitude
         });
         if (!stateId) {
             setCityList([]); // Clear cities if no state is selected
             return;
         }
         try {
-            const cityObj = { state_id: stateId };
+            const cityObj = { state_id: stateId , lang:"en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                setCityList(getCityInfo.data);
+                setCityList(getCityInfo.data.cities);
             } else {
                 setCityList([]);
             }
@@ -164,28 +168,70 @@ export default function CreateProperty() {
     };
     const handleDistrictChange = async (DistrictId) => {
         console.log('District ID:', DistrictId);
+        const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
+        console.log('selectedState ID:', selectedDistricts.latitude);
+        const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
-            latitude: 33.51535,
-            longitude: 7.81677
-          });
+            latitude: latitude,
+            longitude: longitude
+        });
+
+        if (!DistrictId) {
+            setNeighborhoodList([]); // Clear cities if no state is selected
+            return;
+        }
+        try {
+            const districtObj = { district_id: DistrictId , lang:"en" };
+            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
+            if (getNeighborhoodObjInfo.status) {
+                setNeighborhoodList(getNeighborhoodObjInfo.data);
+            } else {
+                setNeighborhoodList([]);
+            }
+        } catch (error) {
+            console.error("Error fetching cities:", error);
+            setNeighborhoodList([]);
+        }
+      
      
     };
+    const handleNeighborhoodChange = async (NeighborhoodId) => {
+        console.log('NeighborhoodId ID:', NeighborhoodId);
+        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
+        if (selecteNeighborhood) {
+            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
+            const { latitude, longitude } = selecteNeighborhood;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+            });
+        } else {
+            console.error('Neighborhood not found');
+        }
+    };
+    
+      
+   
 
     const handleCityChange = async (cityId) => {
         console.log('City ID:', cityId);
+        const selectedCites = cityList.find((cities) => cities.id === cityId);
+        console.log('selectedState ID:', selectedCites.latitude);
+        const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
-            latitude: 33.51535,
-            longitude: 7.81677
+            latitude: latitude,
+            longitude: longitude
         });
+       
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
             return;
         }
         try {
-            const districtObj = { city_id: cityId };
+            const districtObj = { city_id: cityId, lang:"en" };
             const getDistrictInfo = await insertData('api/district', districtObj, true);
             if (getDistrictInfo.status) {
-                setDistrictList(getDistrictInfo.data);
+                setDistrictList(getDistrictInfo.data.districts);
             } else {
                 setDistrictList([]);
             }
@@ -329,6 +375,7 @@ export default function CreateProperty() {
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
+                    neighborhood_id: values.neighborhood_id,
                     latitude: values.latitude,
                     transaction: values.transaction_type,
                     longitude: values.longitude,
@@ -420,6 +467,7 @@ export default function CreateProperty() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
+                    neighborhood_id: "",    
                     transaction_type: "",
                     property_type: "",
                     user_id: "",
@@ -734,7 +782,7 @@ export default function CreateProperty() {
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Location</h6>
-                                <div className="box grid-3 gap-30">
+                                <div className="box grid-4 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">State:</label>
                                         <Field as="select" name="state_id" className="nice-select country-code"
@@ -767,7 +815,7 @@ export default function CreateProperty() {
                                                 {cityList && cityList.length > 0 ? (
                                                     cityList.map((cities) => (
                                                         <option key={cities.id} value={cities.id}>
-                                                            {cities.name}
+                                                            {cities.city_name}
                                                         </option>
                                                     ))
                                                 ) : (
@@ -787,7 +835,7 @@ export default function CreateProperty() {
                                                 {districtList && districtList.length > 0 ? (
                                                     districtList.map((districts) => (
                                                         <option key={districts.id} value={districts.id}>
-                                                            {districts.name}
+                                                            {districts.district_name}
                                                         </option>
                                                     ))
                                                 ) : (
@@ -795,6 +843,26 @@ export default function CreateProperty() {
                                                 )}
                                             </Field>
                                         <ErrorMessage name="districts_id" component="div" className="error" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Neighborhood:</label>
+                                            <Field as="select" name="neighborhood_id" className="nice-select country-code"  onChange={(e) => {
+                                                    const selectedNeighborhood = e.target.value;
+                                                    setFieldValue("neighborhood_id", selectedNeighborhood);
+                                                    handleNeighborhoodChange(selectedNeighborhood);
+                                                }}>
+                                                <option value="">Select Neighborhood</option>
+                                                {neighborhoodList && neighborhoodList.length > 0 ? (
+                                                    neighborhoodList.map((neighborhoods) => (
+                                                        <option key={neighborhoods.id} value={neighborhoods.id}>
+                                                            {neighborhoods.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </Field>
+                                        <ErrorMessage name="neighborhood_id" component="div" className="error" />
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
@@ -807,6 +875,8 @@ export default function CreateProperty() {
                                     value={address}
                                     readOnly
                                     />  
+                                                {/* <GooglePlacesAutocomplete /> */}
+
                                     {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
                                         selectProps={{
