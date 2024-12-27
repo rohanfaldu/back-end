@@ -16,7 +16,7 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 
 	const { isLoaded } = useJsApiLoader({
 		id: 'google-map-script',
-		googleMapsApiKey: 'AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag',
+		googleMapsApiKey: 'AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw',
 	});
 
 	useEffect(() => {

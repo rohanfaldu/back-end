@@ -279,8 +279,8 @@ export default function CreateAgency() {
                         latitude: values.latitude,
                         longitude: values.longitude,
                         meta_details:selectedAmenities,
-                        latitude: "34.092809",
-                        longitude: "-118.328661",
+                        latitude: 34.092809,
+                        longitude: -118.328661,
                         address:""
                     }
                     console.log('projectData');

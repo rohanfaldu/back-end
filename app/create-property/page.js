@@ -897,7 +897,7 @@ export default function CreateProperty() {
                                                 {/* <GooglePlacesAutocomplete /> */}
 
                                     {/* <ReactGooglePlacesAutocomplete
-                                        apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
+                                        apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),

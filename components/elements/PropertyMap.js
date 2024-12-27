@@ -21,7 +21,7 @@ export default function PropertyMap({ topmap, singleMap }) {
 	
 	const { isLoaded } = useJsApiLoader({
 		id: 'google-map-script',
-		googleMapsApiKey: 'AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag',
+		googleMapsApiKey: 'AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw',
 	  })
 	
 	const [map, setMap] = React.useState(null)
