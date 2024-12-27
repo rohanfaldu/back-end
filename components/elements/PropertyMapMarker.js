@@ -21,10 +21,10 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 
 	useEffect(() => {
 		if (isGeolocation) {
-			console.log("isGeolocation");
+			// console.log("isGeolocation");
 
 		  if ("geolocation" in navigator) {
-			console.log("Geolocation");
+			// console.log("Geolocation");
 
 			navigator.geolocation.getCurrentPosition(
 			  (position) => {
@@ -49,32 +49,34 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 
 		  setCurrentLocation({ lat: latitude, lng: longitude });
 		}
-	  }, [isGeolocation, latitude, longitude]);
+	}, [isGeolocation, latitude, longitude]);
 	
-
-
-
+	console.log(currentLocation);
 	// Custom marker icon
 	const customIcon = {
 		url: '/images/favicon/marker.jpg', // Replace with the correct path to your image
 		scaledSize: { width: 40, height: 40 }, // Adjust size
 		origin: { x: 0, y: 0 }, // Image origin
-		anchor: { x: 20, y: 40 },  // Image anchor point
+		// Image anchor point
 	};
-	console.log(currentLocation);
+	// console.log(currentLocation);
 	
-	const zoomlevel = zoom? zoom: 14;
-	console.log(zoomlevel);
-	const center = {
-		lat: isGeolocationAvailable ? currentLocation.lat : latitude || 33.985047,
-		lng: isGeolocationAvailable ? currentLocation.lng : longitude || -118.469483,
-	  };
-	  const onLoad = useCallback(function callback(map) {
-		const bounds = new window.google.maps.LatLngBounds(center);
-		map.fitBounds(bounds);
-		setMap(map);
-	  }, [center]);
+	const zoomlevel = zoom? zoom: 8;
 
+	const center = {
+		lat: latitude ? currentLocation.lat || 33.5945144 : latitude ,
+		lng: latitude ? currentLocation.lng || -7.6200284 : longitude ,
+	  };
+	  
+	  const onLoad = useCallback(function callback(map) {
+		if (zoomlevel) {
+			map.setZoom(zoomlevel); // Explicitly set zoom level
+		} else {
+			const bounds = new window.google.maps.LatLngBounds(center);
+			map.fitBounds(bounds);
+		}
+		setMap(map);
+	}, [center,zoomlevel]);
 	const onUnmount = useCallback(function callback(map) {
 		setMap(null);
 	}, []);
@@ -89,10 +91,10 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
           onLoad={onLoad}
           onUnmount={onUnmount}
         >
-    	<Marker
+    	{/* <Marker
             position={center} // Position of the marker
             icon={customIcon} // Custom icon
-          />
+          /> */}
         </GoogleMap>
       ) : (
         <Preloader /> 

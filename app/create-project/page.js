@@ -13,6 +13,7 @@ import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,7 +23,9 @@ export default function CreateAgency() {
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [fileCoverImg, setFileCoverImg] = useState(null);
     const [uploadImage, setUploadImage] = useState(null);
+    const [neighborhoodList, setNeighborhoodList] = useState([]);
     const [uploadFile, setUploadFile] = useState(null);
+    const [isVideoUpload, setIsVideoUpload] = useState(true);
     const [stateList, setStateList] = useState([]);
     const [developerList, setDeveloperList] = useState([]);
     const [cityList, setCityList] = useState([]);
@@ -32,6 +35,11 @@ export default function CreateAgency() {
     const [checkedItems, setCheckedItems] = useState({});
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const router = useRouter();
+    const [propertyMapCoords, setPropertyMapCoords] = useState({
+        latitude: 33.5945144,
+        longitude: -7.6200284,
+        zoom: 6
+    });
     const validationSchema = Yup.object({
         title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
         title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -42,9 +50,9 @@ export default function CreateAgency() {
         picture_img: Yup.mixed().required("Image is required"),
         credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
-        video: Yup.mixed().required("Video is required"),
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
+        neighborhood_id: Yup.string().required("Neighborhood is required"),
         user_id: Yup.string().required("Developer is required"),
         link_uuid: Yup.string().required("Link uuid is required"),
     });
@@ -61,17 +69,17 @@ export default function CreateAgency() {
                     }
                 }
 
-                if(cityList.length === 0){
-                    const stateObj = {};
-                    const getCityInfo = await insertData('api/city', stateObj, true);
-                    console.log('getCityInfo');
-                    console.log(getCityInfo);
+                // if(cityList.length === 0){
+                //     const stateObj = {};
+                //     const getCityInfo = await insertData('api/city', stateObj, true);
+                //     console.log('getCityInfo');
+                //     console.log(getCityInfo);
 
-                    if(getCityInfo) {
-                        setCityList(getCityInfo.data);
-                    }
-                }
-                if(projectOfNumberListing.length === 0){
+                //     if(getCityInfo) {
+                //         setCityList(getCityInfo.data);
+                //     }
+                // }
+                if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
                     const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
                     console.log(getProjectListingInfo);
@@ -99,34 +107,36 @@ export default function CreateAgency() {
     const handleStateChange = async (stateId) => {
         console.log('State ID:', stateId);
 
-        if (!stateId) {
-            setCityList([]); // Clear cities if no state is selected
-            return;
-        }
-        try {
-            const cityObj = { state_id: stateId,  lang: "en"};
+        const selectedState = stateList.find((state) => state.id === stateId);
+        const { latitude, longitude } = selectedState;
+        setPropertyMapCoords({
+            latitude: latitude,
+            longitude: longitude
+        });
+        if(cityList.length === 0){
+            const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                console.log("test");
-                console.log(getCityInfo);
+                console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
-            } else {
-                setCityList([]);
             }
-        } catch (error) {
-            console.error("Error fetching cities:", error);
-            setCityList([]);
         }
     };
     const handleCityChange = async (cityId) => {
-        console.log('City ID:', cityId);
-
+        const selectedCites = cityList.find((cities) => cities.id === cityId);
+        console.log('selectedState ID:', selectedCites.latitude);
+        const { latitude, longitude } = selectedCites;
+        setPropertyMapCoords({
+            latitude: latitude,
+            longitude: longitude
+        });
+       
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
             return;
         }
         try {
-            const districtObj = { city_id: cityId ,lang:"en"};
+            const districtObj = { city_id: cityId, lang: "en" };
             const getDistrictInfo = await insertData('api/district', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data.districts);
@@ -138,6 +148,35 @@ export default function CreateAgency() {
             setDistrictList([]);
         }
     }; 
+
+    const handleDistrictChange = async (DistrictId) => {
+        console.log('District ID:', DistrictId);
+        const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
+        console.log('selectedState ID:', selectedDistricts.latitude);
+        const { latitude, longitude } = selectedDistricts;
+        setPropertyMapCoords({
+            latitude: latitude,
+            longitude: longitude
+        });
+
+        if (!DistrictId) {
+            setNeighborhoodList([]); // Clear cities if no state is selected
+            return;
+        }
+        try {
+            const districtObj = { district_id: DistrictId , lang:"en" };
+            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
+            if (getNeighborhoodObjInfo.status) {
+                setNeighborhoodList(getNeighborhoodObjInfo.data);
+            } else {
+                setNeighborhoodList([]);
+            }
+        } catch (error) {
+            console.error("Error fetching cities:", error);
+            setNeighborhoodList([]);
+        }
+    };
+
     const handleVideoUpload = (e) => {
         const file = e.target.files[0];
         if (file.type === "video/mp4" && file.size <= 20 * 1024 * 1024) { // Check for file type and size (20 MB)
@@ -148,6 +187,21 @@ export default function CreateAgency() {
             alert("File size exceeds the 20 MB limit. Please upload a smaller video.");
         } else {
             alert("Please upload a valid MP4 video.");
+        }
+    };
+
+    const handleNeighborhoodChange = async (NeighborhoodId) => {
+        console.log('NeighborhoodId ID:', NeighborhoodId);
+        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
+        if (selecteNeighborhood) {
+            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
+            const { latitude, longitude } = selecteNeighborhood;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+            });
+        } else {
+            console.error('Neighborhood not found');
         }
     };
 
@@ -168,6 +222,15 @@ export default function CreateAgency() {
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
         console.log(values);
+        if (isVideoUpload && !values.video) {
+            alert("Please upload a video file.");
+            return false;
+        }
+    
+        if (!isVideoUpload && !values.video_link) {
+            alert("Please enter a YouTube video link.");
+            return false;
+        }
 
         const selectedAmenities = projectOfBooleanListing
         .filter((project) => checkedItems[project.key])
@@ -176,7 +239,7 @@ export default function CreateAgency() {
         console.log('Selected Amenities:', selectedAmenities);
 
        
-        setErrorMessage('');
+        //setErrorMessage('');
         console.log(values);
         // const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
         // const getUserInfo = await insertData('auth/check/user', checkData, false);
@@ -191,6 +254,10 @@ export default function CreateAgency() {
                 if(uploadImageUrl.files.length > 0) {
                     pictureUrl = fileUrls[0];
                     videoUrl = fileUrls[1];
+                }
+
+                if (!videoUrl) {
+                    videoUrl = values.video_link;
                 }
                 /********* create user ***********/
                 try {
@@ -208,11 +275,13 @@ export default function CreateAgency() {
                         state_id: values.state_id,
                         city_id: values.city_id,
                         district_id: values.districts_id,
+                        neighborhoods_id: values.neighborhood_id,
                         latitude: values.latitude,
                         longitude: values.longitude,
                         meta_details:selectedAmenities,
                         latitude: "34.092809",
-                        longitude: "-118.328661"
+                        longitude: "-118.328661",
+                        address:""
                     }
                     console.log('projectData');
                     console.log(projectData);
@@ -247,6 +316,19 @@ export default function CreateAgency() {
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
+        const isUpload = event.target.value === "upload";
+        setIsVideoUpload(isUpload);
+      
+        if (!isUpload) {
+          // Switching to YouTube Link
+          setVideoPreview(null); // Clear video preview
+          setFieldValue("video", null); // Clear Formik video field
+        }else if(isUpload){
+
+          setFieldValue("video_link", null); 
+          setVideoLink(null); // Update YouTube link manually
+
+        }
 		const selectedRadioId = event.target.id
 		setSelectedRadio(selectedRadioId)
 	}
@@ -273,6 +355,7 @@ export default function CreateAgency() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
+                    neighborhood_id: "", 
                     user_id: "",
                     link_uuid: "",
                  }}  
@@ -419,49 +502,81 @@ export default function CreateAgency() {
                                         </div>
                                     </fieldset>
                                     <fieldset className="box-fieldset">
-                                        <label htmlFor="videoUpload">Video Upload:</label>
-                                        <div
-                                            className="box-floor-img uploadfile"
-                                            onDragOver={handleDragOver}
-                                            onDrop={handleDrop}
-                                        >
-                                            <div className="btn-upload">
-                                                <label className="tf-btn primary">
-                                                    Choose File
-                                                    <input
-                                                        type="file"
-                                                        className="ip-file"
-                                                        accept="video/mp4"
-                                                        onChange={(event) => {
-                                                            const file = event.currentTarget.files[0];
-                                                            if (file.type === "video/mp4" && file.size <= 20 * 1024 * 1024) { // Check for file type and size (20 MB)
-                                                                setFieldValue("video", file);
-                                                                setVideoPreview(URL.createObjectURL(file));
-                                                            } else if (file.size > 20 * 1024 * 1024) {
-                                                                alert("File size exceeds the 20 MB limit. Please upload a smaller video.");
-                                                            } else {
-                                                                alert("Please upload a valid MP4 video.");
-                                                            }
-                                                        }}
-                                                        style={{ display: 'none' }}
-                                                    />
-                                                </label>
-                                                {videoPreview ? (
-                                                <video controls className="uploadFileImage">
-                                                    <source src={videoPreview} type="video/mp4" />
+                                        <legend>Video Option</legend>
+
+                                        {/* Video Option Radio Buttons */}
+                                        <div>
+                                            <fieldset className="fieldset-radio">
+                                                <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
+                                                        setIsVideoUpload(true); // Update the state for conditional rendering
+                                                        setFieldValue("video", null); // Reset the file field in Formik state
+                                                    }} defaultChecked />
+                                                <label htmlFor="upload" className="text-radio">Upload Video</label>
+                                        
+                                                <input
+                                                    type="radio"
+                                                    className="tf-radio"
+                                                    name="videoOption"
+                                                    value="link"
+                                                    onChange={() => {
+                                                        setIsVideoUpload(false); // Update the state for conditional rendering
+                                                        setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
+                                                    }}
+                                                />
+                                                <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
+                                                </fieldset>
+                                        </div>
+
+                                        {/* Conditional Fields */}
+                                        {isVideoUpload ? (
+                                            // Video Upload Field
+                                            <div className="box-floor-img uploadfile">
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                        Choose File
+                                                        <input
+                                                            type="file"
+                                                            accept="video/mp4"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                                const file = event.target.files[0];
+                                                                if (file) {
+                                                                    setFieldValue("video", file); // Set the video file in Formik state
+                                                                    setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                }
+                                                            }}
+                                                            style={{ display: "none" }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                {videoPreview && (
+                                                    <video controls className="uploadFileImage">
+                                                        <source src={videoPreview} type="video/mp4" />
                                                         Your browser does not support the video tag.
                                                     </video>
-                                                ) : (<></>)}
-                                            </div>  
+                                                )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                {errors.video && touched.video && ( <div className="error">{errors.video}</div> )}
-                                        </div>
+                                                <ErrorMessage name="video" component="div" className="error" />
+                                            </div>
+                                        ) : (
+                                            // YouTube Link Input Field
+                                            <div>
+                                                <label htmlFor="video_link">YouTube Link:</label>
+                                                <Field
+                                                    type="text"
+                                                    name="video_link"
+                                                    className="form-control"
+                                                    placeholder="Enter YouTube video link"
+                                                />
+                                                <ErrorMessage name="video_link" component="div" className="error" />
+                                            </div>
+                                        )}
                                     </fieldset>
                                 </div>
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Location</h6>
-                                <div className="box grid-3 gap-30">
+                                <div className="box grid-4 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">State:</label>
                                         <Field as="select" name="state_id" className="nice-select country-code"
@@ -505,7 +620,11 @@ export default function CreateAgency() {
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
-                                            <Field as="select" name="districts_id" className="nice-select country-code">
+                                            <Field as="select" name="districts_id" className="nice-select country-code"  onChange={(e) => {
+                                                    const selectedDistrict = e.target.value;
+                                                    setFieldValue("districts_id", selectedDistrict);
+                                                    handleDistrictChange(selectedDistrict);
+                                                }}>
                                                 <option value="">Select District</option>
                                                 {districtList && districtList.length > 0 ? (
                                                     districtList.map((districts) => (
@@ -519,14 +638,38 @@ export default function CreateAgency() {
                                             </Field>
                                         <ErrorMessage name="districts_id" component="div" className="error" />
                                     </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Neighborhood:</label>
+                                            <Field as="select" name="neighborhood_id" className="nice-select country-code"  onChange={(e) => {
+                                                    const selectedNeighborhood = e.target.value;
+                                                    setFieldValue("neighborhood_id", selectedNeighborhood);
+                                                    handleNeighborhoodChange(selectedNeighborhood);
+                                                }}>
+                                                <option value="">Select Neighborhood</option>
+                                                {neighborhoodList && neighborhoodList.length > 0 ? (
+                                                    neighborhoodList.map((neighborhoods) => (
+                                                        <option key={neighborhoods.id} value={neighborhoods.id}>
+                                                            {neighborhoods.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </Field>
+                                        <ErrorMessage name="neighborhood_id" component="div" className="error" />
+                                    </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    <label htmlFor="location">Address:<span>*</span></label>
+                                    {/* <label htmlFor="location">Address:<span>*</span></label>
                                     <div className="box-ip">
                                         <input type="text" className="form-control style-1" name="address" />
                                         <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div>
-                                    <PropertyMap singleMap />
+                                    </div> */}
+                                    <PropertyMapMarker
+                                        latitude={propertyMapCoords.latitude}
+                                        longitude={propertyMapCoords.longitude}
+                                        zoom={propertyMapCoords.zoom}
+                                    />
                                 </div>
                             </div>
                             <div className="widget-box-2">

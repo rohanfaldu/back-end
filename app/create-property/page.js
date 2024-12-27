@@ -11,12 +11,11 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
 import GooglePlacesAutocomplete from "@/components/elements/GooglePlacesAutocomplete"; // Adjust the path based on your project structure
+import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
-// import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
-
-import  "../../components/ErrorPopup/ErrorPopup.css";
-import ErrorPopup from "../../components/ErrorPopup/ErrorPopup.js";
+import  "../../components/errorPopup/ErrorPopup.css";
+import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 
 export default function CreateProperty() {
 	const [errorMessage, setErrorMessage] = useState('');
@@ -40,9 +39,12 @@ export default function CreateProperty() {
     const [videoLink, setVideoLink] = useState("");
     const [filePreviews, setFilePreviews] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [currencyList, setCurrencyList] = useState([]);
+    const [currencyCode, setCurrencyCode] = useState([]);
     const [propertyMapCoords, setPropertyMapCoords] = useState({
-        latitude: null,
-        longitude: null,
+        latitude: 33.5945144,
+        longitude: -7.6200284,
+        zoom: 6
     });
     const [address, setAddress] = useState('');
 
@@ -64,6 +66,7 @@ export default function CreateProperty() {
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
+        currency_id: Yup.string().required("Currency is required"),
         districts_id: Yup.string().required("District is required"),
         neighborhood_id: Yup.string().required("Neighborhood is required"),
         transaction_type: Yup.string().required("Transaction type is required"),
@@ -131,6 +134,16 @@ export default function CreateProperty() {
                     }
                     setPropertyMeta(true);
                 }
+                if(currencyList.length === 0){
+                    // console.log(1);
+                    const currencyObj = {};
+                    const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
+                   
+                    if(getCurrencyInfo.status) {
+                        setCurrencyList(getCurrencyInfo.data);
+                    }
+                } 
+             
                 //console.log(propertyofTypes)
             } catch (error) {
                 console.error(error);
@@ -141,29 +154,19 @@ export default function CreateProperty() {
     });
 
     const handleStateChange = async (stateId) => {
-        console.log('State ID:', stateId);
         const selectedState = stateList.find((state) => state.id === stateId);
-        console.log('selectedState ID:', selectedState.latitude);
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
             longitude: longitude
         });
-        if (!stateId) {
-            setCityList([]); // Clear cities if no state is selected
-            return;
-        }
-        try {
-            const cityObj = { state_id: stateId , lang:"en" };
+        if(cityList.length === 0){
+            const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
+                console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
-            } else {
-                setCityList([]);
             }
-        } catch (error) {
-            console.error("Error fetching cities:", error);
-            setCityList([]);
         }
     };
     const handleDistrictChange = async (DistrictId) => {
@@ -192,8 +195,6 @@ export default function CreateProperty() {
             console.error("Error fetching cities:", error);
             setNeighborhoodList([]);
         }
-      
-     
     };
     const handleNeighborhoodChange = async (NeighborhoodId) => {
         console.log('NeighborhoodId ID:', NeighborhoodId);
@@ -228,7 +229,7 @@ export default function CreateProperty() {
             return;
         }
         try {
-            const districtObj = { city_id: cityId, lang:"en" };
+            const districtObj = { city_id: cityId, lang: "en" };
             const getDistrictInfo = await insertData('api/district', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data.districts);
@@ -368,7 +369,7 @@ export default function CreateProperty() {
                     description_fr: values.description_fr??null,
                     price: parseInt(values.price)??0,
                     vr_link: values.vr_link??null,
-                    picture: pictureUrl,
+                    picture: imageUrls,
                     video: videoUrl,
                     user_id: values.user_id,
                     link_uuid: values.link_uuid??null,
@@ -382,6 +383,7 @@ export default function CreateProperty() {
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft)??0,
                     meta_details:selectedAmenities,
+                    currency_id: values.currency_id,
                     project_id: values.project_id??null,
                     latitude: "34.092809",
                     longitude: "-118.328661"
@@ -436,7 +438,7 @@ export default function CreateProperty() {
           setVideoLink(null); // Update YouTube link manually
 
         }
-      };
+    };
 
     const handleVideoLinkChange = (event, setFieldValue) => {
         setVideoLink(event.target.value); // Update YouTube link manually
@@ -610,10 +612,33 @@ export default function CreateProperty() {
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Price:<span>*</span></label>
-                                        <Field type="text" id="price" name="price" className="box-fieldset" />
-                                        <ErrorMessage name="price" component="div" className="error" />
+                                <fieldset className="box-fieldset ">
+                                        <label htmlFor="name">Price<span>*</span>:</label>
+                                            <div className="phone-and-country-code">
+                                                <Field as="select" name="currency_id" className="nice-select country-code"
+                                                    id="country-code"
+                                                    value={currencyCode}
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setCurrencyCode(selectedState);
+                                                        setFieldValue("currency_id", selectedState);
+                                                        //handleCityChange(selectedState);
+                                                    }}
+                                                >
+                                                    <option value="">Select Currency</option>
+                                                    {currencyList && currencyList.length > 0 ? (
+                                                        currencyList.map((currency, index) =>(
+                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                                <Field type="text" id="price" name="price" className="form-control style-1" />
+                                            </div>
+                                            <ErrorMessage name="price" component="div" className="error" />
+                                        <ErrorMessage name="currency_id" component="div" className="error" />
                                     </fieldset>
                                     {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
@@ -707,76 +732,76 @@ export default function CreateProperty() {
                                     </fieldset>
 
                                     <fieldset className="box-fieldset">
-                                    <legend>Video Option</legend>
+                                        <legend>Video Option</legend>
 
-                                    {/* Video Option Radio Buttons */}
-                                    <div>
-                                    <fieldset className="fieldset-radio">
-                                            <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
-                                                    setIsVideoUpload(true); // Update the state for conditional rendering
-                                                    setFieldValue("video", null); // Reset the file field in Formik state
-                                                }} defaultChecked />
-                                            <label htmlFor="upload" className="text-radio">Upload Video</label>
-                                       
-                                            <input
-                                                type="radio"
-                                                className="tf-radio"
-                                                name="videoOption"
-                                                value="link"
-                                                onChange={() => {
-                                                    setIsVideoUpload(false); // Update the state for conditional rendering
-                                                    setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
-                                                }}
-                                            />
-                                             <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
-                                             </fieldset>
-                                    </div>
-
-                                    {/* Conditional Fields */}
-                                    {isVideoUpload ? (
-                                        // Video Upload Field
-                                        <div className="box-floor-img uploadfile">
-                                            <div className="btn-upload">
-                                                <label className="tf-btn primary">
-                                                    Choose File
-                                                    <input
-                                                        type="file"
-                                                        accept="video/mp4"
-                                                        className="ip-file"
-                                                        onChange={(event) => {
-                                                            const file = event.target.files[0];
-                                                            if (file) {
-                                                                setFieldValue("video", file); // Set the video file in Formik state
-                                                                setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                            }
-                                                        }}
-                                                        style={{ display: "none" }}
-                                                    />
-                                                </label>
-                                            </div>
-                                            {videoPreview && (
-                                                <video controls className="uploadFileImage">
-                                                    <source src={videoPreview} type="video/mp4" />
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            )}
-                                            <p className="file-name fw-5">Or drop video here to upload</p>
-                                            <ErrorMessage name="video" component="div" className="error" />
-                                        </div>
-                                    ) : (
-                                        // YouTube Link Input Field
+                                        {/* Video Option Radio Buttons */}
                                         <div>
-                                            <label htmlFor="video_link">YouTube Link:</label>
-                                            <Field
-                                                type="text"
-                                                name="video_link"
-                                                className="form-control"
-                                                placeholder="Enter YouTube video link"
-                                            />
-                                            <ErrorMessage name="video_link" component="div" className="error" />
+                                            <fieldset className="fieldset-radio">
+                                                <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
+                                                        setIsVideoUpload(true); // Update the state for conditional rendering
+                                                        setFieldValue("video", null); // Reset the file field in Formik state
+                                                    }} defaultChecked />
+                                                <label htmlFor="upload" className="text-radio">Upload Video</label>
+                                        
+                                                <input
+                                                    type="radio"
+                                                    className="tf-radio"
+                                                    name="videoOption"
+                                                    value="link"
+                                                    onChange={() => {
+                                                        setIsVideoUpload(false); // Update the state for conditional rendering
+                                                        setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
+                                                    }}
+                                                />
+                                                <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
+                                                </fieldset>
                                         </div>
-                                    )}
-                                </fieldset>
+
+                                        {/* Conditional Fields */}
+                                        {isVideoUpload ? (
+                                            // Video Upload Field
+                                            <div className="box-floor-img uploadfile">
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                        Choose File
+                                                        <input
+                                                            type="file"
+                                                            accept="video/mp4"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                                const file = event.target.files[0];
+                                                                if (file) {
+                                                                    setFieldValue("video", file); // Set the video file in Formik state
+                                                                    setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                }
+                                                            }}
+                                                            style={{ display: "none" }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                {videoPreview && (
+                                                    <video controls className="uploadFileImage">
+                                                        <source src={videoPreview} type="video/mp4" />
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                )}
+                                                <p className="file-name fw-5">Or drop video here to upload</p>
+                                                <ErrorMessage name="video" component="div" className="error" />
+                                            </div>
+                                        ) : (
+                                            // YouTube Link Input Field
+                                            <div>
+                                                <label htmlFor="video_link">YouTube Link:</label>
+                                                <Field
+                                                    type="text"
+                                                    name="video_link"
+                                                    className="form-control"
+                                                    placeholder="Enter YouTube video link"
+                                                />
+                                                <ErrorMessage name="video_link" component="div" className="error" />
+                                            </div>
+                                        )}
+                                    </fieldset>
 
                                 </div>
                             </div>
@@ -866,15 +891,9 @@ export default function CreateProperty() {
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    <label htmlFor="location">Address:<span>*</span></label>
+                                    {/* <label htmlFor="location">Address:<span>*</span></label> */}
                                     <div className="box-ip">
-                                    <input
-                                    type="text"
-                                    className="form-control style-1"
-                                    name="address"
-                                    value={address}
-                                    readOnly
-                                    />  
+                                     
                                                 {/* <GooglePlacesAutocomplete /> */}
 
                                     {/* <ReactGooglePlacesAutocomplete
@@ -883,13 +902,13 @@ export default function CreateProperty() {
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
                                         }}
-                                    />                                       */}
+                                    />                                        */}
                                     <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
                                     </div>
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
-
+                                        zoom={propertyMapCoords.zoom}
                                     />
                                 </div>
                             </div>
