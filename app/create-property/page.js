@@ -385,8 +385,9 @@ export default function CreateProperty() {
                     meta_details:selectedAmenities,
                     currency_id: values.currency_id,
                     project_id: values.project_id??null,
-                    latitude: 34.092809,
-                    longitude: -118.328661
+                    latitude: "34.092809",
+                    longitude: "-118.328661",
+                    address:""
                 }
                 console.log(propertData);
 
