@@ -336,7 +336,8 @@ export default function CreateProperty() {
         // console.log('Selected Amenities:', selectedAmenities);
         const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
         uploadImageObj.push(values.video);
-
+            console.log('uploadImageObj');
+            console.log(uploadImageObj);
        const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
      if (uploadImageUrl.files.length > 0) {
         const imageUrls  = [];
@@ -703,9 +704,23 @@ export default function CreateProperty() {
                                                                 multiple
                                                                 className="ip-file"
                                                                 onChange={(event) => {
-                                                                    const files = Array.from(event.target.files); // Get the selected files
-                                                                    form.setFieldValue(field.name, files); // Update Formik state
-                                                                    setFilePreviews(files.map(file => URL.createObjectURL(file))); // Generate previews
+                                                                    let imageList = [];
+                                                                    const files = Array.from(event.target.files); // Convert to an array
+                                                                    const validPreviews = [];
+                                                                  
+                                                                    files.forEach((file) => {
+                                                                      if (file.size < 150000) { // Example size limit: 40KB
+                                                                        alert(`Please upload files above 150kb`);
+                                                                      } else {
+                                                                        validPreviews.push(URL.createObjectURL(file)); // Generate preview
+                                                                        imageList.push(file); // Add valid file to the list
+                                                                      }
+                                                                    });
+                                                                  
+                                                                    // Update state and Formik
+                                                                    setFilePreviews(validPreviews); // Set previews for valid files
+                                                                    form.setFieldValue(field.name, imageList);
+                                                                    // Generate previews
                                                                 }}
                                                                 style={{ display: "none" }}
                                                             />
