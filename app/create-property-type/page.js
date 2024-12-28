@@ -30,29 +30,35 @@ export default function CreatePropertyType() {
         title_fr: Yup.string().required("Title is required"),
     });
 
-    const handleSubmit = async (values, {resetForm}) => {
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
         setShowErrorPopup('');
+        
         try {
-          const propertData = {
-              en_string: values.title_en,
-              fr_string: values.title_fr
-          };
-          console.log(propertData);
-
-          const createPrpertyInfo = await insertData('api/property-type/create', propertData, true);
-          if(createPrpertyInfo.status) {
+            const propertyData = {
+                en_string: values.title_en,
+                fr_string: values.title_fr
+            };
+            console.log(propertyData);
+    
+            const createPropertyInfo = await insertData('api/property-type/create', propertyData, true);
+    
+            if (createPropertyInfo.status) {
                 setSucessMessage(true);
                 setShowErrorPopup("Property of Type created successfully");
                 router.push('/property-type-listing');
-          }else{
-              setShowErrorPopup(createPrpertyInfo.message);
-          }
-      } catch (error) {
-          setShowErrorPopup(error.message);
-      }
-
+            } else {
+                // Use setErrors to store the error message
+                setErrors({ serverError: createPropertyInfo.message || "Failed to create property type." });
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            // Catch unexpected errors
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
+        }
     };
+    
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 

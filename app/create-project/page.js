@@ -224,91 +224,90 @@ export default function CreateAgency() {
         }
     };
     // Handle form submission
-    const handleSubmit = async (values, {resetForm}) => {
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
+    
+        // Validation for video upload
         if (isVideoUpload && !values.video) {
-            alert("Please upload a video file.");
-            return false;
+            setErrors({ serverError: "Please upload a video file." });
+            setShowErrorPopup(true);
+            return;
         }
-
+    
         if (!isVideoUpload && !values.video_link) {
-            alert("Please enter a YouTube video link.");
-            return false;
+            setErrors({ serverError: "Please enter a YouTube video link." });
+            setShowErrorPopup(true);
+            return;
         }
-
+    
         const selectedAmenities = projectOfBooleanListing
-        .filter((project) => checkedItems[project.key])
-        .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-
-        console.log('Selected Amenities:', selectedAmenities);
-
-
-        //setShowErrorPopup('');
-        console.log(values);
-        // const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
-        // const getUserInfo = await insertData('auth/check/user', checkData, false);
-        // if(getUserInfo.status === false) {
-            /********* upload image ***********/
+            .filter((project) => checkedItems[project.key])
+            .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
+    
+        console.log("Selected Amenities:", selectedAmenities);
+    
+        try {
+            /********* Upload Image ***********/
             const uploadImageObj = [values.picture_img, values.video];
-            const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-            if(uploadImageUrl.files.length > 0) {
-                const fileUrls = uploadImageUrl.files.map(file => file.url);
-                let pictureUrl = null;
-                let videoUrl = null;
-                if(uploadImageUrl.files.length > 0) {
-                    pictureUrl = fileUrls[0];
-                    videoUrl = fileUrls[1];
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+    
+            if (uploadImageUrl.files.length > 0) {
+                const fileUrls = uploadImageUrl.files.map((file) => file.url);
+                const pictureUrl = fileUrls[0] || null;
+                let videoUrl = fileUrls[1] || values.video_link;
+    
+                if (!pictureUrl) {
+                    setErrors({ serverError: "Picture upload failed." });
+                    setShowErrorPopup(true);
+                    return;
                 }
-
-                if (!videoUrl) {
-                    videoUrl = values.video_link;
-                }
-                /********* create user ***********/
-                try {
-                    const projectData = {
-                        title_en: values.title_en,
-                        title_fr: values.title_fr,
-                        description_en: values.description_en??null,
-                        description_fr: values.description_fr??null,
-                        price: parseInt(values.price)??0,
-                        vr_link: values.vr_link??null,
-                        picture: pictureUrl,
-                        video: videoUrl,
-                        user_id: values.user_id,
-                        link_uuid: values.link_uuid??null,
-                        state_id: values.state_id,
-                        city_id: values.city_id,
-                        district_id: values.districts_id,
-                        neighborhoods_id: values.neighborhood_id,
-                        latitude: values.latitude,
-                        longitude: values.longitude,
-                        meta_details:selectedAmenities,
-                        latitude: "34.092809",
-                        longitude: "-118.328661",
-                        address:""
-                    }
-                    console.log('projectData');
-                    console.log(projectData);
-                    const createUserInfo = await insertData('api/projects/create', projectData, true);
-                    console.log('status');
-                    console.log(createUserInfo);
-                    if(createUserInfo.status) {
-                        setSucessMessage(true);
-                        setShowErrorPopup("Project created successfully");
-                        router.push('/project-listing');
-                    }else{
-                        setShowErrorPopup(createUserInfo.message);
-                    }
-                } catch (error) {
-                    setShowErrorPopup(error.message);
+    
+                /********* Create Project ***********/
+                const projectData = {
+                    title_en: values.title_en,
+                    title_fr: values.title_fr,
+                    description_en: values.description_en ?? null,
+                    description_fr: values.description_fr ?? null,
+                    price: parseInt(values.price) ?? 0,
+                    vr_link: values.vr_link ?? null,
+                    picture: pictureUrl,
+                    video: videoUrl,
+                    user_id: values.user_id,
+                    link_uuid: values.link_uuid ?? null,
+                    state_id: values.state_id,
+                    city_id: values.city_id,
+                    district_id: values.districts_id,
+                    neighborhoods_id: values.neighborhood_id,
+                    latitude: values.latitude ?? "34.092809",
+                    longitude: values.longitude ?? "-118.328661",
+                    meta_details: selectedAmenities,
+                    address: "",
+                };
+    
+                console.log("Project Data:", projectData);
+    
+                const createUserInfo = await insertData("api/projects/create", projectData, true);
+    
+                if (createUserInfo.status) {
+                    setSucessMessage(true);
+                    setErrors({ serverError: "Project created successfully." });
+                    setShowErrorPopup(true);
+                    resetForm();
+                    router.push("/project-listing");
+                } else {
+                    setErrors({ serverError: createUserInfo.message || "Failed to create project." });
+                    setShowErrorPopup(true);
                 }
             } else {
-               setShowErrorPopup('File not uploaded');
+                setErrors({ serverError: "File upload failed." });
+                setShowErrorPopup(true);
             }
-        // }else{
-        //     setShowErrorPopup(getUserInfo.message);
-        // }
+        } catch (error) {
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
+        }
     };
+    
 
     const handleCheckboxChange = (key) => {
         setCheckedItems((prevState) => ({

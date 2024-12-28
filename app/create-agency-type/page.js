@@ -27,6 +27,7 @@ export default function CreateAgency() {
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
 
+
     const router = useRouter();
     const validationSchema = Yup.object({
             title_en: Yup.string().required("Title is required"),
@@ -34,23 +35,31 @@ export default function CreateAgency() {
         });
 
     // Handle form submission
-    const handleSubmit = async (values, {resetForm}) => {
-        setShowErrorPopup('');
-        try{
-            const agencyObject = {en_string: values.title_en, fr_string: values.title_fr, type: "BASIC" }
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
+        setShowErrorPopup(false); // Reset popup
+        try {
+            const agencyObject = {
+                en_string: values.title_en,
+                fr_string: values.title_fr,
+                type: "BASIC",
+            };
+    
             const createAgencyType = await insertData('api/agency-packages/create', agencyObject, true);
-            if(createAgencyType.status) {
+    
+            if (createAgencyType.status) {
                 setSucessMessage(true);
-                setShowErrorPopup("Property of Type created successfully");
+                setShowErrorPopup(false);
                 router.push('/agency-types-listing');
-            } else{
-                setShowErrorPopup(error.message);
+            } else {
+                setErrors({ serverError: createAgencyType.message || "Failed to create agency type." });
+                setShowErrorPopup(true);
             }
         } catch (error) {
-            setShowErrorPopup(error.message);
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
         }
-
     };
+    
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
@@ -101,7 +110,7 @@ export default function CreateAgency() {
                             <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Agency Type</button>
                         </div >
                         {/* Error Popup */}
-                          {showErrorPopup && Object.keys(errors).length > 0 && (
+                        {showErrorPopup && (Object.keys(errors).length > 0) && (
                             <ErrorPopup
                                 errors={errors}
                                 validationSchema={validationSchema}

@@ -12,7 +12,7 @@ import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 // Adjust the path based on your project structure
-import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
+//import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
@@ -319,102 +319,111 @@ export default function CreateProperty() {
       };
 
     // Handle form submission
-    const handleSubmit = async (values, {resetForm}) => {
-        // if (Object.keys(errors).length > 0) {
-        //     setShowErrorPopup(true);
-        // }
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-        if (isVideoUpload && !values.video) {
-            alert("Please upload a video file.");
-            return false;
-          }
-
-          if (!isVideoUpload && !values.video_link) {
-            alert("Please enter a YouTube video link.");
-            return false;
-          }
-
-        const selectedAmenities = projectOfBooleanListing
-            .filter((project) => checkedItems[project.key])
-            .map((project) => ({ property_type_id: project.id, value: "true" }));
-            if(propertyOfMetaNumberValue.length > 0) {
+    
+        try {
+            // Validation for video
+            if (isVideoUpload && !values.video) {
+                setErrors({ serverError: "Please upload a video file." });
+                setShowErrorPopup(true);
+                return;
+            }
+    
+            if (!isVideoUpload && !values.video_link) {
+                setErrors({ serverError: "Please enter a YouTube video link." });
+                setShowErrorPopup(true);
+                return;
+            }
+    
+            // Prepare amenities
+            const selectedAmenities = projectOfBooleanListing
+                .filter((project) => checkedItems[project.key])
+                .map((project) => ({ property_type_id: project.id, value: "true" }));
+    
+            if (propertyOfMetaNumberValue.length > 0) {
                 selectedAmenities.push(...propertyOfMetaNumberValue);
             }
-        //const allAminities = [...selectedAmenities, ...propertyOfMetaNumberValue];
-        // console.log('Selected Amenities:', selectedAmenities);
-        const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-        uploadImageObj.push(values.video);
-       const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-     if (uploadImageUrl.files.length > 0) {
-        const imageUrls  = [];
-        let videoUrl = null;
-
-        // Iterate over the files and separate images and video
-       uploadImageUrl.files.forEach(file => {
-            if (file.mimeType.startsWith('image')) {
-                imageUrls.push(file.url); // Collect image URLs
-            } else if (file.mimeType.startsWith('video')) {
-                videoUrl = file.url; // Set video URL
-            }
-        });
-       const pictureUrl = imageUrls.join(', ');
-
-        // pictureUrls will contain all image URLs, videoUrl will contain the video URL
-        console.log('Image URLs:', pictureUrl);
-        console.log('Video URL:', videoUrl);
-
-        if (!videoUrl) {
-            videoUrl = values.video_link;
-        }
-
-            /********* create user ***********/
-            try {
-                const propertData = {
+    
+            console.log("Selected Amenities:", selectedAmenities);
+    
+            // Prepare images and videos for upload
+            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
+            uploadImageObj.push(values.video);
+    
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+    
+            if (uploadImageUrl.files.length > 0) {
+                const imageUrls = [];
+                let videoUrl = null;
+    
+                uploadImageUrl.files.forEach((file) => {
+                    if (file.mimeType.startsWith("image")) {
+                        imageUrls.push(file.url);
+                    } else if (file.mimeType.startsWith("video")) {
+                        videoUrl = file.url;
+                    }
+                });
+    
+                const pictureUrl = imageUrls.join(", ");
+                console.log("Image URLs:", pictureUrl);
+                console.log("Video URL:", videoUrl);
+    
+                if (!videoUrl) {
+                    videoUrl = values.video_link;
+                }
+    
+                // Prepare data for property creation
+                const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
-                    description_en: values.description_en??null,
-                    description_fr: values.description_fr??null,
-                    price: parseInt(values.price)??0,
-                    vr_link: values.vr_link??null,
+                    description_en: values.description_en ?? null,
+                    description_fr: values.description_fr ?? null,
+                    price: parseInt(values.price) ?? 0,
+                    vr_link: values.vr_link ?? null,
                     picture: imageUrls,
                     video: videoUrl,
                     user_id: values.user_id,
-                    link_uuid: values.link_uuid??null,
+                    link_uuid: values.link_uuid ?? null,
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: values.latitude,
+                    latitude: values.latitude ? String(values.latitude) : "33.985047",
+                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
                     transaction: values.transaction_type,
-                    longitude: values.longitude,
                     type_id: values.property_type,
-                    size: parseInt(values.size_sqft)??0,
+                    size: parseInt(values.size_sqft) ?? 0,
                     meta_details: selectedAmenities,
                     currency_id: values.currency_id,
-                    project_id: values.project_id??null,
-                    latitude: values.latitude? String(values.latitude):"33.985047",
-                    longitude: values.latitude? String(values.longitude):"-118.469483",
+                    project_id: values.project_id ?? null,
                     address: values.address,
+                };
+    
+                console.log("Property Data:", propertyData);
+    
+                // Create property
+                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
+    
+                if (createPropertyInfo.status) {
+                    setErrors({ serverError: "Property created successfully." });
+                    setShowErrorPopup(true);
+                    resetForm();
+                    router.push("/property-listing");
+                } else {
+                    setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
+                    setShowErrorPopup(true);
                 }
-
-                const createPrpertyInfo = await insertData('api/property/create', propertData, true);
-                if(createPrpertyInfo.status) {
-                    setSucessMessage(true);
-                    setShowErrorPopup("Property created successfully");
-                    router.push('/property-listing');
-                }else{
-                    setShowErrorPopup(createPrpertyInfo.message);
-                }
-            } catch (error) {
-                console.log('propertData');
-
-                setShowErrorPopup(error.message);
+            } else {
+                setErrors({ serverError: "File upload failed. Please try again." });
+                setShowErrorPopup(true);
             }
-        } else {
-            console.log('File not uploaded');
-            setShowErrorPopup('File not uploaded');
+        } catch (error) {
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
         }
     };
+    
 
     const handleCheckboxChange = (key) => {
         setCheckedItems((prevState) => ({
