@@ -10,9 +10,9 @@ import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
-import GooglePlacesAutocomplete from "@/components/elements/GooglePlacesAutocomplete"; // Adjust the path based on your project structure
-// import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
-
+// import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+// Adjust the path based on your project structure
+//import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
@@ -158,7 +158,8 @@ export default function CreateProperty() {
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 10
         });
         if(cityList.length === 0){
             const cityObj = { state_id: stateId, lang: "en" };
@@ -176,7 +177,8 @@ export default function CreateProperty() {
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!DistrictId) {
@@ -205,6 +207,7 @@ export default function CreateProperty() {
             setPropertyMapCoords({
                 latitude: latitude,
                 longitude: longitude,
+                zoom: 14
             });
         } else {
             console.error('Neighborhood not found');
@@ -305,112 +308,122 @@ export default function CreateProperty() {
 
     const handlePlaceSelect = (place) => {
         // You can access selected place details here
+        console.log("place");
         console.log(place);
         // Update address state with the selected place's formatted address
         setAddress(place.description);
     };
 
+    const handleAddressSelect = (newAddress, newLocation) => {
+        
+      };
+
     // Handle form submission
-    const handleSubmit = async (values, {resetForm}) => {
-        // if (Object.keys(errors).length > 0) {
-        //     setShowErrorPopup(true);
-        // }
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-        if (isVideoUpload && !values.video) {
-            alert("Please upload a video file.");
-            return false;
-          }
-
-          if (!isVideoUpload && !values.video_link) {
-            alert("Please enter a YouTube video link.");
-            return false;
-          }
-
-        const selectedAmenities = projectOfBooleanListing
-            .filter((project) => checkedItems[project.key])
-            .map((project) => ({ property_type_id: project.id, value: "true" }));
-            if(propertyOfMetaNumberValue.length > 0) {
+    
+        try {
+            // Validation for video
+            if (isVideoUpload && !values.video) {
+                setErrors({ serverError: "Please upload a video file." });
+                setShowErrorPopup(true);
+                return;
+            }
+    
+            if (!isVideoUpload && !values.video_link) {
+                setErrors({ serverError: "Please enter a YouTube video link." });
+                setShowErrorPopup(true);
+                return;
+            }
+    
+            // Prepare amenities
+            const selectedAmenities = projectOfBooleanListing
+                .filter((project) => checkedItems[project.key])
+                .map((project) => ({ property_type_id: project.id, value: "true" }));
+    
+            if (propertyOfMetaNumberValue.length > 0) {
                 selectedAmenities.push(...propertyOfMetaNumberValue);
             }
-        //const allAminities = [...selectedAmenities, ...propertyOfMetaNumberValue];
-        // console.log('Selected Amenities:', selectedAmenities);
-        const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-        uploadImageObj.push(values.video);
-            console.log('uploadImageObj');
-            console.log(uploadImageObj);
-       const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-     if (uploadImageUrl.files.length > 0) {
-        const imageUrls  = [];
-        let videoUrl = null;
-
-        // Iterate over the files and separate images and video
-       uploadImageUrl.files.forEach(file => {
-            if (file.mimeType.startsWith('image')) {
-                imageUrls.push(file.url); // Collect image URLs
-            } else if (file.mimeType.startsWith('video')) {
-                videoUrl = file.url; // Set video URL
-            }
-        });
-       const pictureUrl = imageUrls.join(', ');
-
-        // pictureUrls will contain all image URLs, videoUrl will contain the video URL
-        console.log('Image URLs:', pictureUrl);
-        console.log('Video URL:', videoUrl);
-
-        if (!videoUrl) {
-            videoUrl = values.video_link;
-        }
-
-            /********* create user ***********/
-            try {
-                const propertData = {
+    
+            console.log("Selected Amenities:", selectedAmenities);
+    
+            // Prepare images and videos for upload
+            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
+            uploadImageObj.push(values.video);
+    
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+    
+            if (uploadImageUrl.files.length > 0) {
+                const imageUrls = [];
+                let videoUrl = null;
+    
+                uploadImageUrl.files.forEach((file) => {
+                    if (file.mimeType.startsWith("image")) {
+                        imageUrls.push(file.url);
+                    } else if (file.mimeType.startsWith("video")) {
+                        videoUrl = file.url;
+                    }
+                });
+    
+                const pictureUrl = imageUrls.join(", ");
+                console.log("Image URLs:", pictureUrl);
+                console.log("Video URL:", videoUrl);
+    
+                if (!videoUrl) {
+                    videoUrl = values.video_link;
+                }
+    
+                // Prepare data for property creation
+                const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
-                    description_en: values.description_en??null,
-                    description_fr: values.description_fr??null,
-                    price: parseInt(values.price)??0,
-                    vr_link: values.vr_link??null,
+                    description_en: values.description_en ?? null,
+                    description_fr: values.description_fr ?? null,
+                    price: parseInt(values.price) ?? 0,
+                    vr_link: values.vr_link ?? null,
                     picture: imageUrls,
                     video: videoUrl,
                     user_id: values.user_id,
-                    link_uuid: values.link_uuid??null,
+                    link_uuid: values.link_uuid ?? null,
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: values.latitude,
+                    latitude: values.latitude ? String(values.latitude) : "33.985047",
+                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
                     transaction: values.transaction_type,
-                    longitude: values.longitude,
                     type_id: values.property_type,
-                    size: parseInt(values.size_sqft)??0,
-                    meta_details:selectedAmenities,
+                    size: parseInt(values.size_sqft) ?? 0,
+                    meta_details: selectedAmenities,
                     currency_id: values.currency_id,
-                    project_id: values.project_id??null,
-                    latitude: "34.092809",
-                    longitude: "-118.328661",
-                    address:""
+                    project_id: values.project_id ?? null,
+                    address: values.address,
+                };
+    
+                console.log("Property Data:", propertyData);
+    
+                // Create property
+                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
+    
+                if (createPropertyInfo.status) {
+                    setErrors({ serverError: "Property created successfully." });
+                    setShowErrorPopup(true);
+                    resetForm();
+                    router.push("/property-listing");
+                } else {
+                    setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
+                    setShowErrorPopup(true);
                 }
-                console.log(propertData);
-
-
-                const createPrpertyInfo = await insertData('api/property/create', propertData, true);
-                if(createPrpertyInfo.status) {
-                    setSucessMessage(true);
-                    setShowErrorPopup("Property created successfully");
-                    router.push('/property-listing');
-                }else{
-                    setShowErrorPopup(createPrpertyInfo.message);
-                }
-            } catch (error) {
-                console.log('propertData');
-
-                setShowErrorPopup(error.message);
+            } else {
+                setErrors({ serverError: "File upload failed. Please try again." });
+                setShowErrorPopup(true);
             }
-        } else {
-            console.log('File not uploaded');
-            setShowErrorPopup('File not uploaded');
+        } catch (error) {
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
         }
     };
+    
 
     const handleCheckboxChange = (key) => {
         setCheckedItems((prevState) => ({
@@ -514,7 +527,6 @@ export default function CreateProperty() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-
                                         {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
@@ -645,12 +657,12 @@ export default function CreateProperty() {
                                     {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        <ErrorMessage name="vr_link" component="div" className="error" />
+                                        // <ErrorMessage name="vr_link" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Link UUID:</label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        <ErrorMessage name="link_uuid" component="div" className="error" />
+                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
                                     </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -688,68 +700,108 @@ export default function CreateProperty() {
                                             <></>
                                         )}
                                 </div>
-                                <div className="grid-2 box gap-30">
-                                <fieldset className="box-fieldset">
+                                <div className="box grid-2 box gap-30">
+                                    <fieldset className="box-fieldset">
                                         <label htmlFor="picture_img">Picture Images:</label>
                                         <Field
                                             name="picture_img"
                                             component={({ field, form }) => (
                                                 <div className="box-floor-img uploadfile">
-                                                    {/* Upload Button */}
-                                                    <div className="btn-upload">
-                                                        <label className="tf-btn primary">
-                                                            Choose Files
-                                                            <input
-                                                                type="file"
-                                                                multiple
-                                                                className="ip-file"
-                                                                onChange={(event) => {
-                                                                    let imageList = [];
-                                                                    const files = Array.from(event.target.files); // Convert to an array
-                                                                    const validPreviews = [];
+                                                {/* Upload Button */}
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                    Choose Files
+                                                    <input
+                                                        type="file"
+                                                        multiple
+                                                        className="ip-file"
+                                                        onChange={(event) => {
+                                                        let imageList = [];
+                                                        const files = Array.from(event.target.files); // Convert to an array
+                                                        const validPreviews = [];
+                                                        files.forEach((file) => {
+                                                            // Check file size (less than 150KB)
+                                                            if (file.size < 150000) {
+                                                            alert(`Please upload files less than 150KB`);
+                                                            } else {
+                                                            // Create an Image object to check its dimensions
+                                                            const img = new Image();
+                                                            const reader = new FileReader();
+                                                            reader.onload = (e) => {
+                                                                img.src = e.target.result; // Set image src to the file's data URL
 
-                                                                    files.forEach((file) => {
-                                                                      if (file.size < 150000) { // Example size limit: 40KB
-                                                                        alert(`Please upload files above 150kb`);
-                                                                      } else {
-                                                                        validPreviews.push(URL.createObjectURL(file)); // Generate preview
-                                                                        imageList.push(file); // Add valid file to the list
-                                                                      }
-                                                                    });
+                                                                // Once the image is loaded, check its dimensions
+                                                                img.onload = () => {
+                                                                const imageHeight = img.height;  // Get image height
+                                                                const imageWidth = img.width;    // Get image width
 
-                                                                    // Update state and Formik
-                                                                    setFilePreviews(validPreviews); // Set previews for valid files
-                                                                    form.setFieldValue(field.name, imageList);
-                                                                    // Generate previews
-                                                                }}
-                                                                style={{ display: "none" }}
-                                                            />
-                                                        </label>
-                                                    </div>
+                                                                // You can add your dimension validation here
+                                                                if (imageHeight <= 800 || imageWidth <= 1100) {
+                                                                    alert('Image dimensions are too large. Please upload an image with smaller dimensions (max 500px).');
+                                                                } else {
+                                                                    // Add the file as a valid image and generate the preview
+                                                                    validPreviews.push(URL.createObjectURL(file));
+                                                                    imageList.push(file); // Add valid file to the list
+                                                                }
 
-                                                    {/* Image Previews */}
-                                                    <div className="image-preview-container">
-                                                        {filePreviews.map((preview, index) => (
-                                                            <img
-                                                                key={index}
-                                                                src={preview}
-                                                                alt={`Preview ${index + 1}`}
-                                                                className="uploadFileImage"
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <p className="file-name fw-5">Or drop images here to upload</p>
+                                                                // Update state and Formik with valid files
+                                                                setFilePreviews(validPreviews); // Set previews for valid files
+                                                                form.setFieldValue(field.name, imageList);
+                                                                };
+                                                            };
 
-                                                    {/* Error Message */}
-                                                    {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
+                                                            // Read the file as a Data URL to create a preview
+                                                            reader.readAsDataURL(file);
+                                                            }
+                                                        });
+                                                        }}
+                                                        style={{ display: "none" }}
+                                                    />
+                                                    </label>
+                                                </div>
+
+                                                
+                                                <p className="file-name fw-5">Or drop images here to upload</p>
+
+                                                {/* Error Message */}
+                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
-                                        />
+                                            />
+
                                     </fieldset>
-
                                     <fieldset className="box-fieldset">
-                                        <legend>Video Option</legend>
-
+                                        {/* Image Previews */}
+                                        <div className="image-preview-container image-gallery">
+                                            {filePreviews.length > 0 && (<p className="fw-5">Image Preview:</p>)}
+                                            {filePreviews.map((preview, index) => (
+                                                <div key={index} className="preview-item">
+                                                    <img
+                                                        src={preview}
+                                                        alt={`Preview ${index + 1}`}
+                                                        className="uploadFileImage"
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => {
+                                                            // Remove the image from preview and Formik
+                                                            const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+                                                            const newImageList = form.values.picture_img.filter((_, i) => i !== index);
+                                                            setFilePreviews(newFilePreviews); // Update preview state
+                                                            form.setFieldValue(field.name, newImageList); // Update Formik field
+                                                        }}
+                                                        className="remove-image-btn"
+                                                    >
+                                                    &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div className="box grid-1 box gap-50">
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="picture_img">Video Option:</label>
                                         {/* Video Option Radio Buttons */}
                                         <div>
                                             <fieldset className="fieldset-radio">
@@ -908,23 +960,31 @@ export default function CreateProperty() {
                                 </div>
                                 <div className="box box-fieldset">
                                     {/* <label htmlFor="location">Address:<span>*</span></label> */}
-                                    <div className="box-ip">
+                                    {/* <div className="box-ip"> */}
+                                     
+                                        {/* <GooglePlacesAutocomplete /> */}
 
-                                                {/* <GooglePlacesAutocomplete /> */}
 
-                                    {/* <ReactGooglePlacesAutocomplete
+                                     {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
                                         }}
-                                    />                                        */}
-                                    <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div>
+                                    /> <br/> */}
+                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
+                                    </div><br/><br/><br/> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                                setFieldValue('address', newAddress); 
+                                                setFieldValue('latitude', newLocation.lat);
+                                                setFieldValue('longitude', newLocation.lng);
+                                                handleAddressSelect(newAddress, newLocation);
+                                            }
+                                        }
                                     />
                                 </div>
                             </div>

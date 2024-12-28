@@ -107,33 +107,6 @@ export default function MyProperty() {
           <DeleteFile />
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
-              {/* <div className="row">
-                <div className="col-md-3">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="status">Post Status:<span>*</span></label>
-                    <select className="nice-select" onChange={handleStatusChange}>
-                      <option value="">Select</option>
-                      <option value="Published">Publish</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Hidden">Hidden</option>
-                      <option value="Sold">Sold</option>
-                    </select>
-                  </fieldset>
-                </div>
-                <div className="col-md-9">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="search">Search by Title:<span>*</span></label>
-                    <input
-                      type="text"
-                      className="form-control style-1"
-                      placeholder="Search by title"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                  </fieldset>
-                </div>
-              </div> */}
-
               <div className="widget-box-2 wd-listing">
                 <h6 className="title">Agency Listing</h6>
                   {(filteredProperties.length > 0)?

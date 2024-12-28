@@ -27,6 +27,7 @@
         "react-datepicker": "^6.9.0",
         "react-dom": "^18.3.1",
         "react-google-places-autocomplete": "^4.1.0",
+        "react-images-uploading": "^3.1.7",
         "react-leaflet": "^4.2.1",
         "react-modal-video": "^2.0.1",
         "react-nice-select": "^1.0.6",

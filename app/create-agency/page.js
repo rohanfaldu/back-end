@@ -57,79 +57,96 @@ export default function CreateAgency() {
     });
 
     // Handle form submission
-    const handleSubmit = async (values, {resetForm}) => {
-        setShowErrorPopup('');
-        console.log(values);
-        const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
-        const getUserInfo = await insertData('auth/check/user', checkData, false);
-        if(getUserInfo.status === false) {
-            /********* upload image ***********/
-            const fileUrls = await insertUploadImage('image', values.image);
-            if(fileUrls) {
-
-                /********* create user ***********/
-                try {
-                    const userData = {
-                        full_name: values.username??null,
-                        user_name: values.username??null,
-                        email_address: values.email??null,
-                        fcm_token: '',
-                        image_url: fileUrls,
-                        type: "agency",
-                        user_login_type	: userType("NONE"),
-                        phone_number: values.phone.toString(),
-                        password: values.password??null,
-                        user_id: null,
-                        device_type:"web",
-                        social_id: null
-                    }
-                    const createUserInfo = await insertData('auth/create/user', userData, false);
-                    console.log(createUserInfo.status);
-                    if(createUserInfo.status === true) {
-                        setSucessMessage(true);
-                        setShowErrorPopup("Agency created successfully");
-                        /********* create agency ***********/
-                        const user_id = createUserInfo.data.userProfile.id;
-                        const agencyData = {
-                            user_id:  user_id,
-                            sub_user_id:  null,
-                            credit:  values.credit??null,
-                            description: values.description??null,
-                            facebook_link:  values.facebook_link??null,
-                            twitter_link: values.twitter_link??null,
-                            youtube_link:  values.youtube_link??null,
-                            pinterest_link:  values.pinterest_link??null,
-                            linkedin_link:  values.linkedin_link??null,
-                            instagram_link:  values.instagram_link??null,
-                            whatsup_number:  values.whatsup_number??null,
-                            service_area:  values.service_area??null,
-                            tax_number:  values.tax_number??null,
-                            license_number:  values.license_number??null,
-                            agency_packages:  values.agency_packages??null,
-                            picture: null,
-                            cover: null
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
+        setShowErrorPopup(false); // Reset error popup
+        try {
+            console.log(values);
+    
+            // Check if user exists
+            const checkData = { email_address: values.email, phone_number: parseInt(values.phone, 10) };
+            const getUserInfo = await insertData('auth/check/user', checkData, false);
+    
+            if (getUserInfo.status === false) {
+                /********* Upload Image ***********/
+                const fileUrls = await insertUploadImage('image', values.image);
+                if (fileUrls) {
+                    try {
+                        /********* Create User ***********/
+                        const userData = {
+                            full_name: values.username ?? null,
+                            user_name: values.username ?? null,
+                            email_address: values.email ?? null,
+                            fcm_token: '',
+                            image_url: fileUrls,
+                            type: "agency",
+                            user_login_type: userType("NONE"),
+                            phone_number: values.phone.toString(),
+                            password: values.password ?? null,
+                            user_id: null,
+                            device_type: "web",
+                            social_id: null
                         };
-                        console.log(agencyData);
-                        const createAgencyInfo = await insertData('api/agencies/create', agencyData, true);
-                        if(createAgencyInfo.status === true) {
-                            resetForm();
-                            router.push('/agency-listing');
-                        } else{
-                            setShowErrorPopup(createAgencyInfo.message);
+    
+                        const createUserInfo = await insertData('auth/create/user', userData, false);
+    
+                        if (createUserInfo.status === true) {
+                            setSucessMessage(true);
+                            setShowErrorPopup("Agency created successfully");
+    
+                            /********* Create Agency ***********/
+                            const user_id = createUserInfo.data.userProfile.id;
+                            const agencyData = {
+                                user_id: user_id,
+                                sub_user_id: null,
+                                credit: values.credit ?? null,
+                                description: values.description ?? null,
+                                facebook_link: values.facebook_link ?? null,
+                                twitter_link: values.twitter_link ?? null,
+                                youtube_link: values.youtube_link ?? null,
+                                pinterest_link: values.pinterest_link ?? null,
+                                linkedin_link: values.linkedin_link ?? null,
+                                instagram_link: values.instagram_link ?? null,
+                                whatsup_number: values.whatsup_number ?? null,
+                                service_area: values.service_area ?? null,
+                                tax_number: values.tax_number ?? null,
+                                license_number: values.license_number ?? null,
+                                agency_packages: values.agency_packages ?? null,
+                                picture: null,
+                                cover: null
+                            };
+    
+                            const createAgencyInfo = await insertData('api/agencies/create', agencyData, true);
+    
+                            if (createAgencyInfo.status === true) {
+                                resetForm();
+                                router.push('/agency-listing');
+                            } else {
+                                setErrors({ serverError: createAgencyInfo.message });
+                                setShowErrorPopup(true);
+                            }
+                        } else {
+                            setErrors({ serverError: createUserInfo.message });
+                            setShowErrorPopup(true);
                         }
-                    }else{
-                        setShowErrorPopup(createUserInfo.message);
+                    } catch (error) {
+                        setErrors({ serverError: error.message });
+                        setShowErrorPopup(true);
                     }
-                } catch (error) {
-                    setShowErrorPopup(error.message);
+                } else {
+                    setErrors({ serverError: fileUrls.message });
+                    setShowErrorPopup(true);
                 }
             } else {
-               setShowErrorPopup(fileUrls.message);
+                setErrors({ serverError: getUserInfo.message });
+                setShowErrorPopup(true);
             }
-        }else{
-            setShowErrorPopup(getUserInfo.message);
+        } catch (error) {
+            setErrors({ serverError: error.message });
+            setShowErrorPopup(true);
         }
     };
+    
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
@@ -187,9 +204,9 @@ export default function CreateAgency() {
                                     {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
                                     <p className="file-name fw-5"> Or drop image here to upload </p>
                                     </label>
-                                    {errors.image && touched.image && (
+                                    {/* {errors.image && touched.image && (
                                     <div className="error">{errors.image}</div>
-                                    )}
+                                    )} */}
                                 </div>
                             </div>
                             <div className="widget-box-2">

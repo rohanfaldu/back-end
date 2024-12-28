@@ -3,7 +3,8 @@
     top: 90px;
     right: 40px;
     width: 300px;
-    height: 300px;
+    max-height: 300px;
+    border-radius: 10px;
     background-color: #f8d7da; /* Add a semi-transparent background */
     color: #721c24; /* Text color */
     padding: 20px;
