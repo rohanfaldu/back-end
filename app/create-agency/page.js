@@ -259,7 +259,7 @@ export default function CreateAgency() {
                                         <Field type="email" id="email" name="email" />
                                         {/* <ErrorMessage name="email" component="div" className="error" /> */}
                                     </fieldset>
-                                    <fieldset className="box-fieldset">
+                                    <fieldset className="box-fieldset password-field">
                                         <label htmlFor="pass">Password<span>*</span>:</label>
                                         <Field
                                             type={showPassword ? "text" : "password"}

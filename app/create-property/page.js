@@ -805,7 +805,7 @@ export default function CreateProperty() {
                                         {/* Video Option Radio Buttons */}
                                         <div>
                                             <fieldset className="fieldset-radio">
-                                                <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
+                                                <input type="radio" className="tf-radio video-upload"  value="upload" name="videoOption" onChange={() => {
                                                         setIsVideoUpload(true); // Update the state for conditional rendering
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />
@@ -813,7 +813,7 @@ export default function CreateProperty() {
 
                                                 <input
                                                     type="radio"
-                                                    className="tf-radio"
+                                                    className="tf-radio video-upload"
                                                     name="videoOption"
                                                     value="link"
                                                     onChange={() => {
