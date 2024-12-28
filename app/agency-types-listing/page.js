@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
-
+import variablesList from "../../components/common/variable";
 export default function AgencyPackageListing() {
   const [properties, setProperties] = useState([]); // Store properties for the current page
   const [loading, setLoading] = useState(true); // Manage loading state
@@ -19,11 +19,11 @@ export default function AgencyPackageListing() {
   const [pagination, setPagination] = useState({
     totalCount: 0,
     totalPages: 0,
-    currentPage: 1,
-    itemsPerPage: 1,
+    currentPage: variablesList.currentPage,
+    itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
 
-  const fetchProperties = async (page = 1, term = '', status = '') => {
+  const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
       const requestData = {

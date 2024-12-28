@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
+import variablesList from "../../components/common/variable";
 
 export default function PropertyListing() {
   const [properties, setProperties] = useState([]); // Store properties for the current page
@@ -17,13 +18,13 @@ export default function PropertyListing() {
   const [searchTerm, setSearchTerm] = useState(''); // Store search input
   const [statusFilter, setStatusFilter] = useState(''); // Store selected status filter
   const [pagination, setPagination] = useState({
-    totalCount: 0,
-    totalPages: 0,
-    currentPage: 1,
-    itemsPerPage: 10,
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: variablesList.currentPage,
+      itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
 
-  const fetchProperties = async (page = 1, term = '', status = '') => {
+  const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
       const requestData = {
