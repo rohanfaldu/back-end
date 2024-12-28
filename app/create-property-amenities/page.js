@@ -34,50 +34,65 @@ export default function CreatePropertyAmenities() {
         icon_img: Yup.mixed().required("Image is required"),
     });
 
-    const handleSubmit = async (values, {resetForm}) => {
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
         setShowErrorPopup('');
-        const uploadImageObj = [values.icon_img];
-        const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-        if(uploadImageUrl.files.length > 0) {
-            const fileUrls = uploadImageUrl.files.map(file => file.url);
-            let pictureUrl = null;
-            if(uploadImageUrl.files.length > 0) {
-                pictureUrl = fileUrls[0];
-            }
-            const checkPrpertyInfo = await insertData('api/property-type-listings/check', {key: values.key }, true);
-            console.log(checkPrpertyInfo);
-            if(checkPrpertyInfo.status) {
-                try {
-                    const propertData = {
-                        en_string: values.title_en,
-                        fr_string: values.title_fr,
-                        icon: pictureUrl,
-                        type: values.type,
-                        key: values.key,
-                        category: 1
-                    };
-                    console.log(propertData);
-
-                    const createPrpertyInfo = await insertData('api/property-type-listings/create', propertData, true);
-                    if(createPrpertyInfo.status) {
-                        setSucessMessage(true);
-                        setShowErrorPopup("Project of Amenities created successfully");
-                        router.push('/property-amenities-listing');
-                    }else{
-                        setShowErrorPopup(createPrpertyInfo.message);
-                    }
-                } catch (error) {
-                    setShowErrorPopup(error.message);
+        
+        try {
+            const uploadImageObj = [values.icon_img];
+            const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
+    
+            if (uploadImageUrl.files.length > 0) {
+                const fileUrls = uploadImageUrl.files.map(file => file.url);
+                let pictureUrl = null;
+                if (uploadImageUrl.files.length > 0) {
+                    pictureUrl = fileUrls[0];
                 }
-            }else{
-                setShowErrorPopup(checkPrpertyInfo.message);
+    
+                const checkPropertyInfo = await insertData('api/property-type-listings/check', { key: values.key }, true);
+                console.log(checkPropertyInfo);
+    
+                if (checkPropertyInfo.status) {
+                    try {
+                        const propertyData = {
+                            en_string: values.title_en,
+                            fr_string: values.title_fr,
+                            icon: pictureUrl,
+                            type: values.type,
+                            key: values.key,
+                            category: 1,
+                        };
+    
+                        console.log('Property Data:', propertyData);
+    
+                        const createPropertyInfo = await insertData('api/property-type-listings/create', propertyData, true);
+                        
+                        if (createPropertyInfo.status) {
+                            setSucessMessage(true);
+                            setShowErrorPopup("Project of Amenities created successfully");
+                            router.push('/property-amenities-listing');
+                        } else {
+                            setErrors({ serverError: createPropertyInfo.message || "Failed to create project amenities." });
+                            setShowErrorPopup(true);
+                        }
+                    } catch (error) {
+                        setErrors({ serverError: error.message || "An unexpected error occurred." });
+                        setShowErrorPopup(true);
+                    }
+                } else {
+                    setErrors({ serverError: checkPropertyInfo.message || "Property check failed." });
+                    setShowErrorPopup(true);
+                }
+            } else {
+                setErrors({ serverError: "Image not found or failed to upload." });
+                setShowErrorPopup(true);
             }
-        }else{
-            setShowErrorPopup("Image not Found");
+        } catch (error) {
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
         }
-
     };
+    
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 

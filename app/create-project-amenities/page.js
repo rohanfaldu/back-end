@@ -33,50 +33,66 @@ export default function CreateProjectAmenities() {
         icon_img: Yup.mixed().required("Image is required"),
     });
 
-    const handleSubmit = async (values, {resetForm}) => {
+    const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-        setShowErrorPopup('');
-        const uploadImageObj = [values.icon_img];
-        const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-        if(uploadImageUrl.files.length > 0) {
-            const fileUrls = uploadImageUrl.files.map(file => file.url);
-            let pictureUrl = null;
-            if(uploadImageUrl.files.length > 0) {
-                pictureUrl = fileUrls[0];
-            }
-            const checkPrpertyInfo = await insertData('api/project-type-listings/check', {key: values.key }, true);
-            console.log(checkPrpertyInfo);
-            if(checkPrpertyInfo.status) {
-                try {
-                    const propertData = {
+        setShowErrorPopup(false); // Ensure popup is initially closed.
+    
+        try {
+            /********* Upload Image ***********/
+            const uploadImageObj = [values.icon_img];
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+    
+            if (uploadImageUrl.files.length > 0) {
+                const fileUrls = uploadImageUrl.files.map((file) => file.url);
+                const pictureUrl = fileUrls[0] || null;
+    
+                if (!pictureUrl) {
+                    setErrors({ serverError: "Image not found or failed to upload." });
+                    setShowErrorPopup(true);
+                    return;
+                }
+    
+                /********* Check Property Info ***********/
+                const checkPropertyInfo = await insertData("api/project-type-listings/check", { key: values.key }, true);
+    
+                if (checkPropertyInfo.status) {
+                    /********* Create Property Info ***********/
+                    const propertyData = {
                         en_string: values.title_en,
                         fr_string: values.title_fr,
                         icon: pictureUrl,
                         type: values.type,
                         key: values.key,
-                        category: 1
+                        category: 1,
                     };
-                    console.log(propertData);
-
-                    const createPrpertyInfo = await insertData('api/project-type-listings/create', propertData, true);
-                    if(createPrpertyInfo.status) {
+    
+                    const createPropertyInfo = await insertData("api/project-type-listings/create", propertyData, true);
+    
+                    if (createPropertyInfo.status) {
                         setSucessMessage(true);
-                        setShowErrorPopup("Project of Amenities created successfully");
-                        router.push('/project-amenities-listing');
-                    }else{
-                        setShowErrorPopup(createPrpertyInfo.message);
+                        resetForm();
+                        setShowErrorPopup(true);
+                        setErrors({ serverError: "Project of Amenities created successfully." });
+                        router.push("/project-amenities-listing");
+                    } else {
+                        setErrors({ serverError: createPropertyInfo.message || "Failed to create project amenities." });
+                        setShowErrorPopup(true);
                     }
-                } catch (error) {
-                    setShowErrorPopup(error.message);
+                } else {
+                    setErrors({ serverError: checkPropertyInfo.message || "Property check failed." });
+                    setShowErrorPopup(true);
                 }
-            }else{
-                setShowErrorPopup(checkPrpertyInfo.message);
+            } else {
+                setErrors({ serverError: "Image not found or failed to upload." });
+                setShowErrorPopup(true);
             }
-        }else{
-            setShowErrorPopup("Image not Found");
+        } catch (error) {
+            setErrors({ serverError: error.message || "An unexpected error occurred." });
+            setShowErrorPopup(true);
         }
-
     };
+    
+    
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 
