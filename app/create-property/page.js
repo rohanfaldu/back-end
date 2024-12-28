@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
-import GooglePlacesAutocomplete from "@/components/elements/GooglePlacesAutocomplete"; // Adjust the path based on your project structure
+// import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+// Adjust the path based on your project structure
 import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 
@@ -158,7 +159,8 @@ export default function CreateProperty() {
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 10
         });
         if(cityList.length === 0){
             const cityObj = { state_id: stateId, lang: "en" };
@@ -176,7 +178,8 @@ export default function CreateProperty() {
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!DistrictId) {
@@ -205,6 +208,7 @@ export default function CreateProperty() {
             setPropertyMapCoords({
                 latitude: latitude,
                 longitude: longitude,
+                zoom: 14
             });
         } else {
             console.error('Neighborhood not found');
@@ -305,10 +309,15 @@ export default function CreateProperty() {
     
     const handlePlaceSelect = (place) => {
         // You can access selected place details here
+        console.log("place");
         console.log(place);
         // Update address state with the selected place's formatted address
         setAddress(place.description);
     };
+
+    const handleAddressSelect = (newAddress, newLocation) => {
+        
+      };
 
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
@@ -336,8 +345,6 @@ export default function CreateProperty() {
         // console.log('Selected Amenities:', selectedAmenities);
         const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
         uploadImageObj.push(values.video);
-            console.log('uploadImageObj');
-            console.log(uploadImageObj);
        const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
      if (uploadImageUrl.files.length > 0) {
         const imageUrls  = [];
@@ -383,15 +390,13 @@ export default function CreateProperty() {
                     longitude: values.longitude,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft)??0,
-                    meta_details:selectedAmenities,
+                    meta_details: selectedAmenities,
                     currency_id: values.currency_id,
                     project_id: values.project_id??null,
-                    latitude: "34.092809",
-                    longitude: "-118.328661",
-                    address:""
+                    latitude: values.latitude? String(values.latitude):"33.985047",
+                    longitude: values.latitude? String(values.longitude):"-118.469483",
+                    address: values.address,
                 }
-                console.log(propertData);
-
 
                 const createPrpertyInfo = await insertData('api/property/create', propertData, true);
                 if(createPrpertyInfo.status) {
@@ -515,26 +520,26 @@ export default function CreateProperty() {
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
                                         
-                                        <ErrorMessage name="title_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        <ErrorMessage name="title_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -553,7 +558,7 @@ export default function CreateProperty() {
                                             <option value="sale">Fore Sale</option>
                                             <option value="rental">For Rental</option>
                                         </Field>
-                                        <ErrorMessage name="transaction_type" component="div" className="error" />
+                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Property Type:<span>*</span></label>
@@ -572,7 +577,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="property_type" component="div" className="error" />
+                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
@@ -591,7 +596,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="project_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
@@ -610,7 +615,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="user_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -639,35 +644,35 @@ export default function CreateProperty() {
                                                 </Field>
                                                 <Field type="text" id="price" name="price" className="form-control style-1" />
                                             </div>
-                                            <ErrorMessage name="price" component="div" className="error" />
-                                        <ErrorMessage name="currency_id" component="div" className="error" />
+                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
+                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
                                     </fieldset>
                                     {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        <ErrorMessage name="vr_link" component="div" className="error" />
+                                        // <ErrorMessage name="vr_link" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Link UUID:</label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        <ErrorMessage name="link_uuid" component="div" className="error" />
+                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
                                     </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        <ErrorMessage name="license_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        <ErrorMessage name="credit" component="div" className="error" />
+                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
-                                        <ErrorMessage name="size_sqft" component="div" className="error" />
+                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -681,75 +686,117 @@ export default function CreateProperty() {
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
-                                                        <ErrorMessage name={project.key} component="div" className="error" />
+                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
                                             <></>
                                         )}
                                 </div>
-                                <div className="grid-2 box gap-30">
-                                <fieldset className="box-fieldset">
+                                <div className="box grid-2 box gap-30">
+                                    <fieldset className="box-fieldset">
                                         <label htmlFor="picture_img">Picture Images:</label>
                                         <Field
                                             name="picture_img"
                                             component={({ field, form }) => (
                                                 <div className="box-floor-img uploadfile">
-                                                    {/* Upload Button */}
-                                                    <div className="btn-upload">
-                                                        <label className="tf-btn primary">
-                                                            Choose Files
-                                                            <input
-                                                                type="file"
-                                                                multiple
-                                                                className="ip-file"
-                                                                onChange={(event) => {
-                                                                    let imageList = [];
-                                                                    const files = Array.from(event.target.files); // Convert to an array
-                                                                    const validPreviews = [];
-                                                                  
-                                                                    files.forEach((file) => {
-                                                                      if (file.size < 150000) { // Example size limit: 40KB
-                                                                        alert(`Please upload files above 150kb`);
-                                                                      } else {
-                                                                        validPreviews.push(URL.createObjectURL(file)); // Generate preview
-                                                                        imageList.push(file); // Add valid file to the list
-                                                                      }
-                                                                    });
-                                                                  
-                                                                    // Update state and Formik
-                                                                    setFilePreviews(validPreviews); // Set previews for valid files
-                                                                    form.setFieldValue(field.name, imageList);
-                                                                    // Generate previews
-                                                                }}
-                                                                style={{ display: "none" }}
-                                                            />
-                                                        </label>
-                                                    </div>
+                                                {/* Upload Button */}
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                    Choose Files
+                                                    <input
+                                                        type="file"
+                                                        multiple
+                                                        className="ip-file"
+                                                        onChange={(event) => {
+                                                        let imageList = [];
+                                                        const files = Array.from(event.target.files); // Convert to an array
+                                                        const validPreviews = [];
 
-                                                    {/* Image Previews */}
-                                                    <div className="image-preview-container">
-                                                        {filePreviews.map((preview, index) => (
-                                                            <img
-                                                                key={index}
-                                                                src={preview}
-                                                                alt={`Preview ${index + 1}`}
-                                                                className="uploadFileImage"
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <p className="file-name fw-5">Or drop images here to upload</p>
+                                                        files.forEach((file) => {
+                                                            // Check file size (less than 150KB)
+                                                            if (file.size < 150000) {
+                                                            alert(`Please upload files less than 150KB`);
+                                                            } else {
+                                                            // Create an Image object to check its dimensions
+                                                            const img = new Image();
+                                                            const reader = new FileReader();
 
-                                                    {/* Error Message */}
-                                                    <ErrorMessage name="picture_img" component="div" className="error" />
+                                                            reader.onload = (e) => {
+                                                                img.src = e.target.result; // Set image src to the file's data URL
+
+                                                                // Once the image is loaded, check its dimensions
+                                                                img.onload = () => {
+                                                                const imageHeight = img.height;  // Get image height
+                                                                const imageWidth = img.width;    // Get image width
+
+                                                                // You can add your dimension validation here
+                                                                if (imageHeight <= 800 || imageWidth <= 1100) {
+                                                                    alert('Image dimensions are too large. Please upload an image with smaller dimensions (max 500px).');
+                                                                } else {
+                                                                    // Add the file as a valid image and generate the preview
+                                                                    validPreviews.push(URL.createObjectURL(file));
+                                                                    imageList.push(file); // Add valid file to the list
+                                                                }
+
+                                                                // Update state and Formik with valid files
+                                                                setFilePreviews(validPreviews); // Set previews for valid files
+                                                                form.setFieldValue(field.name, imageList);
+                                                                };
+                                                            };
+
+                                                            // Read the file as a Data URL to create a preview
+                                                            reader.readAsDataURL(file);
+                                                            }
+                                                        });
+                                                        }}
+                                                        style={{ display: "none" }}
+                                                    />
+                                                    </label>
+                                                </div>
+
+                                                
+                                                <p className="file-name fw-5">Or drop images here to upload</p>
+
+                                                {/* Error Message */}
+                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
-                                        />
+                                            />
+
                                     </fieldset>
-
                                     <fieldset className="box-fieldset">
-                                        <legend>Video Option</legend>
-
+                                        {/* Image Previews */}
+                                        <div className="image-preview-container image-gallery">
+                                            {filePreviews.length > 0 && (<p className="fw-5">Image Preview:</p>)}
+                                            {filePreviews.map((preview, index) => (
+                                                <div key={index} className="preview-item">
+                                                    <img
+                                                        src={preview}
+                                                        alt={`Preview ${index + 1}`}
+                                                        className="uploadFileImage"
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => {
+                                                            // Remove the image from preview and Formik
+                                                            const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+                                                            const newImageList = form.values.picture_img.filter((_, i) => i !== index);
+                                                            setFilePreviews(newFilePreviews); // Update preview state
+                                                            form.setFieldValue(field.name, newImageList); // Update Formik field
+                                                        }}
+                                                        className="remove-image-btn"
+                                                    >
+                                                    &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div className="box grid-1 box gap-50">
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="picture_img">Video Option:</label>
                                         {/* Video Option Radio Buttons */}
                                         <div>
                                             <fieldset className="fieldset-radio">
@@ -802,7 +849,7 @@ export default function CreateProperty() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                <ErrorMessage name="video" component="div" className="error" />
+                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -814,7 +861,7 @@ export default function CreateProperty() {
                                                     className="form-control"
                                                     placeholder="Enter YouTube video link"
                                                 />
-                                                <ErrorMessage name="video_link" component="div" className="error" />
+                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -841,7 +888,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        <ErrorMessage name="state_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
@@ -863,7 +910,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="city_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -883,7 +930,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="districts_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -903,28 +950,35 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="neighborhood_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
                                     {/* <label htmlFor="location">Address:<span>*</span></label> */}
-                                    <div className="box-ip">
+                                    {/* <div className="box-ip"> */}
                                      
-                                                {/* <GooglePlacesAutocomplete /> */}
+                                        {/* <GooglePlacesAutocomplete /> */}
 
-                                    {/* <ReactGooglePlacesAutocomplete
+                                     {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
                                         }}
-                                    />                                        */}
-                                    <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div>
+                                    /> <br/> */}
+                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
+                                    </div><br/><br/><br/> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                                setFieldValue('address', newAddress); 
+                                                setFieldValue('latitude', newLocation.lat);
+                                                setFieldValue('longitude', newLocation.lng);
+                                                handleAddressSelect(newAddress, newLocation);
+                                            }
+                                        }
                                     />
                                 </div>
                             </div>
@@ -942,7 +996,7 @@ export default function CreateProperty() {
                                                         onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    <ErrorMessage name={project.key} component="div" className="error" />
+                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (

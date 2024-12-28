@@ -10312,3 +10312,20 @@ tr {
 .list-action .edit{
   margin-right: 10px;
 }
+
+.remove-image-btn{
+    position: absolute;
+    background: #00000045;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+}
+.image-gallery .preview-item{
+  float: left;
+  padding-right: 10px;
+}
+.table-responsive .listing-box .images img{
+  width: 100px;
+  height: 100px;
+}
