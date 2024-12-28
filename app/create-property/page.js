@@ -11,7 +11,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
 import GooglePlacesAutocomplete from "@/components/elements/GooglePlacesAutocomplete"; // Adjust the path based on your project structure
-import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
+// import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 
 import  "../../components/errorPopup/ErrorPopup.css";
@@ -138,12 +138,12 @@ export default function CreateProperty() {
                     // console.log(1);
                     const currencyObj = {};
                     const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
-                   
+
                     if(getCurrencyInfo.status) {
                         setCurrencyList(getCurrencyInfo.data);
                     }
-                } 
-             
+                }
+
                 //console.log(propertyofTypes)
             } catch (error) {
                 console.error(error);
@@ -210,9 +210,9 @@ export default function CreateProperty() {
             console.error('Neighborhood not found');
         }
     };
-    
-      
-   
+
+
+
 
     const handleCityChange = async (cityId) => {
         console.log('City ID:', cityId);
@@ -223,7 +223,7 @@ export default function CreateProperty() {
             latitude: latitude,
             longitude: longitude
         });
-       
+
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
             return;
@@ -241,7 +241,7 @@ export default function CreateProperty() {
             setDistrictList([]);
         }
     };
-  
+
 
     const handleNumberChange = (id, value) => {
         setPropertyOfMetaNumberValue((prev) => {
@@ -257,7 +257,7 @@ export default function CreateProperty() {
         });
     };
 
-   
+
 
 
 
@@ -273,7 +273,7 @@ export default function CreateProperty() {
             setFieldValue("video", videoFile);
             setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         }
-    
+
         // If image files are selected, set them in the "picture_img" field
         // if (imageFiles.length > 0) {
         //     console.log(imageFiles);
@@ -294,7 +294,7 @@ export default function CreateProperty() {
         //     setFieldValue("video", videoFile);
         //     setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         // }
-    
+
         // If image files are selected, set them in the "picture_img" field
         if (imageFiles.length > 0) {
             console.log(imageFiles);
@@ -302,7 +302,7 @@ export default function CreateProperty() {
             setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
         }
     };
-    
+
     const handlePlaceSelect = (place) => {
         // You can access selected place details here
         console.log(place);
@@ -315,17 +315,17 @@ export default function CreateProperty() {
         // if (Object.keys(errors).length > 0) {
         //     setShowErrorPopup(true);
         // }
-        console.log(values); 
+        console.log(values);
         if (isVideoUpload && !values.video) {
             alert("Please upload a video file.");
             return false;
           }
-        
+
           if (!isVideoUpload && !values.video_link) {
             alert("Please enter a YouTube video link.");
             return false;
           }
-        
+
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ property_type_id: project.id, value: "true" }));
@@ -396,19 +396,19 @@ export default function CreateProperty() {
                 const createPrpertyInfo = await insertData('api/property/create', propertData, true);
                 if(createPrpertyInfo.status) {
                     setSucessMessage(true);
-                    setErrorMessage("Property created successfully");
+                    setShowErrorPopup("Property created successfully");
                     router.push('/property-listing');
                 }else{
-                    setErrorMessage(createPrpertyInfo.message);
+                    setShowErrorPopup(createPrpertyInfo.message);
                 }
             } catch (error) {
                 console.log('propertData');
 
-                setErrorMessage(error.message);
+                setShowErrorPopup(error.message);
             }
         } else {
             console.log('File not uploaded');
-            setErrorMessage('File not uploaded');
+            setShowErrorPopup('File not uploaded');
         }
     };
 
@@ -429,14 +429,14 @@ export default function CreateProperty() {
     const handleRadioChange = (event, setFieldValue) => {
         const isUpload = event.target.value === "upload";
         setIsVideoUpload(isUpload);
-      
+
         if (!isUpload) {
           // Switching to YouTube Link
           setVideoPreview(null); // Clear video preview
           setFieldValue("video", null); // Clear Formik video field
         }else if(isUpload){
 
-          setFieldValue("video_link", null); 
+          setFieldValue("video_link", null);
           setVideoLink(null); // Update YouTube link manually
 
         }
@@ -471,7 +471,7 @@ export default function CreateProperty() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
-                    neighborhood_id: "",    
+                    neighborhood_id: "",
                     transaction_type: "",
                     property_type: "",
                     user_id: "",
@@ -514,27 +514,27 @@ export default function CreateProperty() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        
-                                        <ErrorMessage name="title_en" component="div" className="error" />
+
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        <ErrorMessage name="title_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -553,7 +553,7 @@ export default function CreateProperty() {
                                             <option value="sale">Fore Sale</option>
                                             <option value="rental">For Rental</option>
                                         </Field>
-                                        <ErrorMessage name="transaction_type" component="div" className="error" />
+                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Property Type:<span>*</span></label>
@@ -572,7 +572,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="property_type" component="div" className="error" />
+                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
@@ -591,7 +591,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="project_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
@@ -610,7 +610,7 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="user_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -639,8 +639,8 @@ export default function CreateProperty() {
                                                 </Field>
                                                 <Field type="text" id="price" name="price" className="form-control style-1" />
                                             </div>
-                                            <ErrorMessage name="price" component="div" className="error" />
-                                        <ErrorMessage name="currency_id" component="div" className="error" />
+                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
+                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
                                     </fieldset>
                                     {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
@@ -657,17 +657,17 @@ export default function CreateProperty() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        <ErrorMessage name="license_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        <ErrorMessage name="credit" component="div" className="error" />
+                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
-                                        <ErrorMessage name="size_sqft" component="div" className="error" />
+                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -681,7 +681,7 @@ export default function CreateProperty() {
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
-                                                        <ErrorMessage name={project.key} component="div" className="error" />
+                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -707,7 +707,7 @@ export default function CreateProperty() {
                                                                     let imageList = [];
                                                                     const files = Array.from(event.target.files); // Convert to an array
                                                                     const validPreviews = [];
-                                                                  
+
                                                                     files.forEach((file) => {
                                                                       if (file.size < 150000) { // Example size limit: 40KB
                                                                         alert(`Please upload files above 150kb`);
@@ -716,7 +716,7 @@ export default function CreateProperty() {
                                                                         imageList.push(file); // Add valid file to the list
                                                                       }
                                                                     });
-                                                                  
+
                                                                     // Update state and Formik
                                                                     setFilePreviews(validPreviews); // Set previews for valid files
                                                                     form.setFieldValue(field.name, imageList);
@@ -741,7 +741,7 @@ export default function CreateProperty() {
                                                     <p className="file-name fw-5">Or drop images here to upload</p>
 
                                                     {/* Error Message */}
-                                                    <ErrorMessage name="picture_img" component="div" className="error" />
+                                                    {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
                                         />
@@ -758,7 +758,7 @@ export default function CreateProperty() {
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />
                                                 <label htmlFor="upload" className="text-radio">Upload Video</label>
-                                        
+
                                                 <input
                                                     type="radio"
                                                     className="tf-radio"
@@ -802,7 +802,7 @@ export default function CreateProperty() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                <ErrorMessage name="video" component="div" className="error" />
+                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -814,7 +814,7 @@ export default function CreateProperty() {
                                                     className="form-control"
                                                     placeholder="Enter YouTube video link"
                                                 />
-                                                <ErrorMessage name="video_link" component="div" className="error" />
+                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -841,7 +841,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        <ErrorMessage name="state_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
@@ -863,7 +863,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="city_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -883,7 +883,7 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="districts_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -903,13 +903,13 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="neighborhood_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
                                     {/* <label htmlFor="location">Address:<span>*</span></label> */}
                                     <div className="box-ip">
-                                     
+
                                                 {/* <GooglePlacesAutocomplete /> */}
 
                                     {/* <ReactGooglePlacesAutocomplete
@@ -942,7 +942,7 @@ export default function CreateProperty() {
                                                         onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    <ErrorMessage name={project.key} component="div" className="error" />
+                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -962,11 +962,11 @@ export default function CreateProperty() {
                             />
                         )}
                     </Form>
-                   
+
                 )}
                 </Formik>
 
-               
+
 			</LayoutAdmin >
 		</>
 	)

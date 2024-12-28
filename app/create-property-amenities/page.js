@@ -8,10 +8,13 @@ import axios from 'axios';
 import { userType } from "../../components/common/functions";
 import { useState } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../public/images/favicon/password-hide.png"; 
+import passwordShow from "../../public/images/favicon/password-show.png";
+import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
+import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+
+
 export default function CreatePropertyAmenities() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -20,6 +23,8 @@ export default function CreatePropertyAmenities() {
     const [filePreview, setFilePreview] = useState(null);
     const [uploadImage, setUploadImage] = useState(null);
     const [filePictureImg, setFilePictureImg] = useState(null);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
     const router = useRouter();
     const validationSchema = Yup.object({
         title_en: Yup.string().required("Title is required"),
@@ -31,7 +36,7 @@ export default function CreatePropertyAmenities() {
 
     const handleSubmit = async (values, {resetForm}) => {
         console.log(values);
-        setErrorMessage('');
+        setShowErrorPopup('');
         const uploadImageObj = [values.icon_img];
         const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
         if(uploadImageUrl.files.length > 0) {
@@ -53,25 +58,25 @@ export default function CreatePropertyAmenities() {
                         category: 1
                     };
                     console.log(propertData);
-                    
+
                     const createPrpertyInfo = await insertData('api/property-type-listings/create', propertData, true);
                     if(createPrpertyInfo.status) {
                         setSucessMessage(true);
-                        setErrorMessage("Project of Amenities created successfully");
+                        setShowErrorPopup("Project of Amenities created successfully");
                         router.push('/property-amenities-listing');
                     }else{
-                        setErrorMessage(createPrpertyInfo.message);   
-                    } 
+                        setShowErrorPopup(createPrpertyInfo.message);
+                    }
                 } catch (error) {
-                    setErrorMessage(error.message);
+                    setShowErrorPopup(error.message);
                 }
             }else{
-                setErrorMessage(checkPrpertyInfo.message);
+                setShowErrorPopup(checkPrpertyInfo.message);
             }
         }else{
-            setErrorMessage("Image not Found");
+            setShowErrorPopup("Image not Found");
         }
-         
+
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -89,12 +94,12 @@ export default function CreatePropertyAmenities() {
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ 
+                initialValues={{
                     title_en: "",
                     title_fr: "",
                     type: "",
-                    key: "", 
-                    icon_img: "", 
+                    key: "",
+                    icon_img: "",
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -142,12 +147,12 @@ export default function CreatePropertyAmenities() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        <ErrorMessage name="title_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        <ErrorMessage name="title_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
@@ -163,12 +168,12 @@ export default function CreatePropertyAmenities() {
                                             <option value="number">Number</option>
                                             <option value="boolean">Boolean</option>
                                         </Field>
-                                        <ErrorMessage name="type" component="div" className="error" />
+                                        {/* <ErrorMessage name="type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Key:<span>*</span></label>
                                         <Field type="text" id="key" name="key" className="form-control style-1" />
-                                        <ErrorMessage name="key" component="div" className="error" />
+                                        {/* <ErrorMessage name="key" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-2 box gap-30">
@@ -189,19 +194,27 @@ export default function CreatePropertyAmenities() {
                                                 {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
                                             </div>
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
-                                            {errors.icon_img && touched.icon_img && ( <div className="error">{errors.icon_img}</div> )}
+                                            {/* {errors.icon_img && touched.icon_img && ( <div className="error">{errors.icon_img}</div> )} */}
                                         </div>
                                     </fieldset>
                                 </div>
-                                
+
                             </div>
-                
-                            <button type="submit"  className="tf-btn primary" >Add Property Amenities</button>
+
+                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Add Property Amenities</button>
+                            {/* Error Popup */}
+                            {showErrorPopup && Object.keys(errors).length > 0 && (
+                                <ErrorPopup
+                                    errors={errors}
+                                    validationSchema={validationSchema}
+                                    onClose={() => setShowErrorPopup(false)}
+                                />
+                            )}
                         </div >
                     </Form>
                 )}
                 </Formik>
-				
+
 
 			</LayoutAdmin >
 		</>

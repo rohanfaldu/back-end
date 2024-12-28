@@ -9,8 +9,10 @@ import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
-import { allCountries } from "country-telephone-data"; 
-import { insertUploadImage } from "../../components/common/imageUpload"
+import { allCountries } from "country-telephone-data";
+import { insertUploadImage } from "../../components/common/imageUpload";
+import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,6 +25,8 @@ export default function CreateAgency() {
     const [uploadFile, setUploadFile] = useState(null);
     const [selectedCode, setSelectedCode] = useState("");
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
     const router = useRouter();
     const validationSchema = Yup.object({
             title_en: Yup.string().required("Title is required"),
@@ -31,21 +35,21 @@ export default function CreateAgency() {
 
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
-        setErrorMessage('');
+        setShowErrorPopup('');
         try{
             const agencyObject = {en_string: values.title_en, fr_string: values.title_fr, type: "BASIC" }
             const createAgencyType = await insertData('api/agency-packages/create', agencyObject, true);
-            if(createAgencyType.status) {   
+            if(createAgencyType.status) {
                 setSucessMessage(true);
-                setErrorMessage("Property of Type created successfully");
+                setShowErrorPopup("Property of Type created successfully");
                 router.push('/agency-types-listing');
             } else{
-                setErrorMessage(error.message);    
+                setShowErrorPopup(error.message);
             }
         } catch (error) {
-            setErrorMessage(error.message);
+            setShowErrorPopup(error.message);
         }
-        
+
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -70,9 +74,9 @@ export default function CreateAgency() {
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ 
-                    title_en: "", title_fr: "", 
-                 }}  
+                initialValues={{
+                    title_en: "", title_fr: "",
+                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
@@ -85,21 +89,29 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        <ErrorMessage name="title_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        <ErrorMessage name="title_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" >Add Agency Type</button>
+                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Agency Type</button>
                         </div >
+                        {/* Error Popup */}
+                          {showErrorPopup && Object.keys(errors).length > 0 && (
+                            <ErrorPopup
+                                errors={errors}
+                                validationSchema={validationSchema}
+                                onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
                     </Form>
                 )}
                 </Formik>
-				
+
 
 			</LayoutAdmin >
 		</>

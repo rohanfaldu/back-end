@@ -7,8 +7,10 @@ import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
-import { allCountries } from "country-telephone-data"; 
-import { insertUploadImage } from "../../components/common/imageUpload"
+import { allCountries } from "country-telephone-data";
+import { insertUploadImage } from "../../components/common/imageUpload";
+import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -19,6 +21,8 @@ export default function CreateAgency() {
     const [selectedCode, setSelectedCode] = useState("+33");
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
     const router = useRouter();
     const validationSchema = Yup.object({
         username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
@@ -55,7 +59,7 @@ export default function CreateAgency() {
 
     // Handle form submission
     const handleSubmit = async (values, {resetForm}) => {
-        setErrorMessage('');
+        setShowErrorPopup('');
         console.log(values);
         const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
         const getUserInfo = await insertData('auth/check/user', checkData, false);
@@ -67,12 +71,12 @@ export default function CreateAgency() {
                 /********* create user ***********/
                 try {
                     const userData = {
-                        full_name: values.username??null, 
-                        user_name: values.username??null, 
-                        email_address: values.email??null, 
-                        fcm_token: '', 
-                        image_url: fileUrls, 
-                        type: "developer", 
+                        full_name: values.username??null,
+                        user_name: values.username??null,
+                        email_address: values.email??null,
+                        fcm_token: '',
+                        image_url: fileUrls,
+                        type: "developer",
                         user_login_type	: userType("NONE"),
                         phone_number: values.phone.toString(),
                         password: values.password??null,
@@ -84,10 +88,10 @@ export default function CreateAgency() {
                     console.log(createUserInfo.status);
                     if(createUserInfo.status === true) {
                         setSucessMessage(true);
-                        setErrorMessage("Developer created successfully");
+                        setShowErrorPopup("Developer created successfully");
                         /********* create agency ***********/
                         const user_id = createUserInfo.data.userProfile.id;
-                        const agencyData = {  
+                        const agencyData = {
                             user_id:  user_id,
                             sub_user_id:  null,
                             credit:  values.credit??null,
@@ -110,21 +114,21 @@ export default function CreateAgency() {
                         const createDeveloperInfo = await insertData('api/developer/create', agencyData, true);
                         if(createDeveloperInfo.status === true) {
                             resetForm();
-                            router.push('/developer-listing');    
+                            router.push('/developer-listing');
                         } else{
-                            setErrorMessage(createDeveloperInfo.message);   
+                            setShowErrorPopup(createDeveloperInfo.message);
                         }
                     }else{
-                        setErrorMessage(createUserInfo.message);   
-                    } 
+                        setShowErrorPopup(createUserInfo.message);
+                    }
                 } catch (error) {
-                    setErrorMessage(error.message);
-                } 
+                    setShowErrorPopup(error.message);
+                }
             } else {
-               setErrorMessage(fileUrls.message);
+               setShowErrorPopup(fileUrls.message);
             }
         }else{
-            setErrorMessage(getUserInfo.message);
+            setShowErrorPopup(getUserInfo.message);
         }
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
@@ -151,22 +155,22 @@ export default function CreateAgency() {
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ 
-                    username: "", 
-                    email: "",  
-                    phone: "",  
+                initialValues={{
+                    username: "",
+                    email: "",
+                    phone: "",
                     image: null,
                     password: "",
                     fullname: "",
                     facebook_link: "",
                     twitter_link: "",
                     youtube_link: "",
-                    pinterest_link: "", 
-                    linkedin_link: "",  
-                    instagram_link: "",  
+                    pinterest_link: "",
+                    linkedin_link: "",
+                    instagram_link: "",
                     country_code: "+33",
                     whatsup_country_code: "+33",
-                 }}  
+                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
@@ -204,12 +208,12 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Name:<span>*</span></label>
                                         <Field type="text" id="username" name="username" className="form-control style-1" />
-                                        <ErrorMessage name="username" component="div" className="error" />
+                                        {/* <ErrorMessage name="username" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Full Name:<span>*</span></label>
                                         <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
-                                        <ErrorMessage name="fullname" component="div" className="error" />
+                                        {/* <ErrorMessage name="fullname" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset ">
                                         <label htmlFor="name">Mobile Number<span>*</span>:</label>
@@ -238,24 +242,24 @@ export default function CreateAgency() {
                                                 </Field>
                                                 <Field type="text" id="phone" name="phone" className="form-control style-1" />
                                             </div>
-                                        <ErrorMessage name="phone" component="div" className="error" />
-                                        <ErrorMessage name="country_code" component="div" className="error" />
+                                        {/* <ErrorMessage name="phone" component="div" className="error" /> */}
+                                        {/* <ErrorMessage name="country_code" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Email:<span>*</span></label>
                                         <Field type="email" id="email" name="email" />
-                                        <ErrorMessage name="email" component="div" className="error" />
+                                        {/* <ErrorMessage name="email" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="pass">Password<span>*</span>:</label>
-                                        <Field 
+                                        <Field
                                             type={showPassword ? "text" : "password"}
-                                            id="password" 
+                                            id="password"
                                             name="password"
                                             onChange={handleChange}
-                                            onBlur={handleBlur} 
+                                            onBlur={handleBlur}
                                             style={{ width: "100%", paddingRight: "2.5rem" }}
                                         />
                                         <span
@@ -264,7 +268,7 @@ export default function CreateAgency() {
                                             >
                                             {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
                                         </span>
-                                        <ErrorMessage name="password" component="div" className="error" />
+                                        {/* <ErrorMessage name="password" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -273,7 +277,7 @@ export default function CreateAgency() {
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description:</label>
-                                        
+
                                         <Field type="textarea"  as="textarea"  id="description" name="description" className="textarea-tinymce" />
                                     </fieldset>
                                 </div>
@@ -305,30 +309,30 @@ export default function CreateAgency() {
                                                 </Field>
                                                 <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
                                             </div>
-                                        <ErrorMessage name="whatsup_country_code" component="div" className="error" />
-                                        <ErrorMessage name="whatsup_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
+                                        {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Service Area:</label>
                                         <Field type="text" name="service_area" className="box-fieldset"  />
-                                        <ErrorMessage name="service_area" component="div" className="error" />
+                                        {/* <ErrorMessage name="service_area" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Tax Number:</label>
                                         <Field type="text"  name="tax_number" className="box-fieldset" />
-                                        <ErrorMessage name="tax_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="tax_number" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        <ErrorMessage name="license_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        <ErrorMessage name="credit" component="div" className="error" />
+                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Agency Packages:</label>
@@ -350,7 +354,7 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="agency_packages" component="div" className="error" />
+                                        {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-2 box gap-30">
@@ -400,43 +404,51 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Facebook Link:</label>
                                         <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
-                                        <ErrorMessage name="facebook_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Twitter Link:</label>
                                         <Field type="text" name="twitter_link" className="box-fieldset"  />
-                                        <ErrorMessage name="twitter_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Youtube Link:</label>
                                         <Field type="text"  name="youtube_link" className="box-fieldset" />
-                                        <ErrorMessage name="youtube_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Pinterest Link:</label>
                                         <Field type="text" name="pinterest_link" className="box-fieldset" />
-                                        <ErrorMessage name="pinterest_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Linkedin Link:</label>
                                         <Field type="text" name="linkedin_link" className="box-fieldset" />
-                                        <ErrorMessage name="linkedin_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Instagram Link:</label>
                                         <Field type="text" name="instagram_link" className="box-fieldset" />
-                                        <ErrorMessage name="instagram_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" >Add Developer</button>
+                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Developer</button>
                         </div >
+                        {/* Error Popup */}
+                          {showErrorPopup && Object.keys(errors).length > 0 && (
+                            <ErrorPopup
+                                errors={errors}
+                                validationSchema={validationSchema}
+                                onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
                     </Form>
                 )}
                 </Formik>
-				
+
 
 			</LayoutAdmin >
 		</>
