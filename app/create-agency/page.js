@@ -187,9 +187,9 @@ export default function CreateAgency() {
                                     {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
                                     <p className="file-name fw-5"> Or drop image here to upload </p>
                                     </label>
-                                    {errors.image && touched.image && (
+                                    {/* {errors.image && touched.image && (
                                     <div className="error">{errors.image}</div>
-                                    )}
+                                    )} */}
                                 </div>
                             </div>
                             <div className="widget-box-2">
