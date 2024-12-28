@@ -14,7 +14,6 @@ import { capitalizeFirstChar } from "../../components/common/functions";
 // Adjust the path based on your project structure
 import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
-
 import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 
@@ -139,12 +138,12 @@ export default function CreateProperty() {
                     // console.log(1);
                     const currencyObj = {};
                     const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
-                   
+
                     if(getCurrencyInfo.status) {
                         setCurrencyList(getCurrencyInfo.data);
                     }
-                } 
-             
+                }
+
                 //console.log(propertyofTypes)
             } catch (error) {
                 console.error(error);
@@ -214,9 +213,9 @@ export default function CreateProperty() {
             console.error('Neighborhood not found');
         }
     };
-    
-      
-   
+
+
+
 
     const handleCityChange = async (cityId) => {
         console.log('City ID:', cityId);
@@ -227,7 +226,7 @@ export default function CreateProperty() {
             latitude: latitude,
             longitude: longitude
         });
-       
+
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
             return;
@@ -245,7 +244,7 @@ export default function CreateProperty() {
             setDistrictList([]);
         }
     };
-  
+
 
     const handleNumberChange = (id, value) => {
         setPropertyOfMetaNumberValue((prev) => {
@@ -261,7 +260,7 @@ export default function CreateProperty() {
         });
     };
 
-   
+
 
 
 
@@ -277,7 +276,7 @@ export default function CreateProperty() {
             setFieldValue("video", videoFile);
             setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         }
-    
+
         // If image files are selected, set them in the "picture_img" field
         // if (imageFiles.length > 0) {
         //     console.log(imageFiles);
@@ -298,7 +297,7 @@ export default function CreateProperty() {
         //     setFieldValue("video", videoFile);
         //     setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         // }
-    
+
         // If image files are selected, set them in the "picture_img" field
         if (imageFiles.length > 0) {
             console.log(imageFiles);
@@ -306,7 +305,7 @@ export default function CreateProperty() {
             setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
         }
     };
-    
+
     const handlePlaceSelect = (place) => {
         // You can access selected place details here
         console.log("place");
@@ -324,17 +323,17 @@ export default function CreateProperty() {
         // if (Object.keys(errors).length > 0) {
         //     setShowErrorPopup(true);
         // }
-        console.log(values); 
+        console.log(values);
         if (isVideoUpload && !values.video) {
             alert("Please upload a video file.");
             return false;
           }
-        
+
           if (!isVideoUpload && !values.video_link) {
             alert("Please enter a YouTube video link.");
             return false;
           }
-        
+
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ property_type_id: project.id, value: "true" }));
@@ -401,19 +400,19 @@ export default function CreateProperty() {
                 const createPrpertyInfo = await insertData('api/property/create', propertData, true);
                 if(createPrpertyInfo.status) {
                     setSucessMessage(true);
-                    setErrorMessage("Property created successfully");
+                    setShowErrorPopup("Property created successfully");
                     router.push('/property-listing');
                 }else{
-                    setErrorMessage(createPrpertyInfo.message);
+                    setShowErrorPopup(createPrpertyInfo.message);
                 }
             } catch (error) {
                 console.log('propertData');
 
-                setErrorMessage(error.message);
+                setShowErrorPopup(error.message);
             }
         } else {
             console.log('File not uploaded');
-            setErrorMessage('File not uploaded');
+            setShowErrorPopup('File not uploaded');
         }
     };
 
@@ -434,14 +433,14 @@ export default function CreateProperty() {
     const handleRadioChange = (event, setFieldValue) => {
         const isUpload = event.target.value === "upload";
         setIsVideoUpload(isUpload);
-      
+
         if (!isUpload) {
           // Switching to YouTube Link
           setVideoPreview(null); // Clear video preview
           setFieldValue("video", null); // Clear Formik video field
         }else if(isUpload){
 
-          setFieldValue("video_link", null); 
+          setFieldValue("video_link", null);
           setVideoLink(null); // Update YouTube link manually
 
         }
@@ -476,7 +475,7 @@ export default function CreateProperty() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
-                    neighborhood_id: "",    
+                    neighborhood_id: "",
                     transaction_type: "",
                     property_type: "",
                     user_id: "",
@@ -519,7 +518,6 @@ export default function CreateProperty() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        
                                         {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
@@ -712,7 +710,6 @@ export default function CreateProperty() {
                                                         let imageList = [];
                                                         const files = Array.from(event.target.files); // Convert to an array
                                                         const validPreviews = [];
-
                                                         files.forEach((file) => {
                                                             // Check file size (less than 150KB)
                                                             if (file.size < 150000) {
@@ -721,7 +718,6 @@ export default function CreateProperty() {
                                                             // Create an Image object to check its dimensions
                                                             const img = new Image();
                                                             const reader = new FileReader();
-
                                                             reader.onload = (e) => {
                                                                 img.src = e.target.result; // Set image src to the file's data URL
 
@@ -805,7 +801,7 @@ export default function CreateProperty() {
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />
                                                 <label htmlFor="upload" className="text-radio">Upload Video</label>
-                                        
+
                                                 <input
                                                     type="radio"
                                                     className="tf-radio"
@@ -959,6 +955,7 @@ export default function CreateProperty() {
                                      
                                         {/* <GooglePlacesAutocomplete /> */}
 
+
                                      {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
                                         selectProps={{
@@ -1016,11 +1013,11 @@ export default function CreateProperty() {
                             />
                         )}
                     </Form>
-                   
+
                 )}
                 </Formik>
 
-               
+
 			</LayoutAdmin >
 		</>
 	)

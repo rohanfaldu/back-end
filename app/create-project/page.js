@@ -8,12 +8,14 @@ import axios from 'axios';
 import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../public/images/favicon/password-hide.png"; 
+import passwordShow from "../../public/images/favicon/password-show.png";
+import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
-import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
+import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,6 +42,8 @@ export default function CreateAgency() {
         longitude: -7.6200284,
         zoom: 6
     });
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
     const validationSchema = Yup.object({
         title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
         title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -56,7 +60,7 @@ export default function CreateAgency() {
         user_id: Yup.string().required("Developer is required"),
         link_uuid: Yup.string().required("Link uuid is required"),
     });
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -90,7 +94,7 @@ export default function CreateAgency() {
                         setProjectOfBooleanListing(projectOfBlooeanType);
                     }
                 }
-                if(developerList.length === 0){ 
+                if(developerList.length === 0){
                     const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
                     const developerList = getUsersDeveloperInfo.data.user_data;
                     if(developerList.length) {
@@ -130,7 +134,7 @@ export default function CreateAgency() {
             latitude: latitude,
             longitude: longitude
         });
-       
+
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
             return;
@@ -147,7 +151,7 @@ export default function CreateAgency() {
             console.error("Error fetching cities:", error);
             setDistrictList([]);
         }
-    }; 
+    };
 
     const handleDistrictChange = async (DistrictId) => {
         console.log('District ID:', DistrictId);
@@ -226,7 +230,7 @@ export default function CreateAgency() {
             alert("Please upload a video file.");
             return false;
         }
-    
+
         if (!isVideoUpload && !values.video_link) {
             alert("Please enter a YouTube video link.");
             return false;
@@ -235,11 +239,11 @@ export default function CreateAgency() {
         const selectedAmenities = projectOfBooleanListing
         .filter((project) => checkedItems[project.key])
         .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-  
+
         console.log('Selected Amenities:', selectedAmenities);
 
-       
-        //setErrorMessage('');
+
+        //setShowErrorPopup('');
         console.log(values);
         // const checkData = { email_address: values.email, phone_number: parseInt(values.phone,10) }
         // const getUserInfo = await insertData('auth/check/user', checkData, false);
@@ -290,19 +294,19 @@ export default function CreateAgency() {
                     console.log(createUserInfo);
                     if(createUserInfo.status) {
                         setSucessMessage(true);
-                        setErrorMessage("Project created successfully");
-                        router.push('/project-listing');  
+                        setShowErrorPopup("Project created successfully");
+                        router.push('/project-listing');
                     }else{
-                        setErrorMessage(createUserInfo.message);   
-                    } 
+                        setShowErrorPopup(createUserInfo.message);
+                    }
                 } catch (error) {
-                    setErrorMessage(error.message);
-                } 
+                    setShowErrorPopup(error.message);
+                }
             } else {
-               setErrorMessage('File not uploaded');
+               setShowErrorPopup('File not uploaded');
             }
         // }else{
-        //     setErrorMessage(getUserInfo.message);
+        //     setShowErrorPopup(getUserInfo.message);
         // }
     };
 
@@ -318,14 +322,14 @@ export default function CreateAgency() {
 	const handleRadioChange = (event) => {
         const isUpload = event.target.value === "upload";
         setIsVideoUpload(isUpload);
-      
+
         if (!isUpload) {
           // Switching to YouTube Link
           setVideoPreview(null); // Clear video preview
           setFieldValue("video", null); // Clear Formik video field
         }else if(isUpload){
 
-          setFieldValue("video_link", null); 
+          setFieldValue("video_link", null);
           setVideoLink(null); // Update YouTube link manually
 
         }
@@ -342,7 +346,7 @@ export default function CreateAgency() {
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{ 
+                initialValues={{
                     title_en: "",
                     title_fr: "",
                     description_en: "",
@@ -355,10 +359,10 @@ export default function CreateAgency() {
                     state_id: "",
                     city_id: "",
                     districts_id: "",
-                    neighborhood_id: "", 
+                    neighborhood_id: "",
                     user_id: "",
                     link_uuid: "",
-                 }}  
+                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
@@ -396,26 +400,26 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        <ErrorMessage name="title_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        <ErrorMessage name="title_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_en" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        <ErrorMessage name="description_fr" component="div" className="error" />
+                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -430,24 +434,24 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        <ErrorMessage name="vr_link" component="div" className="error" />
+                                        {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Link UUID:<span>*</span></label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        <ErrorMessage name="link_uuid" component="div" className="error" />
+                                        {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        <ErrorMessage name="license_number" component="div" className="error" />
+                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        <ErrorMessage name="credit" component="div" className="error" />
+                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
@@ -460,20 +464,20 @@ export default function CreateAgency() {
                                             <option value="">Select User Listing</option>
                                             {developerList && developerList.length > 0 ? (
                                                 developerList.map((user) => (
-                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></> 
+                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
                                                 ))
                                             ) : (
                                                 <></>
                                             )}
                                         </Field>
-                                        <ErrorMessage name="user_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">{project.name}:</label>
                                                         <Field type="number" name={project.id} className="box-fieldset" />
-                                                    <ErrorMessage name={project.key} component="div" className="error" />
+                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -498,7 +502,7 @@ export default function CreateAgency() {
                                                 {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
                                             </div>
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
-                                            {errors.picture_img && touched.picture_img && ( <div className="error">{errors.picture_img}</div> )}
+                                            {/* {errors.picture_img && touched.picture_img && ( <div className="error">{errors.picture_img}</div> )} */}
                                         </div>
                                     </fieldset>
                                     <fieldset className="box-fieldset">
@@ -512,7 +516,7 @@ export default function CreateAgency() {
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />
                                                 <label htmlFor="upload" className="text-radio">Upload Video</label>
-                                        
+
                                                 <input
                                                     type="radio"
                                                     className="tf-radio"
@@ -556,7 +560,7 @@ export default function CreateAgency() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                <ErrorMessage name="video" component="div" className="error" />
+                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -568,7 +572,7 @@ export default function CreateAgency() {
                                                     className="form-control"
                                                     placeholder="Enter YouTube video link"
                                                 />
-                                                <ErrorMessage name="video_link" component="div" className="error" />
+                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -594,7 +598,7 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        <ErrorMessage name="state_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
@@ -616,7 +620,7 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="city_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -636,7 +640,7 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="districts_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -656,7 +660,7 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        <ErrorMessage name="neighborhood_id" component="div" className="error" />
+                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
@@ -679,14 +683,14 @@ export default function CreateAgency() {
                                     {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
                                             projectOfBooleanListing.map((project) => (
                                                 <fieldset className="amenities-item">
-                                                    <Field 
-                                                        type="checkbox" name={project.id} 
+                                                    <Field
+                                                        type="checkbox" name={project.id}
                                                         className="tf-checkbox style-1 primary"
                                                         checked={!!checkedItems[project.key]} // Set checked status
-                                                        onChange={() => handleCheckboxChange(project.key)} 
+                                                        onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    <ErrorMessage name={project.key} component="div" className="error" />
+                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -695,12 +699,20 @@ export default function CreateAgency() {
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" >Add Project</button>
+                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Add Project</button>
                         </div >
+                        {/* Error Popup */}
+                          {showErrorPopup && Object.keys(errors).length > 0 && (
+                            <ErrorPopup
+                                errors={errors}
+                                validationSchema={validationSchema}
+                                onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
                     </Form>
                 )}
                 </Formik>
-				
+
 
 			</LayoutAdmin >
 		</>
