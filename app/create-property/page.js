@@ -117,9 +117,9 @@ export default function CreateProperty() {
                 }
 
                 if(projectOfListing.length === 0){
-                    const getProjectListInfo = await insertData('api/projects/', {}, true);
+                    const getProjectListInfo = await insertData('api/projects/', {page: 1, limit: 1000}, true);
                     if(getProjectListInfo.status) {
-                        setProjectOfListing(getProjectListInfo.data);
+                        setProjectOfListing(getProjectListInfo.data.list);
                     }
                 }
 
