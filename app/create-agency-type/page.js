@@ -45,7 +45,6 @@ export default function CreateAgency() {
             };
     
             const createAgencyType = await insertData('api/agency-packages/create', agencyObject, true);
-    
             if (createAgencyType.status) {
                 setSucessMessage(true);
                 setShowErrorPopup(false);
