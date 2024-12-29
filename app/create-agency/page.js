@@ -32,12 +32,12 @@ export default function CreateAgency() {
         phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
         image: Yup.mixed().required("Image is required"),
         password: Yup.string() .min(6, "Password must be at least 6 characters") .required("Password is required"),
-        facebook_link: Yup.string().url("Invalid facebook URL").nullable(),
-        twitter_link: Yup.string().url("Invalid twitter URL").nullable(),
-        youtube_link: Yup.string().url("Invalid youtube URL").nullable(),
-        pinterest_link: Yup.string().url("Invalid pinterest URL").nullable(),
-        linkedin_link: Yup.string().url("Invalid linkedin URL").nullable(),
-        instagram_link: Yup.string().url("Invalid instagram URL").nullable()
+        facebook_link: Yup.string().url("Invalid URL").nullable(),
+        twitter_link: Yup.string().url("Invalid URL").nullable(),
+        youtube_link: Yup.string().url("Invalid URL").nullable(),
+        pinterest_link: Yup.string().url("Invalid URL").nullable(),
+        linkedin_link: Yup.string().url("Invalid URL").nullable(),
+        instagram_link: Yup.string().url("Invalid URL").nullable()
     });
 
     useEffect (() => {
@@ -259,7 +259,7 @@ export default function CreateAgency() {
                                         <Field type="email" id="email" name="email" />
                                         {/* <ErrorMessage name="email" component="div" className="error" /> */}
                                     </fieldset>
-                                    <fieldset className="box-fieldset password-field">
+                                    <fieldset className="box-fieldset">
                                         <label htmlFor="pass">Password<span>*</span>:</label>
                                         <Field
                                             type={showPassword ? "text" : "password"}

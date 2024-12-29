@@ -176,8 +176,8 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li className="edit">
-                                        <Link href={`/edit-agency/${user.id}`} className="item">
+                                      <li className="edit">
+                                        <Link href={`/edit-developer/${user.id}`} className="item">
                                           <Image 
                                             src={EditIcon} // Imported image object or static path
                                             alt="Edit icon" 
@@ -185,7 +185,7 @@ export default function MyProperty() {
                                             height={25} 
                                           />
                                         </Link>
-                                      </li> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(user.id)}>
                                           <Image 
