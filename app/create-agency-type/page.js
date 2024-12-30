@@ -69,16 +69,7 @@ export default function CreateAgency() {
 	return (
 		<>
 
-			{/* <DeleteFile /> */}
-            {/* <div className="error-message" >
-                <ul>
-                    <li>12</li>
-                    <li>23</li>
-                    <li>45</li>
-                    <li>66</li>
-                </ul>
-                <p>Please check the required fields</p>
-            </div> */}
+		
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
