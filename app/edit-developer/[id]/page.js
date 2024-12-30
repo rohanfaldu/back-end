@@ -8,10 +8,12 @@ import axios from 'axios';
 import { userType } from "../../../components/common/functions";
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../../public/images/favicon/password-hide.png"; 
+import passwordShow from "../../../public/images/favicon/password-show.png";
+import passwordHide from "../../../public/images/favicon/password-hide.png";
 import { insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
+import { allCountries } from "country-telephone-data";
+
 export default function EditDeveloper({params}) {
     const { id } = params;
     const [showPassword, setShowPassword] = useState(false);
@@ -21,6 +23,14 @@ export default function EditDeveloper({params}) {
 	const [loading, setLoading] = useState(true);
     const [filePreview, setFilePreview] = useState(null);
     const [userDetail, setUserDetail] = useState(null);
+    const [selectedCode, setSelectedCode] = useState("+33");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [agencyPackageList, setAgencyPackageList] = useState([]);
+    const [filePictureImg, setFilePictureImg] = useState(null);
+    const [fileCoverImg, setFileCoverImg] = useState(null);
+
+
+
 
     useEffect(() => {
         console.log(id);
@@ -67,7 +77,7 @@ export default function EditDeveloper({params}) {
                 setErrorMessage(createUserInfo.message);
                 router.push('/developer-listing');
             }else{
-                setErrorMessage(createUserInfo.message);   
+                setErrorMessage(createUserInfo.message);
             }
             console.log(response);
             router.push('/developer-listing');
@@ -80,7 +90,7 @@ export default function EditDeveloper({params}) {
         setErrorMessage('');
         const formData = new FormData();
         formData.append('image', values.image);
-    
+
         try {
             let imageUrl = filePreview;
             if (values.image instanceof File) {
@@ -97,12 +107,12 @@ export default function EditDeveloper({params}) {
 
             if(imageUrl) {
                 const userData = {
-                    full_name: values.username, 
-                    user_name: values.username, 
-                    email_address: values.email, 
-                    fcm_token: '', 
-                    image_url: imageUrl, 
-                    type: "developer", 
+                    full_name: values.username,
+                    user_name: values.username,
+                    email_address: values.email,
+                    fcm_token: '',
+                    image_url: imageUrl,
+                    type: "developer",
                     user_login_type	: userType("NONE"),
                     phone_number: values.phone.toString(),
                     password: "",
@@ -110,11 +120,11 @@ export default function EditDeveloper({params}) {
                 }
                 console.log(userData);
                 const checkData = {
-                    email_address: values.email, 
+                    email_address: values.email,
                     phone_number: parseInt(values.phone,10)
                 }
-            
-                
+
+
                 const getUserInfo = await insertData('auth/check/user', checkData, false);
                 if(getUserInfo.status === false) {
                     const createUserInfo = await insertData('auth/update/user', userData, false);
@@ -123,19 +133,19 @@ export default function EditDeveloper({params}) {
                         setErrorMessage(createUserInfo.message);
                         router.push('/developer-listing');
                     }else{
-                        setErrorMessage(createUserInfo.message);   
-                    } 
+                        setErrorMessage(createUserInfo.message);
+                    }
                 }else{
                     setErrorMessage(getUserInfo.message);
                 }
             }else{
-                setErrorMessage(response.data.message); 
+                setErrorMessage(response.data.message);
             }
         } catch (error) {
           console.error('Error uploading file:', error);
         }
 
-        
+
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -153,7 +163,22 @@ export default function EditDeveloper({params}) {
 			        <LayoutAdmin>
                     {errorMessage && <div className={messageClass}>{errorMessage}</div>}
                     <Formik
-                        initialValues={{ username: userDetail.user_name, email: userDetail.email_address,  phone: userDetail.mobile_number,  image: userDetail.image  }}
+                         initialValues={{
+                            username: userDetail.user_name,
+                            email: userDetail.email,
+                            phone: userDetail.email,
+                            image: userDetail.image,
+                            password: '',
+                            fullname: userDetail.fullname,
+                            facebook_link: userDetail.facebook_link,
+                            twitter_link: userDetail.youtube_link,
+                            youtube_link: userDetail.youtube_link,
+                            pinterest_link: userDetail.pinterest_link,
+                            linkedin_link: userDetail.linkedin_link,
+                            instagram_link: userDetail.instagram_link,
+                            country_code: userDetail.country_code,
+                            whatsup_country_code: userDetail.country_code,
+                        }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
                         >
@@ -161,66 +186,251 @@ export default function EditDeveloper({params}) {
                             <Form>
                                 <div>
                                     <div className="widget-box-2">
-                                        <h6 className="title">Upload Media</h6>
+                                        <h6 className="title">Upload Developer User Image</h6>
                                         <div className="box-uploadfile text-center">
                                             <label className="uploadfile">
                                             <span className="icon icon-img-2" />
                                             <div className="btn-upload">
                                                 <span className="tf-btn primary">Choose Image</span>
                                                 <input
-                                                type="file"
-                                                className="ip-file"
-                                                onChange={(event) => {
-                                                    console.log(event.currentTarget);
-                                                    const file = event.currentTarget.files[0];
-                                                    setFieldValue("image", file);
-                                                    setFilePreview(URL.createObjectURL(file));
-                                                }}
+                                                    type="file"
+                                                    className="ip-file"
+                                                    onChange={(event) => {
+                                                        const file = event.currentTarget.files[0];
+                                                        setFieldValue("image", file);
+                                                        setFilePreview(URL.createObjectURL(file));
+                                                    }}
                                                 />
                                             </div>
-                                            {filePreview && (
-                                                <img
-                                                src={filePreview}
-                                                alt="Preview"
-                                                style={{ width: "100px", marginTop: "10px" }}
-                                                />
-                                            )}
-                                            <p className="file-name fw-5">
-                                                Or drop image here to upload
-                                            </p>
+                                            {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
+                                            <p className="file-name fw-5"> Or drop image here to upload </p>
                                             </label>
-                                            {errors.image && touched.image && (
+                                            {/* {errors.image && touched.image && (
                                             <div className="error">{errors.image}</div>
-                                            )}
+                                            )} */}
+                                        </div>
+                                    </div>
+                                    <div className="widget-box-2">
+                                        <h6 className="title">User Information</h6>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Name:<span>*</span></label>
+                                                <Field type="text" id="username" name="username" className="form-control style-1" />
+                                                {/* <ErrorMessage name="username" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">Full Name:<span>*</span></label>
+                                                <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
+                                                {/* <ErrorMessage name="fullname" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                <div className="phone-and-country-code">
+                                                    <Field as="select" name="country_code" className="nice-select country-code"
+                                                        id="country-code"
+                                                        value={selectedCode}
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setSelectedCode(selectedState);
+                                                            setFieldValue("country_code", selectedState);
+                                                            //handleCityChange(selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Country Code</option>
+                                                        {allCountries && allCountries.length > 0 ? (
+                                                            allCountries
+                                                            .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
+                                                            .map((country, index) =>(
+                                                                <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                                </div>
+                                            </fieldset>
                                         </div>
                                     </div>
                                     <div className="widget-box-2">
                                         <h6 className="title">Developer Information</h6>
-                                        <div className="box-info-property">
+                                        <div className="grid-1 box gap-30">
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="description">Description:</label>
+
+                                                <Field type="textarea"  as="textarea"  id="description" name="description" className="textarea-tinymce" />
+                                            </fieldset>
+                                        </div>
+                                        <div className="box grid-3 gap-30">
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="title">User Name:<span>*</span></label>
-                                                <Field type="text" id="username" name="username" className="form-control style-1" />
-                                                <ErrorMessage name="username" component="div" className="error" />
+                                                <label htmlFor="desc">Whatsup number:</label>
+                                                    <div className="phone-and-country-code">
+                                                        <Field as="select" name="whatsup_country_code" className="nice-select country-code"
+                                                            id="country-code"
+                                                            value={selectedCode}
+                                                            onChange={(e) => {
+                                                                const selectedState = e.target.value;
+                                                                setSelectedWhatsupCode(selectedState);
+                                                                setFieldValue("whatsup_country_code", selectedState);
+                                                                //handleCityChange(selectedState);
+                                                            }}
+                                                        >
+                                                            <option value="">Select Country Code</option>
+                                                            {allCountries && allCountries.length > 0 ? (
+                                                                allCountries
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
+                                                                .map((country, index) =>(
+                                                                    <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                                                    </option>
+                                                                ))
+                                                            ) : (
+                                                                <></>
+                                                            )}
+                                                        </Field>
+                                                        <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
+                                                    </div>
+                                                {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
+                                                {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Email:<span>*</span></label>
-                                                <Field type="email" id="email" name="email" />
-                                                <ErrorMessage name="email" component="div" className="error" />
+                                                <label htmlFor="desc">Service Area:</label>
+                                                <Field type="text" name="service_area" className="box-fieldset"  />
+                                                {/* <ErrorMessage name="service_area" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Phone:<span>*</span></label>
-                                                <Field type="text" id="phone" name="phone" />
-                                                <ErrorMessage name="phone" component="div" className="error" />
+                                                <label htmlFor="desc">Tax Number:</label>
+                                                <Field type="text"  name="tax_number" className="box-fieldset" />
+                                                {/* <ErrorMessage name="tax_number" component="div" className="error" /> */}
+                                            </fieldset>
+                                        </div>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">License number:</label>
+                                                <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
+                                                {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Credit:</label>
+                                                <Field type="text" name="credit" className="box-fieldset"  />
+                                                {/* <ErrorMessage name="credit" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Agency Packages:</label>
+                                                    <Field as="select" name="agency_packages" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("agency_packages", selectedState);
+                                                            //handleAgencyPackageChange(selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Agency Packages</option>
+                                                        {agencyPackageList && agencyPackageList.length > 0 ? (
+                                                            agencyPackageList.map((agency) => (
+                                                                <option key={agency.id} value={agency.id}>
+                                                                    {agency.name}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
+                                            </fieldset>
+                                        </div>
+                                        <div className="grid-2 box gap-30">
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="bedrooms">Picture Image:</label>
+                                                <div className="box-floor-img uploadfile">
+                                                    <div className="btn-upload">
+                                                        <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                        <input
+                                                            type="file"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                                const file = event.currentTarget.files[0];
+                                                                setFieldValue("picture_img", file);
+                                                                setFilePictureImg(URL.createObjectURL(file));
+                                                            }}
+                                                        />
+                                                        {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
+                                                    </div>
+                                                    <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="bedrooms">Cover Image:</label>
+                                                <div className="box-floor-img uploadfile">
+                                                    <div className="btn-upload">
+                                                        <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                        <input
+                                                            type="file"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                                const file = event.currentTarget.files[0];
+                                                                setFieldValue("cover_img", file);
+                                                                setFileCoverImg(URL.createObjectURL(file));
+                                                            }}
+                                                        />
+                                                        {fileCoverImg && ( <img src={fileCoverImg} alt="Preview" className="uploadFileImage" /> )}
+                                                    </div>
+                                                    <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                </div>
                                             </fieldset>
                                         </div>
                                     </div>
-                        
-                                    <button type="submit"  className="tf-btn primary" >Update Developer</button>
-                                </div >
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Other Information</h6>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Facebook Link:</label>
+                                                <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
+                                                {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Twitter Link:</label>
+                                                <Field type="text" name="twitter_link" className="box-fieldset"  />
+                                                {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Youtube Link:</label>
+                                                <Field type="text"  name="youtube_link" className="box-fieldset" />
+                                                {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                        </div>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Pinterest Link:</label>
+                                                <Field type="text" name="pinterest_link" className="box-fieldset" />
+                                                {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Linkedin Link:</label>
+                                                <Field type="text" name="linkedin_link" className="box-fieldset" />
+                                                {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Instagram Link:</label>
+                                                <Field type="text" name="instagram_link" className="box-fieldset" />
+                                                {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Developer</button>
+                                    {/* Error Popup */}
+                                    {showErrorPopup && Object.keys(errors).length > 0 && (
+                                        <ErrorPopup
+                                            errors={errors}
+                                            validationSchema={validationSchema}
+                                            onClose={() => setShowErrorPopup(false)}
+                                        />
+                                    )}
+                                </div>
                             </Form>
                         )}
                         </Formik>
-                        
+
 
                     </LayoutAdmin >
             }

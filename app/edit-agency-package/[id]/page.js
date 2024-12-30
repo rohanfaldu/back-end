@@ -7,8 +7,8 @@ import * as Yup from "yup";
 import axios from 'axios';
 import { userType } from "../../../components/common/functions";
 import React, { useEffect, useState } from 'react';
-import passwordShow from "../../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../../public/images/favicon/password-hide.png"; 
+import passwordShow from "../../../public/images/favicon/password-show.png";
+import passwordHide from "../../../public/images/favicon/password-hide.png";
 import { insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
@@ -30,19 +30,30 @@ export default function EditAgency({ params }) {
         // if (!router.isReady || !id) return; // Ensure router is ready and id exists
 
         const fetchData = async () => {
-            const getUserInfo = await insertData("api/agency-packages/", false);
-            console.log(router); // Check if the API returns the expected data
+
+            const requestData = {
+                   page: '',
+                   limit: '',
+                   lang: "en",
+                   searchTerm: '',
+                   status: '',
+                 };
+        const type = { type: "agency-packages" };
+
+                //  const response = await insertData("api/agency-packages", requestData, true);
+        const getUserInfo = await insertData('auth/getall', type, false);
+            console.log(getUserInfo); // Check if the API returns the expected data
 
             try {
                 const requestData = {
                     lang: "en",
                 };
                 const getUserInfo = await insertData("api/agency-packages/", false);
-                
+
                 console.log(getUserInfo); // Check if the API returns the expected data
 
                 // Assuming getUserInfo has a 'list' property containing the data
-                const allUsersList = getUserInfo.data.list; 
+                const allUsersList = getUserInfo.data.list;
                 const specificUserDetail = allUsersList.find(item => item.id === id);
 
                 if (specificUserDetail) {
