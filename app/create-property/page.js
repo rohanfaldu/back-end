@@ -895,7 +895,7 @@ export default function CreateProperty() {
                                                     type="text"
                                                     name="video_link"
                                                     className="form-control"
-                                                    placeholder="Enter YouTube video link"
+                                                    placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
                                                 />
                                                 {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
