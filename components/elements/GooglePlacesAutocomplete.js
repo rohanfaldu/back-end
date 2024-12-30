@@ -17,7 +17,7 @@ const GooglePlacesAutocomplete = () => {
 
     return (
         <LoadScript
-            googleMapsApiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw" // Replace with your actual Google Maps API key
+            googleMapsApiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag" // Replace with your actual Google Maps API key
             libraries={libraries}
         >
             <Autocomplete

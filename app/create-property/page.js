@@ -5,6 +5,7 @@ import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useFormik } from 'formik';
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
@@ -61,7 +62,7 @@ export default function CreateProperty() {
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
-        picture_img: Yup.array().min(1, "At least one image is required").required("Image is required"),
+        picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
         credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
@@ -316,7 +317,32 @@ export default function CreateProperty() {
 
     const handleAddressSelect = (newAddress, newLocation) => {
         
-      };
+    };
+    
+      // Handler for image remove
+      const handleImageRemove = (index) => {
+        // Log current Formik values and filePreviews before removal
+        console.log('Before removal - filePreviews:', filePreviews);
+        console.log('Before removal - Formik picture_img:', form.values.picture_img);
+    
+        // Remove the image from preview and Formik field
+        const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+        const newImageList = form.values.picture_img.filter((_, i) => i !== index);
+    
+        // Log the new state and new image list
+        console.log('After removal - newFilePreviews:', newFilePreviews);
+        console.log('After removal - newImageList:', newImageList);
+    
+        // Update preview state
+        setFilePreviews(newFilePreviews);
+    
+        // Update Formik field
+        form.setFieldValue('picture_img', newImageList);
+    
+        // Log Formik values after updating to ensure it's updated
+        console.log('Formik picture_img after update:', form.values.picture_img);
+    };
+    
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
@@ -329,7 +355,12 @@ export default function CreateProperty() {
                 setShowErrorPopup(true);
                 return;
             }
-    
+            
+            // if(picture_img.length > 0){
+            //     setErrors({ serverError: "Please Upload the Images." });
+            //     setShowErrorPopup(true);
+            //     return;
+            // }
             if (!isVideoUpload && !values.video_link) {
                 setErrors({ serverError: "Please enter a YouTube video link." });
                 setShowErrorPopup(true);
@@ -493,7 +524,7 @@ export default function CreateProperty() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
                             {/* <div className="widget-box-2">
@@ -722,7 +753,7 @@ export default function CreateProperty() {
                                                         files.forEach((file) => {
                                                             // Check file size (less than 150KB)
                                                             if (file.size < 150000) {
-                                                            alert(`Please upload files less than 150KB`);
+                                                            alert(`Please upload files above the size of 150KB`);
                                                             } else {
                                                             // Create an Image object to check its dimensions
                                                             const img = new Image();
@@ -737,7 +768,7 @@ export default function CreateProperty() {
 
                                                                 // You can add your dimension validation here
                                                                 if (imageHeight <= 800 || imageWidth <= 1100) {
-                                                                    alert('Image dimensions are too large. Please upload an image with smaller dimensions (max 500px).');
+                                                                    alert('Please upload images with a maximum height of 800px and a maximum width of 1100px.');
                                                                 } else {
                                                                     // Add the file as a valid image and generate the preview
                                                                     validPreviews.push(URL.createObjectURL(file));
@@ -781,19 +812,19 @@ export default function CreateProperty() {
                                                         alt={`Preview ${index + 1}`}
                                                         className="uploadFileImage"
                                                     />
-                                                    <button 
+                                                    <button
                                                         type="button"
                                                         onClick={() => {
-                                                            // Remove the image from preview and Formik
                                                             const newFilePreviews = filePreviews.filter((_, i) => i !== index);
-                                                            const newImageList = form.values.picture_img.filter((_, i) => i !== index);
-                                                            setFilePreviews(newFilePreviews); // Update preview state
-                                                            form.setFieldValue(field.name, newImageList); // Update Formik field
-                                                        }}
+                                                            const newImageList = values.picture_img.filter((_, i) => i !== index);
+                                                            setFilePreviews(newFilePreviews);
+                                                            setFieldValue("picture_img", newImageList);
+                                                          }}
                                                         className="remove-image-btn"
                                                     >
-                                                    &times;
+                                                        &times;
                                                     </button>
+
                                                 </div>
                                             ))}
                                         </div>
@@ -966,7 +997,7 @@ export default function CreateProperty() {
 
 
                                      {/* <ReactGooglePlacesAutocomplete
-                                        apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
+                                        apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
