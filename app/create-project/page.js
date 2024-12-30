@@ -475,7 +475,7 @@ export default function CreateAgency() {
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" />
+                                                        <Field type="number" name={project.id} className="box-fieldset" min="1" />
                                                     {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
@@ -510,7 +510,7 @@ export default function CreateAgency() {
                                         {/* Video Option Radio Buttons */}
                                         <div>
                                             <fieldset className="fieldset-radio">
-                                                <input type="radio" className="tf-radio video-upload"  value="upload" name="videoOption" onChange={() => {
+                                                <input type="radio" className="tf-radio video-uploadx"  value="upload" name="videoOption" onChange={() => {
                                                         setIsVideoUpload(true); // Update the state for conditional rendering
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />

@@ -93,23 +93,23 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
       {isLoaded ? (
         <>
           {/* Search Input */}
-			<div >
-				<Autocomplete
-				onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-				onPlaceChanged={handlePlaceSelect}
-				>
-					 <fieldset className="fieldset-input">
-						<input
-							type="text"
-							label="Search for a place"
-							className="ip-file"
-							placeholder="Search for a place"
-							
-						/>
-					 </fieldset>
-				
-				</Autocomplete>
-			</div>
+          <div >
+            <Autocomplete
+            onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+            onPlaceChanged={handlePlaceSelect}
+            >
+              <fieldset className="fieldset-input">
+                <input
+                  type="text"
+                  label="Search for a place"
+                  className="ip-file"
+                  placeholder="Search for a place"
+                  
+                />
+              </fieldset>
+            
+            </Autocomplete>
+          </div>
 
 			{/* Google Map */}
 			<GoogleMap
