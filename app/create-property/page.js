@@ -225,7 +225,8 @@ export default function CreateProperty() {
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!cityId) {

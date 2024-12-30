@@ -115,7 +115,8 @@ export default function CreateAgency() {
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 10
         });
         if(cityList.length === 0){
             const cityObj = { state_id: stateId, lang: "en" };
@@ -132,7 +133,8 @@ export default function CreateAgency() {
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!cityId) {
@@ -160,7 +162,8 @@ export default function CreateAgency() {
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 14
         });
 
         if (!DistrictId) {
@@ -203,6 +206,7 @@ export default function CreateAgency() {
             setPropertyMapCoords({
                 latitude: latitude,
                 longitude: longitude,
+                zoom: 12
             });
         } else {
             console.error('Neighborhood not found');
