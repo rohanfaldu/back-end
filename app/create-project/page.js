@@ -475,7 +475,7 @@ export default function CreateAgency() {
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" min="1" />
+                                                        <Field type="number" name={project.id} className="box-fieldset" min="0" />
                                                     {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))

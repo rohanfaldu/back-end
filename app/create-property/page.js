@@ -709,7 +709,7 @@ export default function CreateProperty() {
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
-                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
+                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
                                         {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
@@ -721,6 +721,7 @@ export default function CreateProperty() {
                                                         <Field
                                                             type="number"
                                                             name={project.id}
+                                                            min="0"
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
