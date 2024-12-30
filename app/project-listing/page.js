@@ -135,26 +135,26 @@ export default function ProjectListing() {
                               </td>
                               <td>
                                 <ul className="list-action">
-                                  {/* <li className="edit">
-                                    <Link href={`/edit-agency/${property.id}`} className="item">
-                                      <Image 
+                                  <li className="edit">
+                                    <Link href={`/edit-project/${property.id}`} className="item">
+                                      <Image
                                         src={EditIcon} // Imported image object or static path
-                                        alt="Edit icon" 
-                                        width={25} 
-                                        height={25} 
+                                        alt="Edit icon"
+                                        width={25}
+                                        height={25}
                                       />
                                     </Link>
-                                  </li> */}
+                                  </li>
                                   <li className="delete">
                                     <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                      <Image 
+                                      <Image
                                           src={DeleteIcon} // Imported image object or static path
-                                          alt="Delete icon" 
-                                          width={25} 
-                                          height={25} 
+                                          alt="Delete icon"
+                                          width={25}
+                                          height={25}
                                         />
                                     </a>
-                                  </li>                                        
+                                  </li>
                                 </ul>
                               </td>
                             </tr>
