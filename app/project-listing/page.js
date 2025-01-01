@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
+import ViewIcon from "../../public/images/favicon/view.png";
 import variablesList from "../../components/common/variable";
 
 export default function ProjectListing() {
@@ -36,9 +37,10 @@ export default function ProjectListing() {
       };
 
       const response = await insertData("api/projects", requestData, true);
+      console.log(response);
       if (response.status) {
-        const { list, totalCount, totalPages, currentPage } = response.data;
-        setProperties(list);
+        const { projects, totalCount, totalPages, currentPage } = response.data;
+        setProperties(projects);
         setPagination({
           ...pagination,
           totalCount,
@@ -83,6 +85,11 @@ export default function ProjectListing() {
     }
   };
 
+  const handleView = (id) => {
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/property/${id}`;
+      window.open(URL, '_blank')
+  };
+
   const handlePageChange = (page) => {
     setPagination({ ...pagination, currentPage: page });
   };
@@ -95,12 +102,12 @@ export default function ProjectListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
-            <div className="box">
-                <button className="tf-btn primary" ><Link href="/create-project">Create Project</Link></button>
-            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Project Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Project Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-project">Add Project</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">
@@ -158,6 +165,22 @@ export default function ProjectListing() {
                                         />
                                     </a>
                                   </li>
+                                  {/* <li className="delete">
+                                    <a
+                                      className="remove-file item"
+                                      onClick={() => handleView(property.id)}
+                                      style={{ border: 'none', background: 'transparent', padding: 0 }}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Image
+                                        src={ViewIcon} // Imported image object or static path
+                                        alt="View icon"
+                                        width={25}
+                                        height={25}
+                                      />
+                                    </a>
+                                  </li> */}
                                 </ul>
                               </td>
                             </tr>

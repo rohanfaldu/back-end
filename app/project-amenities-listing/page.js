@@ -95,12 +95,12 @@ export default function ProjectAmenitiesListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
-            <div className="box">
-                <button className="tf-btn primary" ><Link href="/create-project-amenities">Create Project amenities</Link></button>
-            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Project AmenitiesListing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Project Amenities Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-project-amenities">Add Project Amenities</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">

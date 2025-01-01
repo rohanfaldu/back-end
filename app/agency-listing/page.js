@@ -106,12 +106,12 @@ export default function MyProperty() {
         <>
           <DeleteFile />
           <LayoutAdmin>
-            <div className="box">
-                <button className="tf-btn primary" ><Link href="/create-agency">Create Agnecy</Link></button>
-            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency">Add Agnecy</Link>
+                </div>
                   {(filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">

@@ -8753,7 +8753,7 @@ label {
   background-color: #00a8c1;
 }
 .layout-wrap .wrap-table .list-action li:not(:last-child) {
-  margin-bottom: 8px;
+  /*margin-bottom: 8px;*/
 }
 .layout-wrap .wrap-table .list-action .item {
   display: flex;
@@ -10350,7 +10350,11 @@ tr {
 .video-upload{
   margin-bottom: 10px;
 }
-
+.list-action{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 @media only screen and (max-width: 767px) {
   .widget-box-2 .grid-4 {
       grid-template-columns: 1fr;

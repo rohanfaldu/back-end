@@ -90,7 +90,7 @@ export default function CreateAgency() {
                     <Form>
                         <div>
                         <div className="widget-box-2">
-                                <h6 className="title">Agency Type Information</h6>
+                                <h6 className="title">Create Agency Package</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
@@ -104,7 +104,7 @@ export default function CreateAgency() {
                                     </fieldset>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Agency Type</button>
+                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Agency Package</button>
                         </div >
                         {/* Error Popup */}
                         {showErrorPopup && (Object.keys(errors).length > 0) && (

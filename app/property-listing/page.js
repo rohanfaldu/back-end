@@ -10,6 +10,7 @@ import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
 import variablesList from "../../components/common/variable";
+import ViewIcon from "../../public/images/favicon/view.png";
 
 export default function PropertyListing() {
   const [properties, setProperties] = useState([]); // Store properties for the current page
@@ -31,12 +32,14 @@ export default function PropertyListing() {
         page,
         limit: pagination.itemsPerPage,
         lang: "en",
-        searchTerm: term,
-        status,
+        title: "",
+        description: "",
       };
 
       const response = await insertData("api/property", requestData, true);
+      console.log(response);
       if (response.status) {
+  
         const { list, totalCount, totalPages, currentPage } = response.data;
         setProperties(list);
         setPagination({
@@ -81,6 +84,11 @@ export default function PropertyListing() {
     }
   };
 
+  const handleView = (id) => {
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/property/${id}`;
+      window.open(URL, '_blank')
+  };
+
   const handlePageChange = (page) => {
     setPagination({ ...pagination, currentPage: page });
   };
@@ -93,12 +101,13 @@ export default function PropertyListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
-            <div className="box">
-                <button className="tf-btn primary" ><Link href="/create-property">Create Property</Link></button>
-            </div>
+            
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Property Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Property Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-property">Add Property</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">
@@ -152,6 +161,22 @@ export default function PropertyListing() {
                                         <Image
                                           src={DeleteIcon}
                                           alt="Delete icon"
+                                          width={25}
+                                          height={25}
+                                        />
+                                      </a>
+                                    </li>
+                                    <li className="delete">
+                                      <a
+                                        className="remove-file item"
+                                        onClick={() => handleView(property.id)}
+                                        style={{ border: 'none', background: 'transparent', padding: 0 }}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Image
+                                          src={ViewIcon} // Imported image object or static path
+                                          alt="View icon"
                                           width={25}
                                           height={25}
                                         />

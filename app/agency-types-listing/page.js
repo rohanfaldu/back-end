@@ -92,12 +92,12 @@ export default function AgencyPackageListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
-            <div className="box">
-                <Link href="/create-agency-type">Create Agency Type</Link>
-            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Packages Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Packages Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency-type">Add Agency Package</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">

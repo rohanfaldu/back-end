@@ -33,7 +33,6 @@ export default function CreatePropertyType() {
     });
 
     const handleSubmit = async (values, { resetForm, setErrors }) => {
-        console.log(values);
         setShowErrorPopup('');
 
         try {
