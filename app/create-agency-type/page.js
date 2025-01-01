@@ -12,6 +12,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { allCountries } from "country-telephone-data";
 import { insertUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +27,7 @@ export default function CreateAgency() {
     const [selectedCode, setSelectedCode] = useState("");
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
 
 
     const router = useRouter();
@@ -43,7 +45,8 @@ export default function CreateAgency() {
                 fr_string: values.title_fr,
                 type: "BASIC",
             };
-    
+            setLoading(true); // Start loader
+
             const createAgencyType = await insertData('api/agency-packages/create', agencyObject, true);
             if (createAgencyType.status) {
                 setSucessMessage(true);
@@ -56,9 +59,11 @@ export default function CreateAgency() {
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
@@ -68,8 +73,10 @@ export default function CreateAgency() {
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
-
-		
+        {loading ? (
+            <Preloader />
+        ) : (
+        <>
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -114,5 +121,7 @@ export default function CreateAgency() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

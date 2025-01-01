@@ -13,6 +13,7 @@ import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 
 export default function CreatePropertyAmenities() {
@@ -24,6 +25,7 @@ export default function CreatePropertyAmenities() {
     const [uploadImage, setUploadImage] = useState(null);
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -37,21 +39,22 @@ export default function CreatePropertyAmenities() {
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
         setShowErrorPopup('');
-        
+
         try {
             const uploadImageObj = [values.icon_img];
             const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
-    
+
             if (uploadImageUrl.files.length > 0) {
                 const fileUrls = uploadImageUrl.files.map(file => file.url);
                 let pictureUrl = null;
                 if (uploadImageUrl.files.length > 0) {
                     pictureUrl = fileUrls[0];
                 }
-    
+                                            setLoading(true); // Start loader
+
                 const checkPropertyInfo = await insertData('api/property-type-listings/check', { key: values.key }, true);
                 console.log(checkPropertyInfo);
-    
+
                 if (checkPropertyInfo.status) {
                     try {
                         const propertyData = {
@@ -62,11 +65,11 @@ export default function CreatePropertyAmenities() {
                             key: values.key,
                             category: 1,
                         };
-    
+
                         console.log('Property Data:', propertyData);
-    
+
                         const createPropertyInfo = await insertData('api/property-type-listings/create', propertyData, true);
-                        
+
                         if (createPropertyInfo.status) {
                             setSucessMessage(true);
                             setShowErrorPopup("Project of Amenities created successfully");
@@ -90,9 +93,11 @@ export default function CreatePropertyAmenities() {
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 
@@ -102,9 +107,11 @@ export default function CreatePropertyAmenities() {
 	}
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
-		<>
-
-			{/* <DeleteFile /> */}
+		 <>
+        {loading ? (
+            <Preloader />
+        ) : (
+        <>
 
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
@@ -233,5 +240,7 @@ export default function CreatePropertyAmenities() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

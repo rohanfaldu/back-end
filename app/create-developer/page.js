@@ -10,6 +10,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { allCountries } from "country-telephone-data";
 import { insertUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ export default function CreateAgency() {
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -62,17 +64,19 @@ export default function CreateAgency() {
         setShowErrorPopup(false); // Reset error popup initially
         try {
             console.log(values);
-    
+
             // Check if user exists
             const checkData = { email_address: values.email, phone_number: parseInt(values.phone, 10) };
             const getUserInfo = await insertData('auth/check/user', checkData, false);
-    
+
             if (getUserInfo.status === false) {
                 /********* Upload Image ***********/
                 const fileUrls = await insertUploadImage('image', values.image);
-    
+
                 if (fileUrls) {
                     try {
+                        setLoading(true); // Start loader
+
                         /********* Create User ***********/
                         const userData = {
                             full_name: values.username ?? null,
@@ -88,13 +92,13 @@ export default function CreateAgency() {
                             device_type: "web",
                             social_id: null
                         };
-    
+
                         const createUserInfo = await insertData('auth/create/user', userData, false);
-    
+
                         if (createUserInfo.status === true) {
                             setSucessMessage(true);
                             setShowErrorPopup("Developer created successfully");
-    
+
                             /********* Create Developer ***********/
                             const user_id = createUserInfo.data.userProfile.id;
                             const developerData = {
@@ -116,10 +120,10 @@ export default function CreateAgency() {
                                 picture: null,
                                 cover: null
                             };
-    
+
                             console.log(developerData);
                             const createDeveloperInfo = await insertData('api/developer/create', developerData, true);
-    
+
                             if (createDeveloperInfo.status === true) {
                                 resetForm();
                                 router.push('/developer-listing');
@@ -146,9 +150,11 @@ export default function CreateAgency() {
         } catch (error) {
             setErrors({ serverError: error.message });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
@@ -159,6 +165,10 @@ export default function CreateAgency() {
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
+        {loading ? (
+            <Preloader />
+        ) : (
+        <>
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -459,5 +469,7 @@ export default function CreateAgency() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

@@ -10,6 +10,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { allCountries } from "country-telephone-data";
 import { insertUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,8 @@ export default function CreateAgency() {
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
+
     const router = useRouter();
     const validationSchema = Yup.object({
         username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
@@ -61,11 +64,11 @@ export default function CreateAgency() {
         setShowErrorPopup(false); // Reset error popup
         try {
             console.log(values);
-    
+
             // Check if user exists
             const checkData = { email_address: values.email, phone_number: parseInt(values.phone, 10) };
             const getUserInfo = await insertData('auth/check/user', checkData, false);
-    
+
             if (getUserInfo.status === false) {
                 /********* Upload Image ***********/
                 const fileUrls = await insertUploadImage('image', values.image);
@@ -86,13 +89,14 @@ export default function CreateAgency() {
                             device_type: "web",
                             social_id: null
                         };
-    
+                                    setLoading(true); // Start loader
+
                         const createUserInfo = await insertData('auth/create/user', userData, false);
-    
+
                         if (createUserInfo.status === true) {
                             setSucessMessage(true);
                             setShowErrorPopup("Agency created successfully");
-    
+
                             /********* Create Agency ***********/
                             const user_id = createUserInfo.data.userProfile.id;
                             const agencyData = {
@@ -114,9 +118,9 @@ export default function CreateAgency() {
                                 picture: null,
                                 cover: null
                             };
-    
+
                             const createAgencyInfo = await insertData('api/agencies/create', agencyData, true);
-    
+
                             if (createAgencyInfo.status === true) {
                                 resetForm();
                                 router.push('/agency-listing');
@@ -143,9 +147,11 @@ export default function CreateAgency() {
         } catch (error) {
             setErrors({ serverError: error.message });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
+
 
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -157,8 +163,10 @@ export default function CreateAgency() {
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
-
-			{/* <DeleteFile /> */}
+        {loading ? (
+            <Preloader />
+        ) : (
+        <>
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -459,5 +467,7 @@ export default function CreateAgency() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

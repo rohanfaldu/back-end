@@ -39,6 +39,8 @@ export default function CreateAgency() {
     const [checkedItems, setCheckedItems] = useState({});
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const [filePreviews, setFilePreviews] = useState([]);
+    const [loading, setLoading] = useState(false); // Loader state
+
 
     const router = useRouter();
     const [propertyMapCoords, setPropertyMapCoords] = useState({
