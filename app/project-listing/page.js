@@ -36,9 +36,12 @@ export default function ProjectListing() {
       };
 
       const response = await insertData("api/projects", requestData, true);
+        console.log(response);
       if (response.status) {
-        const { list, totalCount, totalPages, currentPage } = response.data;
-        setProperties(list);
+        const {projects, totalCount, totalPages, currentPage } = response.data;
+        console.log(projects);
+
+        setProperties(projects);
         setPagination({
           ...pagination,
           totalCount,

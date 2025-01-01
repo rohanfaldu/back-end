@@ -8,8 +8,8 @@ import axios from 'axios';
 import { userType } from "../../../components/common/functions";
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../../public/images/favicon/password-show.png"; 
-import passwordHide from "../../../public/images/favicon/password-hide.png"; 
+import passwordShow from "../../../public/images/favicon/password-show.png";
+import passwordHide from "../../../public/images/favicon/password-hide.png";
 import { insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
@@ -37,10 +37,11 @@ export default function EditAgency({params}) {
         console.log(id);
         const fetchData = async () => {
 		try {
-            const type = { type: "agency" };
-            const getUserInfo = await insertData('auth/getall', type, false);
-            const allUsersList = getUserInfo.data.user_data;
-			const specifcUserDetail = allUsersList.find(item => item.id === id);
+            const type = { user_id: id };
+            const getUserInfo = await insertData('api/agencies', type, true);
+
+            const allUsersList = getUserInfo.data[0];
+			const specifcUserDetail = allUsersList;
 			setUserDetail(specifcUserDetail);
 			setFilePreview(specifcUserDetail.image);
 			setLoading(false); // Stop loading
@@ -59,9 +60,9 @@ export default function EditAgency({params}) {
             console.error('Error inserting data:', error);
         }
 		};
-      
-           
-        
+
+
+
 		fetchData(); // Fetch data on component mount
 	}, []);
 
@@ -91,7 +92,7 @@ export default function EditAgency({params}) {
                 setErrorMessage(createUserInfo.message);
                 router.push('/agency-listing');
             }else{
-                setErrorMessage(createUserInfo.message);   
+                setErrorMessage(createUserInfo.message);
             }
             console.log(response);
             router.push('/agency-listing');
@@ -104,7 +105,7 @@ export default function EditAgency({params}) {
         setErrorMessage('');
         const formData = new FormData();
         formData.append('image', values.image);
-    
+
         try {
             let imageUrl = filePreview;
             if (values.image instanceof File) {
@@ -121,12 +122,12 @@ export default function EditAgency({params}) {
 
             if(imageUrl) {
                 const userData = {
-                    full_name: values.username, 
-                    user_name: values.username, 
-                    email_address: values.email, 
-                    fcm_token: '', 
-                    image_url: imageUrl, 
-                    type: "agency", 
+                    full_name: values.username,
+                    user_name: values.username,
+                    email_address: values.email,
+                    fcm_token: '',
+                    image_url: imageUrl,
+                    type: "agency",
                     user_login_type	: userType("NONE"),
                     phone_number: values.phone.toString(),
                     password: "",
@@ -134,11 +135,11 @@ export default function EditAgency({params}) {
                 }
                 console.log(userData);
                 const checkData = {
-                    email_address: values.email, 
+                    email_address: values.email,
                     phone_number: parseInt(values.phone,10)
                 }
-            
-                
+
+
                 const getUserInfo = await insertData('auth/check/user', checkData, false);
                 if(getUserInfo.status === false) {
                     const createUserInfo = await insertData('auth/update/user', userData, false);
@@ -147,19 +148,19 @@ export default function EditAgency({params}) {
                         setErrorMessage(createUserInfo.message);
                         router.push('/agency-listing');
                     }else{
-                        setErrorMessage(createUserInfo.message);   
-                    } 
+                        setErrorMessage(createUserInfo.message);
+                    }
                 }else{
                     setErrorMessage(getUserInfo.message);
                 }
             }else{
-                setErrorMessage(response.data.message); 
+                setErrorMessage(response.data.message);
             }
         } catch (error) {
           console.error('Error uploading file:', error);
         }
 
-        
+
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
@@ -291,7 +292,7 @@ export default function EditAgency({params}) {
                                         <Field type="email" id="email" name="email" />
                                         {/* <ErrorMessage name="email" component="div" className="error" /> */}
                                     </fieldset>
-                                    
+
                                 </div>
                                 </div>
                                 <div className="widget-box-2">
@@ -395,10 +396,10 @@ export default function EditAgency({params}) {
                                         }}
                                     />
                                     {values.picture_img || filePictureImg ? (
-                                        <img 
-                                        src={filePictureImg || values.picture_img} 
-                                        alt="Preview" 
-                                        className="uploadFileImage" 
+                                        <img
+                                        src={filePictureImg || values.picture_img}
+                                        alt="Preview"
+                                        className="uploadFileImage"
                                         />
                                     ) : null}
                                     </div>
@@ -422,10 +423,10 @@ export default function EditAgency({params}) {
                                         }}
                                     />
                                     {values.cover_img || fileCoverImg ? (
-                                        <img 
-                                        src={fileCoverImg || values.cover_img} 
-                                        alt="Preview" 
-                                        className="uploadFileImage" 
+                                        <img
+                                        src={fileCoverImg || values.cover_img}
+                                        alt="Preview"
+                                        className="uploadFileImage"
                                         />
                                     ) : null}
                                     </div>
@@ -472,13 +473,13 @@ export default function EditAgency({params}) {
                                 </div>
 
                             </div>
-                        
+
                                     <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency</button>
                                 </div >
                             </Form>
                         )}
                         </Formik>
-                        
+
 
                     </LayoutAdmin >
             }

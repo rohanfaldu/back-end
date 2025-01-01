@@ -1,101 +1,149 @@
 'use client'
 import PropertyMap from "@/components/elements/PropertyMap"
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
-import { userType } from "../../components/common/functions";
+import { useFormik } from 'formik';
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png";
-import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
-import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
+import Preloader from "@/components/elements/Preloader";
+import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
-import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
-
-export default function CreateAgency() {
-    const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+export default function EditProperty() {
+    const [loading, setLoading] = useState(false); // Loader state
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
-    const [filePreview, setFilePreview] = useState(null);
+	const [propertyMeta, setPropertyMeta] = useState(false);
     const [filePictureImg, setFilePictureImg] = useState(null);
-    const [fileCoverImg, setFileCoverImg] = useState(null);
-    const [uploadImage, setUploadImage] = useState(null);
-    const [neighborhoodList, setNeighborhoodList] = useState([]);
-    const [uploadFile, setUploadFile] = useState(null);
-    const [isVideoUpload, setIsVideoUpload] = useState(true);
     const [stateList, setStateList] = useState([]);
-    const [developerList, setDeveloperList] = useState([]);
     const [cityList, setCityList] = useState([]);
+    const [userList, setUserList] = useState([]);
     const [districtList, setDistrictList] = useState([]);
+    const [neighborhoodList, setNeighborhoodList] = useState([]);
+    const [projectOfListing, setProjectOfListing] = useState([]);
     const [projectOfNumberListing, setProjectOfNumberListing] = useState([]);
+    const [propertyofTypesListing, setpropertyofTypesListing] = useState([]);
     const [projectOfBooleanListing, setProjectOfBooleanListing] = useState([]);
     const [checkedItems, setCheckedItems] = useState({});
+    const [propertyOfMetaNumberValue, setPropertyOfMetaNumberValue] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
+    const [isVideoUpload, setIsVideoUpload] = useState(true);
+    const [video, setVideo] = useState(null);
+    const [videoLink, setVideoLink] = useState("");
     const [filePreviews, setFilePreviews] = useState([]);
-    const [loading, setLoading] = useState(false); // Loader state
-
-
-    const router = useRouter();
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [currencyList, setCurrencyList] = useState([]);
+    const [currencyCode, setCurrencyCode] = useState([]);
     const [propertyMapCoords, setPropertyMapCoords] = useState({
         latitude: 33.5945144,
         longitude: -7.6200284,
         zoom: 6
     });
-    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [address, setAddress] = useState('');
 
+
+    const router = useRouter();
     const validationSchema = Yup.object({
-        title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
-        title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
+        title_en: Yup.string()
+            .min(3, "Title must be at least 3 characters")
+            .required("Title is required"),
+        title_fr: Yup.string()
+            .min(3, "Title must be at least 3 characters")
+            .required("Title is required"),
         description_en: Yup.string().required("Description is required"),
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
-        vr_link: Yup.string().url("Invalid VR URL").nullable(),
+        // vr_link: Yup.string().url("Invalid URL").nullable(),
         picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
         credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
+        videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
+        currency_id: Yup.string().required("Currency is required"),
         districts_id: Yup.string().required("District is required"),
         neighborhood_id: Yup.string().required("Neighborhood is required"),
-        user_id: Yup.string().required("Developer is required"),
-        link_uuid: Yup.string().required("Link uuid is required"),
+        transaction_type: Yup.string().required("Transaction type is required"),
+        property_type: Yup.string().required("Property type is required"),
+        user_id: Yup.string().required("User is required"),
+        size_sqft: Yup.string().required("Size is required"),
     });
+
 
     useEffect(() => {
         const fetchData = async () => {
+            // console.log('propertyofTypes');
             try {
                 if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo.data.states[0].id);
+                    console.log(getStateInfo);
                     if(getStateInfo) {
                         setStateList(getStateInfo.data.states);
                     }
                 }
-                if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
-                    const stateObj = {};
-                    const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
-                    console.log(getProjectListingInfo);
-                    if(getProjectListingInfo) {
-                        const projectOfNumberType = getProjectListingInfo.data.list.filter(item => item.type === "number");
-                        const projectOfBlooeanType = getProjectListingInfo.data.list.filter(item => item.type === "boolean");
+                // console.log('cityList');
+                // console.log(cityList.length);
+                // if(cityList.length === 0){
+                //     const stateObj = {};
+                //     const getCityInfo = await insertData('api/city', stateObj, true);
+                //     console.log(getCityInfo);
+                //     if(getCityInfo) {
+                //         setCityList(getCityInfo.data);
+                //     }
+                // }
+
+                if(userList.length === 0){
+                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
+                    const developerList = getUsersDeveloperInfo.data.user_data;
+                    const getUsersAgencyInfo = await insertData('auth/get/agency', {}, false);
+                    const agencyList = getUsersAgencyInfo.data.user_data;
+                    const getalluserInfo = developerList.concat(agencyList);
+                    setUserList(getalluserInfo);
+                }
+
+                if(propertyofTypesListing.length === 0){
+                    const getPropertyTypeInfo = await insertData('api/property-type/', {page: 1, limit: 100}, true);
+                    if(getPropertyTypeInfo.status) {
+                        console.log(getPropertyTypeInfo.data.list);
+                        setpropertyofTypesListing(getPropertyTypeInfo.data.list);
+                    }
+                }
+
+                if(projectOfListing.length === 0){
+                    const getProjectListInfo = await insertData('api/projects/', {page: 1, limit: 1000}, true);
+                    if(getProjectListInfo.status) {
+                        setProjectOfListing(getProjectListInfo.data.list);
+                    }
+                }
+
+                if(!propertyMeta){
+                    const projectMetaObj = { page: 1, limit: 100 };
+                    const getPropertyInfo = await insertData('api/property-type-listings', projectMetaObj, true);
+                    if(getPropertyInfo) {
+                        const projectOfNumberType = getPropertyInfo.data.list.filter(item => item.type === "number");
+                        const projectOfBlooeanType = getPropertyInfo.data.list.filter(item => item.type === "boolean");
                         setProjectOfNumberListing(projectOfNumberType);
                         setProjectOfBooleanListing(projectOfBlooeanType);
                     }
+                    setPropertyMeta(true);
                 }
-                if(developerList.length === 0){
-                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
-                    const developerList = getUsersDeveloperInfo.data.user_data;
-                    if(developerList.length) {
-                        setDeveloperList(developerList);
+                if(currencyList.length === 0){
+                    // console.log(1);
+                    const currencyObj = {};
+                    const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
+
+                    if(getCurrencyInfo.status) {
+                        setCurrencyList(getCurrencyInfo.data);
                     }
                 }
+
+                //console.log(propertyofTypes)
             } catch (error) {
                 console.error(error);
             }
@@ -103,14 +151,14 @@ export default function CreateAgency() {
         fetchData();
         console.log(stateList);
     });
-    const handleStateChange = async (stateId) => {
-        console.log('State ID:', stateId);
 
+    const handleStateChange = async (stateId) => {
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 10
         });
         if(cityList.length === 0){
             const cityObj = { state_id: stateId, lang: "en" };
@@ -121,13 +169,62 @@ export default function CreateAgency() {
             }
         }
     };
+    const handleDistrictChange = async (DistrictId) => {
+        console.log('District ID:', DistrictId);
+        const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
+        console.log('selectedState ID:', selectedDistricts.latitude);
+        const { latitude, longitude } = selectedDistricts;
+        setPropertyMapCoords({
+            latitude: latitude,
+            longitude: longitude,
+            zoom: 12
+        });
+
+        if (!DistrictId) {
+            setNeighborhoodList([]); // Clear cities if no state is selected
+            return;
+        }
+        try {
+            const districtObj = { district_id: DistrictId , lang:"en" };
+            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
+            if (getNeighborhoodObjInfo.status) {
+                setNeighborhoodList(getNeighborhoodObjInfo.data);
+            } else {
+                setNeighborhoodList([]);
+            }
+        } catch (error) {
+            console.error("Error fetching cities:", error);
+            setNeighborhoodList([]);
+        }
+    };
+    const handleNeighborhoodChange = async (NeighborhoodId) => {
+        console.log('NeighborhoodId ID:', NeighborhoodId);
+        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
+        if (selecteNeighborhood) {
+            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
+            const { latitude, longitude } = selecteNeighborhood;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 14
+            });
+        } else {
+            console.error('Neighborhood not found');
+        }
+    };
+
+
+
+
     const handleCityChange = async (cityId) => {
+        console.log('City ID:', cityId);
         const selectedCites = cityList.find((cities) => cities.id === cityId);
         console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!cityId) {
@@ -148,82 +245,143 @@ export default function CreateAgency() {
         }
     };
 
-    const handleDistrictChange = async (DistrictId) => {
-        console.log('District ID:', DistrictId);
-        const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
-        const { latitude, longitude } = selectedDistricts;
-        setPropertyMapCoords({
-            latitude: latitude,
-            longitude: longitude
+
+    const handleNumberChange = (id, value) => {
+        setPropertyOfMetaNumberValue((prev) => {
+          const propertyOfMetaNumberValue = [...prev];
+          const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
+          if (index > -1) {
+            propertyOfMetaNumberValue[index].value = value;
+          } else {
+            const propertyOfMetaNumberObj = {property_type_id: id, value: value};
+            propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
+          }
+          return propertyOfMetaNumberValue;
         });
+    };
 
-        if (!DistrictId) {
-            setNeighborhoodList([]); // Clear cities if no state is selected
-            return;
+
+
+
+
+    const handleFileChangeVideo = (event, setFieldValue) => {
+        console.log( 'video' );
+        console.log( event );
+        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
+        const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
+        //const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
+        console.log(videoFile);
+        // If video file is selected, set it in the "video" field
+        if (videoFile) {
+            setFieldValue("video", videoFile);
+            setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         }
-        try {
-            const districtObj = { district_id: DistrictId , lang:"en" };
-            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
-            if (getNeighborhoodObjInfo.status) {
-                setNeighborhoodList(getNeighborhoodObjInfo.data);
-            } else {
-                setNeighborhoodList([]);
-            }
-        } catch (error) {
-            console.error("Error fetching cities:", error);
-            setNeighborhoodList([]);
+
+        // If image files are selected, set them in the "picture_img" field
+        // if (imageFiles.length > 0) {
+        //     console.log(imageFiles);
+        //     setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
+        //     setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
+        // }
+    };
+
+    const handleFileChange = (event, setFieldValue) => {
+        console.log( 'image' );
+        console.log( event );
+        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
+        //const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
+        const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
+        console.log(imageFiles);
+        // If video file is selected, set it in the "video" field
+        // if (videoFile) {
+        //     setFieldValue("video", videoFile);
+        //     setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
+        // }
+
+        // If image files are selected, set them in the "picture_img" field
+        if (imageFiles.length > 0) {
+            console.log(imageFiles);
+            setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
+            setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
         }
     };
 
-    const handleNeighborhoodChange = async (NeighborhoodId) => {
-        console.log('NeighborhoodId ID:', NeighborhoodId);
-        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
-        if (selecteNeighborhood) {
-            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
-            const { latitude, longitude } = selecteNeighborhood;
-            setPropertyMapCoords({
-                latitude: latitude,
-                longitude: longitude,
-            });
-        } else {
-            console.error('Neighborhood not found');
-        }
+    const handlePlaceSelect = (place) => {
+        // You can access selected place details here
+        console.log("place");
+        console.log(place);
+        // Update address state with the selected place's formatted address
+        setAddress(place.description);
     };
+
+    const handleAddressSelect = (newAddress, newLocation) => {
+
+    };
+
+      // Handler for image remove
+      const handleImageRemove = (index) => {
+        // Log current Formik values and filePreviews before removal
+        console.log('Before removal - filePreviews:', filePreviews);
+        console.log('Before removal - Formik picture_img:', form.values.picture_img);
+
+        // Remove the image from preview and Formik field
+        const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+        const newImageList = form.values.picture_img.filter((_, i) => i !== index);
+
+        // Log the new state and new image list
+        console.log('After removal - newFilePreviews:', newFilePreviews);
+        console.log('After removal - newImageList:', newImageList);
+
+        // Update preview state
+        setFilePreviews(newFilePreviews);
+
+        // Update Formik field
+        form.setFieldValue('picture_img', newImageList);
+
+        // Log Formik values after updating to ensure it's updated
+        console.log('Formik picture_img after update:', form.values.picture_img);
+    };
+
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
 
-        // Validation for video upload
-        if (isVideoUpload && !values.video) {
+        try {
+            // Validation for video
+            if (isVideoUpload && !values.video) {
                 setErrors({ serverError: "Please upload a video file." });
                 setShowErrorPopup(true);
                 return;
-        }
-        if (!isVideoUpload && !values.video_link) {
+            }
+
+            if (!isVideoUpload && !values.video_link) {
                 setErrors({ serverError: "Please enter a YouTube video link." });
                 setShowErrorPopup(true);
                 return;
             }
 
-
-        const selectedAmenities = projectOfBooleanListing
-            .filter((project) => checkedItems[project.key])
-            .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-
-        console.log("Selected Amenities:", selectedAmenities);
-
-        try {
-            /********* Upload Image ***********/
-            // const uploadImageObj = [values.picture_img, values.video];
-            // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-            uploadImageObj.push(values.video);
-            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-
             setLoading(true); // Start loader
 
+
+            // Prepare amenities
+            const selectedAmenities = projectOfBooleanListing
+                .filter((project) => checkedItems[project.key])
+                .map((project) => ({ property_type_id: project.id, value: "true" }));
+
+            if (propertyOfMetaNumberValue.length > 0) {
+                selectedAmenities.push(...propertyOfMetaNumberValue);
+            }
+
+            console.log("Selected Amenities:", selectedAmenities);
+                    setLoading(true); // Start loader
+
+
+            // Prepare images and videos for upload
+            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
+            uploadImageObj.push(values.video);
+
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
             if (uploadImageUrl.files.length > 0) {
                 const imageUrls = [];
@@ -245,10 +403,8 @@ export default function CreateAgency() {
                     videoUrl = values.video_link;
                 }
 
-
-
-                /********* Create Project ***********/
-                const projectData = {
+                // Prepare data for property creation
+                const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
                     description_en: values.description_en ?? null,
@@ -262,35 +418,41 @@ export default function CreateAgency() {
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
-                    neighborhoods_id: values.neighborhood_id,
-                    latitude: values.latitude ?? "34.092809",
-                    longitude: values.longitude ?? "-118.328661",
+                    neighborhood_id: values.neighborhood_id,
+                    latitude: values.latitude ? String(values.latitude) : "33.985047",
+                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
+                    transaction: values.transaction_type,
+                    type_id: values.property_type,
+                    size: parseInt(values.size_sqft) ?? 0,
                     meta_details: selectedAmenities,
-                    address: "",
+                    currency_id: values.currency_id,
+                    project_id: values.project_id ?? null,
+                    address: values.address,
                 };
 
-                console.log("Project Data:", projectData);
+                console.log("Property Data:", propertyData);
 
-                const createUserInfo = await insertData("api/projects/create", projectData, true);
+                // Create property
+                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
-                if (createUserInfo.status) {
-                    setSucessMessage(true);
-                    setErrors({ serverError: "Project created successfully." });
+                if (createPropertyInfo.status) {
+                    setErrors({ serverError: "Property created successfully." });
                     setShowErrorPopup(true);
                     resetForm();
-                    router.push("/project-listing");
+                    router.push("/property-listing");
                 } else {
-                    setErrors({ serverError: createUserInfo.message || "Failed to create project." });
+                    setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
                 }
             } else {
-                setErrors({ serverError: "File upload failed." });
+                setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
-        }finally {
+        }
+        finally {
             setLoading(false); // Stop loader
         }
     };
@@ -303,8 +465,34 @@ export default function CreateAgency() {
         }));
     };
 
+	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
+	// const handleRadioChange = (event) => {
+	// 	const selectedRadioId = event.target.id
+	// 	setSelectedRadio(selectedRadioId)
+	// }
 
+    const handleRadioChange = (event, setFieldValue) => {
+        const isUpload = event.target.value === "upload";
+        setIsVideoUpload(isUpload);
+
+        if (!isUpload) {
+          // Switching to YouTube Link
+          setVideoPreview(null); // Clear video preview
+          setFieldValue("video", null); // Clear Formik video field
+        }else if(isUpload){
+
+          setFieldValue("video_link", null);
+          setVideoLink(null); // Update YouTube link manually
+
+        }
+    };
+
+    const handleVideoLinkChange = (event, setFieldValue) => {
+        setVideoLink(event.target.value); // Update YouTube link manually
+        setFieldValue("video_link", event.target.value); // Update Formik state
+
+    };
     console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
@@ -313,9 +501,6 @@ export default function CreateAgency() {
             <Preloader />
         ) : (
 		<>
-
-			{/* <DeleteFile /> */}
-
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -324,22 +509,25 @@ export default function CreateAgency() {
                     title_fr: "",
                     description_en: "",
                     description_fr: "",
-                    price: 0,
-                    vr_link: "",
+                    price: "",
+                  //vr_link: "",
                     picture_img: [], // Set this to an empty array for multiple files
                     video: null, // Use `null` for file inputs
+                    video_link: "", // Add this for YouTube video link
                     credit: "",
                     state_id: "",
                     city_id: "",
                     districts_id: "",
                     neighborhood_id: "",
+                    transaction_type: "",
+                    property_type: "",
                     user_id: "",
-                    link_uuid: "",
+                    size_sqft: "",
                  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
                             {/* <div className="widget-box-2">
@@ -368,7 +556,7 @@ export default function CreateAgency() {
                                 </div>
                             </div> */}
                             <div className="widget-box-2">
-                                <h6 className="title">Project Information</h6>
+                                <h6 className="title">Property Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
@@ -398,22 +586,118 @@ export default function CreateAgency() {
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Other Information</h6>
-                                <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Price:<span>*</span></label>
-                                        <Field type="number" id="price" name="price" className="box-fieldset" />
-                                        <ErrorMessage name="price" component="div" className="error" />
-                                    </fieldset> */}
+                                <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Transaction Type:<span>*</span></label>
+                                        <Field as="select" name="transaction_type" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("transaction_type", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Transaction Type</option>
+                                            <option value="sale">Fore Sale</option>
+                                            <option value="rental">For Rental</option>
+                                        </Field>
+                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Property Type:<span>*</span></label>
+                                        <Field as="select" name="property_type" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("property_type", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Property Type</option>
+                                            {propertyofTypesListing && propertyofTypesListing.length > 0 ? (
+                                                propertyofTypesListing.map((property) => (
+                                                    <option key={property.id} value={property.id}>{capitalizeFirstChar(property.title)}</option>
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Project Listing:<span>*</span></label>
+                                        <Field as="select" name="project_id" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("project_id", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select Project Listing</option>
+                                            {projectOfListing && projectOfListing.length > 0 ? (
+                                                projectOfListing.map((propertyList) => (
+                                                    <option key={propertyList.id} value={propertyList.id}>{capitalizeFirstChar(propertyList.title)}</option>
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">User Listing:</label>
+                                        <Field as="select" name="user_id" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("user_id", selectedState);
+                                                }}
+                                            >
+                                            <option value="">Select User Listing</option>
+                                            {userList && userList.length > 0 ? (
+                                                userList.map((user) => (
+                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
+                                                ))
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </Field>
+                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
+                                    </fieldset>
+                                </div>
+                                <div className="box grid-3 gap-30">
+                                <fieldset className="box-fieldset ">
+                                        <label htmlFor="name">Price<span>*</span>:</label>
+                                            <div className="phone-and-country-code">
+                                                <Field as="select" name="currency_id" className="nice-select country-code"
+                                                    id="country-code"
+                                                    value={currencyCode}
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setCurrencyCode(selectedState);
+                                                        setFieldValue("currency_id", selectedState);
+                                                        //handleCityChange(selectedState);
+                                                    }}
+                                                >
+                                                    <option value="">Select Currency</option>
+                                                    {currencyList && currencyList.length > 0 ? (
+                                                        currencyList.map((currency, index) =>(
+                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                                <Field type="text" id="price" name="price" className="form-control style-1" />
+                                            </div>
+                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
+                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
+                                    </fieldset>
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
+                                        // <ErrorMessage name="vr_link" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:<span>*</span></label>
+                                        <label htmlFor="desc">Link UUID:</label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
-                                    </fieldset>
+                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
+                                    </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
@@ -426,38 +710,32 @@ export default function CreateAgency() {
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">User Listing:</label>
-                                        <Field as="select" name="user_id" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("user_id", selectedState);
-                                                }}
-                                            >
-                                            <option value="">Select User Listing</option>
-                                            {developerList && developerList.length > 0 ? (
-                                                developerList.map((user) => (
-                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
-                                                ))
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="description">Size of SqMeter:<span>*</span></label>
+                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
+                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
+                                </div>
+                                <div className="box grid-3 gap-30">
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" />
-                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
+                                                        <Field
+                                                            type="number"
+                                                            name={project.id}
+                                                            min="0"
+                                                            className="box-fieldset"
+                                                            onChange={(e) => handleNumberChange(project.id, e.target.value)}
+                                                        />
+                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
                                             <></>
                                         )}
                                 </div>
-                                <div className="grid-2 box gap-30">
+                                <div className="box grid-2 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="picture_img">Picture Images:</label>
                                         <Field
@@ -716,15 +994,32 @@ export default function CreateAgency() {
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    {/* <label htmlFor="location">Address:<span>*</span></label>
-                                    <div className="box-ip">
-                                        <input type="text" className="form-control style-1" name="address" />
-                                        <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div> */}
+                                    {/* <label htmlFor="location">Address:<span>*</span></label> */}
+                                    {/* <div className="box-ip"> */}
+
+                                        {/* <GooglePlacesAutocomplete /> */}
+
+
+                                     {/* <ReactGooglePlacesAutocomplete
+                                        apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
+                                        selectProps={{
+                                            value: address,
+                                            onChange: (selected) => handlePlaceSelect(selected),
+                                        }}
+                                    /> <br/> */}
+                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
+                                    </div><br/><br/><br/> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                                setFieldValue('address', newAddress);
+                                                setFieldValue('latitude', newLocation.lat);
+                                                setFieldValue('longitude', newLocation.lng);
+                                                handleAddressSelect(newAddress, newLocation);
+                                            }
+                                        }
                                     />
                                 </div>
                             </div>
@@ -732,7 +1027,7 @@ export default function CreateAgency() {
                                 <h6 className="title">Amenities </h6>
                                 <div className="box-amenities-property">
                                     <div className="box-amenities">
-                                    {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
+                                        {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
                                             projectOfBooleanListing.map((project) => (
                                                 <fieldset className="amenities-item">
                                                     <Field
@@ -751,9 +1046,9 @@ export default function CreateAgency() {
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Add Project</button>
+                            <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
                         </div >
-                        {/* Error Popup */}
+                          {/* Error Popup */}
                           {showErrorPopup && Object.keys(errors).length > 0 && (
                             <ErrorPopup
                                 errors={errors}
@@ -762,13 +1057,12 @@ export default function CreateAgency() {
                             />
                         )}
                     </Form>
+
                 )}
-                </Formik>
-
-
+            </Formik>
 			</LayoutAdmin >
 		</>
-           )}
+            )}
         </>
-	)
+  );
 }
