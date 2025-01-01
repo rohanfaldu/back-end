@@ -92,6 +92,9 @@ export default function AgencyPackageListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
+            <div className="box">
+                <Link href="/create-agency-type">Create Agency Type</Link>
+            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
                 <h6 className="title">Agency Packages Listing</h6>
@@ -126,24 +129,24 @@ export default function AgencyPackageListing() {
                                     <ul className="list-action">
                                     {/* <li className="edit">
                                         <Link href={`/edit-agency-package/${property.id}`} className="item">
-                                          <Image 
+                                          <Image
                                             src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
                                           />
                                         </Link>
                                       </li> */}
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>

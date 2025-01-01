@@ -95,6 +95,9 @@ export default function ProjectListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
+            <div className="box">
+                <button className="tf-btn primary" ><Link href="/create-project">Create Project</Link></button>
+            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
                 <h6 className="title">Project Listing</h6>

@@ -93,6 +93,9 @@ export default function PropertyListing() {
         <>
           <DeleteFile />
           <LayoutAdmin>
+            <div className="box">
+                <button className="tf-btn primary" ><Link href="/create-property">Create Property</Link></button>
+            </div>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
                 <h6 className="title">Property Listing</h6>
