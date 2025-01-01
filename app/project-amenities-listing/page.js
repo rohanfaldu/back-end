@@ -138,7 +138,7 @@ export default function ProjectAmenitiesListing() {
                              <td>
                                <ul className="list-action">
                                  {/* <li className="edit">
-                                   <Link href={`/edit-agency/${property.id}`} className="item">
+                                   <Link href={`/edit-project-amenities/${property.id}`} className="item">
                                      <Image
                                        src={EditIcon} // Imported image object or static path
                                        alt="Edit icon"
