@@ -14,7 +14,10 @@ import { insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 import { capitalizeFirstChar } from "@/components/common/functions";
-
+const resolveIdByName = (stateName, statesList) => {
+    const state = statesList.find((state) => state.name === stateName);
+    return state ? state.id : ""; // Return the state id or empty string if not found
+  };
 export default function EditProject({params}) {
     const { id } = params;
     const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +45,8 @@ export default function EditProject({params}) {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [isVideoUpload, setIsVideoUpload] = useState(true);
     const [neighborhoodList, setNeighborhoodList] = useState([]);
-
+    const [iconPreview, setIconPreview] = useState([]);
+   
 
 
 
@@ -56,7 +60,6 @@ export default function EditProject({params}) {
                 };
                 const getProjectInfo = await insertData('api/projects/getbyid', requestData, true);
                     // console.log(getProjectInfo);
-
 
                 if (getProjectInfo.data) {
                     setProjectDetail(getProjectInfo.data);
@@ -76,15 +79,42 @@ export default function EditProject({params}) {
                 console.log('initialCheckedItems',initialCheckedItems);
                 setCheckedItems(initialCheckedItems);
             }
+            if (getProjectInfo.data.picture) {
+                setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
+            }
+            if (getProjectInfo.data.icon) {
+                setVideoPreview(getProjectInfo.data.icon); // Use URL for video preview
+            }
+            if (getProjectInfo.data.video) {
+                setVideoPreview(getProjectInfo.data.video); // Use URL for video preview
+            }
+
+            
+        
+            // setInitialValues((prevValues) => ({
+            //     ...prevValues,
+            //     city_id: resolveIdByName(getProjectInfo.data.city, cityList, 'city_name'),
+            //     districts_id: resolveIdByName(getProjectInfo.data.district, districtList, 'district_name'),
+            //     neighborhood_id: resolveIdByName(getProjectInfo.data.neighborhood, neighborhoodList),
+            // }));
 
 
-            if(stateList.length === 0){
+                if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
                     // console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
                         setStateList(getStateInfo.data.states);
                     }
+                    const state_id = resolveIdByName(getProjectInfo.data.state, getStateInfo.data.states);
+                    console.log("Resolved State ID:", state_id);
+                
+                    // Update the initialValues to set the correct state_id
+                    setInitialValues((prevValues) => ({
+                    ...prevValues,
+                    state_id: state_id, // Set resolved state_id
+                    }));
+                   
                 }
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
@@ -106,7 +136,6 @@ export default function EditProject({params}) {
                 }
                 const type = { project_id: id };
                 const getUserInfo = await insertData('api/projects', type, true);
-                // console.log(getUserInfo);
                 const allUsersList = getUserInfo.data.user_data;
                 const specifcUserDetail = allUsersList.find(item => item.id === id);
                 setUserDetail(specifcUserDetail);
@@ -119,8 +148,10 @@ export default function EditProject({params}) {
 		};
 		fetchData(); // Fetch data on component mount
 	}, []);
+        console.log(projectDetail);
 
-    // console.log(projectDetail);
+        
+
 
     const validationSchema = Yup.object({
             title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -143,7 +174,6 @@ export default function EditProject({params}) {
 
     const handleStateChange = async (stateId) => {
         // console.log('State ID:', stateId);
-
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
@@ -315,19 +345,20 @@ export default function EditProject({params}) {
                             price: projectDetail.price || 0,
                             vr_link: projectDetail.vr_link || "",
                             picture_img: projectDetail.picture_img || [],
+                            icon: projectDetail.icon || null,
                             video: projectDetail.video || null,
                             credit: projectDetail.credit || "",
-                            state_id: projectDetail.state_id || "",
-                            city_id: projectDetail.city_id || "",
-                            districts_id: projectDetail.districts_id || "",
-                            neighborhood_id: projectDetail.neighborhood_id || "",
+                            state_id: "",
+                            city_id: projectDetail.city || "",
+                            districts_id: projectDetail.district || "",
+                            neighborhood_id: projectDetail.neighborhood || "",
                             user_id: projectDetail.user_id || "",
                             link_uuid: projectDetail.link_uuid || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
                         >
-                        {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                        {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                             <Form>
                                 <div>
                                     <div className="widget-box-2">
@@ -362,11 +393,11 @@ export default function EditProject({params}) {
                                     <div className="widget-box-2">
                                         <h6 className="title">Other Information</h6>
                                         <div className="box grid-3 gap-30">
-                                            {/* <fieldset className="box box-fieldset">
+                                            <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Price:<span>*</span></label>
                                                 <Field type="number" id="price" name="price" className="box-fieldset" />
                                                 <ErrorMessage name="price" component="div" className="error" />
-                                            </fieldset> */}
+                                            </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">VR Link:</label>
                                                 <Field type="text" name="vr_link" className="box-fieldset"  />
@@ -408,17 +439,16 @@ export default function EditProject({params}) {
                                                 </Field>
                                                 {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                             </fieldset>
-                                                {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                                {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                                     projectOfNumberListing.map((project) => (
                                                         <fieldset className="box box-fieldset">
                                                             <label htmlFor="desc">{project.name}:</label>
                                                                 <Field type="number" name={project.id} className="box-fieldset" />
-                                                            {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                         </fieldset>
                                                     ))
                                                 ) : (
                                                     <></>
-                                                )}
+                                                )} */}
                                         </div>
                                         <div className="grid-2 box gap-30">
                                             <fieldset className="box-fieldset">
@@ -519,6 +549,90 @@ export default function EditProject({params}) {
                                                 </div>
                                             </fieldset>
                                         </div>
+                                        <div className="grid-2 box gap-30">
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="picture_img">Icon Images:</label>
+                                                <Field
+                                            name="icon"
+                                            component={({ field, form }) => (
+                                                <div className="box-floor-img uploadfile">
+                                                {/* Upload Button */}
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                    Choose Files
+                                                    <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                            const file = event.target.files[0]; // Get the first file
+                                                            if (file) {
+                                                                // Perform size validation
+                                                                if (file.size < 1000) {
+                                                                alert(`Please upload a file above the size of 1KB`);
+                                                                return;
+                                                                }
+
+                                                                const img = new Image();
+                                                                const reader = new FileReader();
+
+                                                                reader.onload = (e) => {
+                                                                img.src = e.target.result;
+
+                                                                img.onload = () => {
+                                                                    const imageHeight = img.height;
+                                                                    const imageWidth = img.width;
+
+                                                                    // Perform dimension validation
+                                                                    if (imageHeight > 200 || imageWidth > 200) {
+                                                                    alert(
+                                                                        "Please upload an image with a maximum height and width of 200px."
+                                                                    );
+                                                                    } else {
+                                                                    setFieldValue("icon", file); // Set the file in Formik state
+                                                                    setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                    }
+                                                                };
+                                                                };
+
+                                                                reader.readAsDataURL(file); // Read file as Data URL
+                                                            }
+                                                            }}
+                                                            style={{ display: "none" }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                <p className="file-name fw-5">Or drop images here to upload</p>
+                                                </div>
+                                            )}
+                                            />
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                {/* Image Previews */}
+                                            <div className="image-preview-container image-gallery">
+                                            {iconPreview && (
+                                                    <div className="preview-item">
+                                                    <img
+                                                        src={iconPreview}
+                                                        alt="Icon Preview"
+                                                        className="uploadFileImage"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                        setIconPreview(null); // Clear the preview
+                                                        setFieldValue("icon", null); // Clear the file in Formik state
+                                                        }}
+                                                        className="remove-image-btn"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            </fieldset>
+
+                                        </div>
                                         <div className="box grid-1 box gap-50">
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="picture_img">Video Option:</label>
@@ -597,23 +711,29 @@ export default function EditProject({params}) {
                                         <h6 className="title">Location</h6>
                                         <div className="box grid-4 gap-30">
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">State:</label>
-                                                <Field as="select" name="state_id" className="nice-select country-code"
+                                                <label htmlFor="desc">State:</label>{values.state_id}
+                                                <Field
+                                                    as="select"
+                                                    name="state_id"
+                                                    className="nice-select country-code"
+                                                    value={values.state_id}
                                                     onChange={(e) => {
                                                         const selectedState = e.target.value;
                                                         setFieldValue("state_id", selectedState);
                                                         handleStateChange(selectedState);
-                                                    }}>
-                                                        <option value="">Select State</option>
-                                                        {stateList && stateList.length > 0 ? (
-                                                            stateList.map((state) => (
-                                                                <option value={state.id}>{state.name}</option>
-                                                            ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                </Field>
-                                                {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
+                                                    }}
+                                                >
+                                                <option value="">Select State</option>
+                                                {stateList.length > 0 ? (
+                                                    stateList.map((state) => (
+                                                        <option key={state.id} value={state.id}>
+                                                            {state.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </Field>
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Cities:</label>
@@ -635,7 +755,6 @@ export default function EditProject({params}) {
                                                             <></>
                                                         )}
                                                     </Field>
-                                                {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">District:</label>
@@ -655,7 +774,6 @@ export default function EditProject({params}) {
                                                             <></>
                                                         )}
                                                     </Field>
-                                                {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Neighborhood:</label>
@@ -675,7 +793,6 @@ export default function EditProject({params}) {
                                                             <></>
                                                         )}
                                                     </Field>
-                                                {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                         <div className="box box-fieldset">

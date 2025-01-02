@@ -105,10 +105,9 @@ export default function EditAgency({params}) {
 
 
                 const userData = {
-                    credit: "1500",
-                    description: "Updated real estate agency description test",
-                    // description_en:  values.description_en,
-                    // description_en:  values.description_en,
+                    credit: values.credit,
+                    description_en:  values.description_en,
+                    description_en:  values.description_fr,
                     facebook_link: values.facebook_link,
                     twitter_link:values.twitter_link,
                     youtube_link: values.youtube_link,
@@ -116,9 +115,8 @@ export default function EditAgency({params}) {
                     linkedin_link: values.linkedin_link,
                     instagram_link: values.instagram_link,
                     whatsup_number: values.whatsup_number,
-                    service_area: 'values.service_area',
-                    // service_area_en: values.service_area_en,
-                    // service_area_fr: values.service_area_fr,
+                    service_area_en: values.service_area_en,
+                    service_area_fr: values.service_area_fr,
                     tax_number: values.tax_number,
                     license_number: values.license_number,
                     picture: "new-urltopicture.jpg",
@@ -245,7 +243,7 @@ export default function EditAgency({params}) {
                                                     {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Credit:</label>
+                                                    <label htmlFor="credit">Credit:</label>
                                                     <Field type="text" name="credit" className="box-fieldset"  />
                                                     {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                                 </fieldset>

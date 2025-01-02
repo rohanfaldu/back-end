@@ -22,7 +22,8 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const type = { user_id: "763f41dd-8a66-48dc-ba02-bd2dbe9968fd" };
+
+        const type = { user_id: "" };
         const getUserInfo = await insertData('api/agencies', type, true);
         setProperties(getUserInfo.data); // Save all properties
         setFilteredProperties(getUserInfo.data); // Initially display all properties
