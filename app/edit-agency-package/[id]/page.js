@@ -28,6 +28,7 @@ export default function EditAgency({ params }) {
 
     useEffect(() => {
         // if (!router.isReady || !id) return; // Ensure router is ready and id exists
+        console.log(id);
 
         const fetchData = async () => {
 
@@ -38,10 +39,10 @@ export default function EditAgency({ params }) {
                    searchTerm: '',
                    status: '',
                  };
-        const type = { type: "agency-packages" };
+        const type = { agency_package_id: '7df6e881-cba4-4b5d-8ea6-5262968da01c' };
 
                 //  const response = await insertData("api/agency-packages", requestData, true);
-        const getUserInfo = await insertData('auth/getall', type, false);
+        const getUserInfo = await insertData('api/agency-packages/getbyid', type, true);
             console.log(getUserInfo); // Check if the API returns the expected data
 
             try {
