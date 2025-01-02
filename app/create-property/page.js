@@ -123,7 +123,7 @@ export default function CreateProperty() {
                 if(projectOfListing.length === 0){
                     const getProjectListInfo = await insertData('api/projects/', {page: 1, limit: 1000}, true);
                     if(getProjectListInfo.status) {
-                        setProjectOfListing(getProjectListInfo.data.list);
+                        setProjectOfListing(getProjectListInfo.data.projects);
                     }
                 }
 
@@ -193,7 +193,7 @@ export default function CreateProperty() {
             const districtObj = { district_id: DistrictId , lang:"en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
-                setNeighborhoodList(getNeighborhoodObjInfo.data);
+                setNeighborhoodList(getNeighborhoodObjInfo.data.neighborhoods);
             } else {
                 setNeighborhoodList([]);
             }
@@ -324,34 +324,11 @@ export default function CreateProperty() {
     };
 
       // Handler for image remove
-      const handleImageRemove = (index) => {
-        // Log current Formik values and filePreviews before removal
-        console.log('Before removal - filePreviews:', filePreviews);
-        console.log('Before removal - Formik picture_img:', form.values.picture_img);
-
-        // Remove the image from preview and Formik field
-        const newFilePreviews = filePreviews.filter((_, i) => i !== index);
-        const newImageList = form.values.picture_img.filter((_, i) => i !== index);
-
-        // Log the new state and new image list
-        console.log('After removal - newFilePreviews:', newFilePreviews);
-        console.log('After removal - newImageList:', newImageList);
-
-        // Update preview state
-        setFilePreviews(newFilePreviews);
-
-        // Update Formik field
-        form.setFieldValue('picture_img', newImageList);
-
-        // Log Formik values after updating to ensure it's updated
-        console.log('Formik picture_img after update:', form.values.picture_img);
-    };
 
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-
         try {
             // Validation for video
             if (isVideoUpload && !values.video) {
@@ -366,7 +343,7 @@ export default function CreateProperty() {
                 return;
             }
 
-            setLoading(true); // Start loader
+            // setLoading(true); // Start loader
 
 
             // Prepare amenities
@@ -379,7 +356,7 @@ export default function CreateProperty() {
             }
 
             console.log("Selected Amenities:", selectedAmenities);
-                    setLoading(true); // Start loader
+                    // setLoading(true); // Start loader
 
 
             // Prepare images and videos for upload
@@ -424,8 +401,8 @@ export default function CreateProperty() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: values.latitude ? String(values.latitude) : "33.985047",
-                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
+                    latitude: values.latitude ? float(values.latitude) : "33.985047",
+                    longitude: values.longitude ? float(values.longitude) : "-118.469483",
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
@@ -436,7 +413,7 @@ export default function CreateProperty() {
                 };
 
                 console.log("Property Data:", propertyData);
-
+// return false;
                 // Create property
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
@@ -776,8 +753,8 @@ export default function CreateProperty() {
                                                                 const imageWidth = img.width;    // Get image width
 
                                                                 // You can add your dimension validation here
-                                                                if (imageHeight <= 800 || imageWidth <= 1100) {
-                                                                    alert('Please upload images with a maximum height of 800px and a maximum width of 1100px.');
+                                                                if (imageHeight <= 80|| imageWidth <= 100) {
+                                                                    alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
                                                                 } else {
                                                                     // Add the file as a valid image and generate the preview
                                                                     validPreviews.push(URL.createObjectURL(file));
@@ -988,7 +965,7 @@ export default function CreateProperty() {
                                                 {neighborhoodList && neighborhoodList.length > 0 ? (
                                                     neighborhoodList.map((neighborhoods) => (
                                                         <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                            {neighborhoods.name}
+                                                            {neighborhoods.neighborhood_name}
                                                         </option>
                                                     ))
                                                 ) : (

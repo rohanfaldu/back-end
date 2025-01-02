@@ -13,6 +13,7 @@ import passwordHide from "../../../public/images/favicon/password-hide.png";
 import { insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
+import { capitalizeFirstChar } from "@/components/common/functions";
 
 export default function EditProject({params}) {
     const { id } = params;
@@ -23,6 +24,7 @@ export default function EditProject({params}) {
 	const [loading, setLoading] = useState(true);
     const [filePreview, setFilePreview] = useState(null);
     const [userDetail, setUserDetail] = useState(null);
+    const [projectDetail, setProjectDetail] = useState(null);
     const [developerList, setDeveloperList] = useState([]);
     const [projectOfNumberListing, setProjectOfNumberListing] = useState([]);
     const [projectOfBooleanListing, setProjectOfBooleanListing] = useState([]);
@@ -45,13 +47,41 @@ export default function EditProject({params}) {
 
 
     useEffect(() => {
-        console.log(id);
+        // console.log(id);
         const fetchData = async () => {
+
 		try {
+                const requestData = {
+                    project_id: id,
+                };
+                const getProjectInfo = await insertData('api/projects/getbyid', requestData, true);
+                    // console.log(getProjectInfo);
+
+
+                if (getProjectInfo.data) {
+                    setProjectDetail(getProjectInfo.data);
+                } else {
+                    setErrorMessage("Project not found.");
+                }
+
+                if (getProjectInfo.data.meta_details) {
+                // Create the checkedItems state based on meta_details
+                const initialCheckedItems = getProjectInfo.data.meta_details.reduce((acc, meta) => {
+
+                    if (meta.value === "true") {
+                        acc[meta.key] = true; // Set the checkbox for this key as checked
+                    }
+                    return acc;
+                }, {});
+                console.log('initialCheckedItems',initialCheckedItems);
+                setCheckedItems(initialCheckedItems);
+            }
+
+
             if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo.data.states[0].id);
+                    // console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
                         setStateList(getStateInfo.data.states);
                     }
@@ -59,7 +89,7 @@ export default function EditProject({params}) {
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
                     const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
-                    console.log(getProjectListingInfo);
+                    // console.log(getProjectListingInfo);
                     if(getProjectListingInfo) {
                         const projectOfNumberType = getProjectListingInfo.data.list.filter(item => item.type === "number");
                         const projectOfBlooeanType = getProjectListingInfo.data.list.filter(item => item.type === "boolean");
@@ -76,7 +106,7 @@ export default function EditProject({params}) {
                 }
                 const type = { project_id: id };
                 const getUserInfo = await insertData('api/projects', type, true);
-                console.log(getUserInfo);
+                // console.log(getUserInfo);
                 const allUsersList = getUserInfo.data.user_data;
                 const specifcUserDetail = allUsersList.find(item => item.id === id);
                 setUserDetail(specifcUserDetail);
@@ -90,7 +120,7 @@ export default function EditProject({params}) {
 		fetchData(); // Fetch data on component mount
 	}, []);
 
-    console.log(userDetail);
+    // console.log(projectDetail);
 
     const validationSchema = Yup.object({
             title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -112,7 +142,7 @@ export default function EditProject({params}) {
     // Handle form submission
 
     const handleStateChange = async (stateId) => {
-        console.log('State ID:', stateId);
+        // console.log('State ID:', stateId);
 
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
@@ -124,14 +154,14 @@ export default function EditProject({params}) {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                console.log(getCityInfo.data.cities);
+                // console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
     };
     const handleCityChange = async (cityId) => {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        console.log('selectedState ID:', selectedCites.latitude);
+        // console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
@@ -157,9 +187,9 @@ export default function EditProject({params}) {
     };
 
     const handleDistrictChange = async (DistrictId) => {
-        console.log('District ID:', DistrictId);
+        // console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
+        // console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
@@ -179,15 +209,15 @@ export default function EditProject({params}) {
                 setNeighborhoodList([]);
             }
         } catch (error) {
-            console.error("Error fetching cities:", error);
+            // console.error("Error fetching cities:", error);
             setNeighborhoodList([]);
         }
     };
     const handleNeighborhoodChange = async (NeighborhoodId) => {
-        console.log('NeighborhoodId ID:', NeighborhoodId);
+        // console.log('NeighborhoodId ID:', NeighborhoodId);
         const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
         if (selecteNeighborhood) {
-            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
+            // console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
             const { latitude, longitude } = selecteNeighborhood;
             setPropertyMapCoords({
                 latitude: latitude,
@@ -261,10 +291,12 @@ export default function EditProject({params}) {
     };
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
-	const handleRadioChange = (event) => {
-		const selectedRadioId = event.target.id
-		setSelectedRadio(selectedRadioId)
-	}
+	const handleCheckboxChange = (key) => {
+        setCheckedItems((prevState) => ({
+            ...prevState,
+            [key]: !prevState[key], // Toggle the checked state
+        }));
+    };
     const messageClass = (sucessMessage) ? "message success" : "message error";
 
 	return (
@@ -276,21 +308,21 @@ export default function EditProject({params}) {
                     {errorMessage && <div className={messageClass}>{errorMessage}</div>}
                     <Formik
                         initialValues={{
-                            title_en: "",
-                            title_fr: "",
-                            description_en: "",
-                            description_fr: "",
-                            price: 0,
-                            vr_link: "",
-                            picture_img: [], // Set this to an empty array for multiple files
-                            video: null, // Use `null` for file inputs
-                            credit: "",
-                            state_id: "",
-                            city_id: "",
-                            districts_id: "",
-                            neighborhood_id: "",
-                            user_id: "",
-                            link_uuid: "",
+                            title_en: projectDetail.title_en || "",
+                            title_fr: projectDetail.title_fr || "",
+                            description_en: projectDetail.description_en || "",
+                            description_fr: projectDetail.description_fr || "",
+                            price: projectDetail.price || 0,
+                            vr_link: projectDetail.vr_link || "",
+                            picture_img: projectDetail.picture_img || [],
+                            video: projectDetail.video || null,
+                            credit: projectDetail.credit || "",
+                            state_id: projectDetail.state_id || "",
+                            city_id: projectDetail.city_id || "",
+                            districts_id: projectDetail.districts_id || "",
+                            neighborhood_id: projectDetail.neighborhood_id || "",
+                            user_id: projectDetail.user_id || "",
+                            link_uuid: projectDetail.link_uuid || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -665,7 +697,7 @@ export default function EditProject({params}) {
                                             <div className="box-amenities">
                                             {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
                                                     projectOfBooleanListing.map((project) => (
-                                                        <fieldset className="amenities-item">
+                                                        <fieldset         className="amenities-item">
                                                             <Field
                                                                 type="checkbox" name={project.id}
                                                                 className="tf-checkbox style-1 primary"

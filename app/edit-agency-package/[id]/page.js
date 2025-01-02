@@ -131,6 +131,7 @@ export default function EditAgency({ params }) {
                             </div>
                             <button type="submit" className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency Type</button>
                         </div>
+
                         {/* Error Popup */}
                         {showErrorPopup && (Object.keys(errors).length > 0) && (
                             <ErrorPopup

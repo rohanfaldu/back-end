@@ -27,7 +27,7 @@ const ErrorPopup = ({ errors, validationSchema, onClose }) => {
                     </li>
                 )}
             </ul>
-           
+
         </div>
     );
 };
