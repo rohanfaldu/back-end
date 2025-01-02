@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import passwordShow from "../../../public/images/favicon/password-show.png";
 import passwordHide from "../../../public/images/favicon/password-hide.png";
-import { updateData } from "../../../components/api/Axios/Helper";
+import { updateData, insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
 import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
@@ -83,7 +83,8 @@ export default function EditAgency({params}) {
     // Handle form submission
 
     const handleSubmit = async (values, {resetForm}) => {
-        console.log(values);
+        console.log(id);
+        // console.log(values);
         setErrorMessage('');
         const formData = new FormData();
         formData.append('image', values.image);
@@ -102,28 +103,32 @@ export default function EditAgency({params}) {
                 },
             });
 
-          
+
                 const userData = {
                     credit: "1500",
-                    description: "Updated real estate agency description",
-                    facebook_link: "https://facebook.com/updated-example",
-                    twitter_link: "https://twitter.com/updated-example",
-                    youtube_link: "https://youtube.com/updated-example",
-                    pinterest_link: "https://pinterest.com/updated-example",
-                    linkedin_link: "https://linkedin.com/updated-example",
-                    instagram_link: "https://instagram.com/updated-example",
-                    whatsup_number: "9876543210",
-                    service_area: "San Francisco",
-                    tax_number: "987654321",
-                    license_number: "XYZ9876",
+                    description: "Updated real estate agency description test",
+                    // description_en:  values.description_en,
+                    // description_en:  values.description_en,
+                    facebook_link: values.facebook_link,
+                    twitter_link:values.twitter_link,
+                    youtube_link: values.youtube_link,
+                    pinterest_link: values.pinterest_link,
+                    linkedin_link: values.linkedin_link,
+                    instagram_link: values.instagram_link,
+                    whatsup_number: values.whatsup_number,
+                    service_area: 'values.service_area',
+                    // service_area_en: values.service_area_en,
+                    // service_area_fr: values.service_area_fr,
+                    tax_number: values.tax_number,
+                    license_number: values.license_number,
                     picture: "new-urltopicture.jpg",
                     cover: "new-urltocoverimage.jpg"
                 }
                 console.log(userData);
-                
 
-               
-                const updateUserInfo = await updateData('api/agencies/dc2d9041-f597-4681-b283-0da8613c5b43', userData, true);
+
+
+                const updateUserInfo = await updateData(`api/agencies/${id}`, userData, true);
                 if(updateUserInfo.status === true) {
                         setSucessMessage(true);
                         setErrorMessage(updateUserInfo.message);
@@ -131,8 +136,8 @@ export default function EditAgency({params}) {
                     }else{
                         setErrorMessage(updateUserInfo.message);
                     }
-               
-           
+
+
         } catch (error) {
           console.error('Error uploading file:', error);
         }
@@ -360,16 +365,17 @@ export default function EditAgency({params}) {
                                             </fieldset>
                                         </div>
                                         </div>
-                                    </div>
+
                                     <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency</button>
-                                    {/* Error Popup */}
-                                    {showErrorPopup && Object.keys(errors).length > 0 && (
-                                        <ErrorPopup
-                                            errors={errors}
-                                            validationSchema={validationSchema}
-                                            onClose={() => setShowErrorPopup(false)}
-                                        />
-                                    )}
+                                        {/* Error Popup */}
+                                        {showErrorPopup && Object.keys(errors).length > 0 && (
+                                            <ErrorPopup
+                                                errors={errors}
+                                                validationSchema={validationSchema}
+                                                onClose={() => setShowErrorPopup(false)}
+                                            />
+                                        )}
+                                    </div>
                             </Form>
                         )}
                         </Formik>
