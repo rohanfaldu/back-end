@@ -626,7 +626,7 @@ export default function CreateProperty() {
                                                     <option value="">Select Currency</option>
                                                     {currencyList && currencyList.length > 0 ? (
                                                         currencyList.map((currency, index) =>(
-                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            <option key={index} value={currency.id}>{currency.name}
                                                             </option>
                                                         ))
                                                     ) : (
