@@ -336,7 +336,9 @@ export default function CreateProperty() {
 
             console.log("Selected Amenities:", selectedAmenities);
             setLoading(true);
-            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
+            const uploadImageObj = Array.isArray(values.picture_img) 
+            ? values.picture_img.filter(item => item !== null) 
+            : [values.picture_img].filter(item => item !== null);
             uploadImageObj.push(values.video);
 
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);

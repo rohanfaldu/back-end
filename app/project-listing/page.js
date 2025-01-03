@@ -86,7 +86,7 @@ export default function ProjectListing() {
   };
 
   const handleView = (id) => {
-    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/property/${id}`;
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/project/${id}`;
       window.open(URL, '_blank')
   };
 
@@ -165,7 +165,7 @@ export default function ProjectListing() {
                                         />
                                     </a>
                                   </li>
-                                  {/* <li className="delete">
+                                  <li className="delete">
                                     <a
                                       className="remove-file item"
                                       onClick={() => handleView(property.id)}
@@ -180,7 +180,7 @@ export default function ProjectListing() {
                                         height={25}
                                       />
                                     </a>
-                                  </li> */}
+                                  </li>
                                 </ul>
                               </td>
                             </tr>
