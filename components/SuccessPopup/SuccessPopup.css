@@ -1,0 +1,56 @@
+.success-popup {
+    position: fixed; /* Stick to a specific position on the screen */
+    top: 90px;
+    right: 40px;
+    width: 300px;
+    border-radius: 10px;
+    background-color: #d4edda; /* Light green background for success */
+    color: #155724; /* Text color for success */
+    padding: 20px;
+    border: 1px solid #c3e6cb;
+    z-index: 9999; /* Ensure it appears on top of other elements */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar Styles (if needed for consistency) */
+.success-popup::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+.success-popup::-webkit-scrollbar-thumb {
+    background-color: #c3e6cb; /* Scrollbar thumb color */
+    border-radius: 4px; /* Rounded corners for the scrollbar thumb */
+}
+
+.success-popup::-webkit-scrollbar-thumb:hover {
+    background-color: #a8d5ba; /* Darker shade on hover */
+}
+
+.success-popup p {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Close button */
+.close-popup-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #155724;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.close-popup-btn:hover {
+    color: #0b3923; /* Slightly darker green on hover */
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 425px) {
+    .success-popup {
+        right: 10px;
+    }
+}
