@@ -252,17 +252,27 @@ export default function CreateProperty() {
 
 
     const handleNumberChange = (id, value) => {
-        setPropertyOfMetaNumberValue((prev) => {
-          const propertyOfMetaNumberValue = [...prev];
-          const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
-          if (index > -1) {
-            propertyOfMetaNumberValue[index].value = value;
-          } else {
-            const propertyOfMetaNumberObj = {property_type_id: id, value: value};
-            propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
-          }
-          return propertyOfMetaNumberValue;
-        });
+        setPropertyOfMetaNumberValue((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    
+        //setPropertyOfMetaNumberValue((prev) => {
+            
+        //   const propertyOfMetaNumberValue = [...prev];
+        //   const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
+        //   console.log('index');
+        //   console.log(index);
+        //   console.log('propertyOfMetaNumberValue');
+        //   console.log(propertyOfMetaNumberValue);
+        //   if (index > -1) {
+        //     propertyOfMetaNumberValue[index].value = value;
+        //   } else {
+        //     const propertyOfMetaNumberObj = {property_type_id: id, value: value};
+        //     propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
+        //   }
+        //   return propertyOfMetaNumberValue;
+        //});
     };
 
 
@@ -329,6 +339,7 @@ export default function CreateProperty() {
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
+        console.log(propertyOfMetaNumberValue);
         try {
             // Validation for video
             if (isVideoUpload && !values.video) {
@@ -415,7 +426,7 @@ export default function CreateProperty() {
                 console.log("Property Data:", propertyData);
 // return false;
                 // Create property
-                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
+                /*const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
                     setErrors({ serverError: "Property created successfully." });
@@ -425,7 +436,7 @@ export default function CreateProperty() {
                 } else {
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
-                }
+                }*/
             } else {
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);

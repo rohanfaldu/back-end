@@ -58,8 +58,9 @@ export default function EditProject({params}) {
                 const requestData = {
                     project_id: id,
                 };
-                const getProjectInfo = await insertData('api/projects/getbyid', requestData, true);
-                    // console.log(getProjectInfo);
+                const getProjectInfo = await insertData('api/projects/getbyIds', requestData, true);
+                     console.log('getProjectInfo');
+                     console.log(getProjectInfo);
 
                 if (getProjectInfo.data) {
                     setProjectDetail(getProjectInfo.data);
@@ -82,10 +83,13 @@ export default function EditProject({params}) {
                 if (getProjectInfo.data.picture) {
                     setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
                 }
+                
                 if (getProjectInfo.data.icon) {
-                    setVideoPreview(getProjectInfo.data.icon); // Use URL for video preview
+                    setIconPreview(getProjectInfo.data.icon); // Use URL for video preview
                 }
                 if (getProjectInfo.data.video) {
+                    // const videoLink = getProjectInfo.data.video;
+                    // const check  = videoLink.toLowerCase().endsWith(".mp4");
                     setVideoPreview(getProjectInfo.data.video); // Use URL for video preview
                 }
 
@@ -354,7 +358,7 @@ export default function EditProject({params}) {
                             city_id: projectDetail.city || "",
                             districts_id: projectDetail.district || "",
                             neighborhood_id: projectDetail.neighborhood || "",
-                            user_id: projectDetail.user_id || ""
+                            user_id: projectDetail.user || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -445,7 +449,7 @@ export default function EditProject({params}) {
                                                 <Field type="text" name="credit" className="box-fieldset"  />
                                             </fieldset> */}
                                             
-                                                {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                                {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                                     projectOfNumberListing.map((project) => (
                                                         <fieldset className="box box-fieldset">
                                                             <label htmlFor="desc">{project.name}:</label>
@@ -454,7 +458,7 @@ export default function EditProject({params}) {
                                                     ))
                                                 ) : (
                                                     <></>
-                                                )} */}
+                                                )}
                                         </div>
                                         <div className="grid-2 box gap-30">
                                             <fieldset className="box-fieldset">

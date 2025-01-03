@@ -131,6 +131,8 @@ export default function CreateAgency() {
             }
         }
     };
+
+    
     const handleCityChange = async (cityId) => {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
         console.log('selectedState ID:', selectedCites.latitude);
@@ -274,9 +276,9 @@ export default function CreateAgency() {
                     }
                     videoUrl = values.video_link ?? null; // Use values.video_link as fallback
                 }
+                console.log('values');
+                console.log(values);
 
-console.log('Here');
-console.log(videoUrl);
                 /********* Create Project ***********/
                 const projectData = {
                     title_en: values.title_en,
@@ -289,7 +291,6 @@ console.log(videoUrl);
                     icon: iconUrl,
                     video: videoUrl,
                     user_id: values.user_id,
-                    
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id, // Fixed
@@ -306,8 +307,8 @@ console.log(videoUrl);
 
                 if (createUserInfo.status) {
                     setSucessMessage(true);
-                    // setErrors({ serverError: "Project created successfully." });
-                    // setShowErrorPopup(true);
+                    setErrors({ serverError: "Project created successfully." });
+                    setShowErrorPopup(true);
                     resetForm();
                     router.push("/project-listing");
                 } else {
@@ -495,7 +496,7 @@ console.log(videoUrl);
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                     </fieldset> */}
-                                        {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="project">{project.name}:</label>
@@ -504,7 +505,7 @@ console.log(videoUrl);
                                             ))
                                         ) : (
                                             <></>
-                                        )} */}
+                                        )}
                                 </div>
                                 <div className="grid-2 box gap-30">
                                     <fieldset className="box-fieldset">
@@ -861,6 +862,13 @@ console.log(videoUrl);
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                            setFieldValue('address', newAddress);
+                                            setFieldValue('latitude', newLocation.lat);
+                                            setFieldValue('longitude', newLocation.lng);
+                                            //handleAddressSelect(newAddress, newLocation);
+                                        }
+                                    }
                                     />
                                 </div>
                             </div>
