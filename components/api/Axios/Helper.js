@@ -110,7 +110,7 @@ export const updateData = async (endpoint, data, flag) => {
 
 
 // Function to handle DELETE requests
-export const deletedData = async (endpoint, data) => {
+export const deletedData = async (endpoint, requestData) => {
   try {
     const token = localStorage.getItem('token');
     console.log(token);
@@ -126,7 +126,8 @@ export const deletedData = async (endpoint, data) => {
       headers: {
         Authorization: `Bearer ${token}`,
         'content-type': 'application/json'
-      }
+      },
+      data: requestData
     };
 
     const { data } = await axios.request(options);

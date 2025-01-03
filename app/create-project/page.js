@@ -178,7 +178,6 @@ export default function CreateAgency() {
         try {
             const districtObj = { district_id: DistrictId , lang:"en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', districtObj, true);
-            console.log(getNeighborhoodObjInfo);
             if (getNeighborhoodObjInfo.status) {
                 setNeighborhoodList(getNeighborhoodObjInfo.data.neighborhoods);
             } else {
