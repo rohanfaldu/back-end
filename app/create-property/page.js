@@ -367,7 +367,7 @@ export default function CreateProperty() {
             }
 
             console.log("Selected Amenities:", selectedAmenities);
-                    // setLoading(true); // Start loader
+            setLoading(true); // Start loader
 
 
             // Prepare images and videos for upload
