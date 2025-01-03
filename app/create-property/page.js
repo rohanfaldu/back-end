@@ -65,7 +65,7 @@ export default function CreateProperty() {
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
-        picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
+        picture_img: Yup.array().min(1, "At least three image is required").required("Image is required"),
         credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
