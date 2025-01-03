@@ -164,7 +164,8 @@ export default function CreateAgency() {
         }
         try {
             const districtObj = { district_id: DistrictId , lang:"en" };
-            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
+            const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', districtObj, true);
+            console.log(getNeighborhoodObjInfo);
             if (getNeighborhoodObjInfo.status) {
                 setNeighborhoodList(getNeighborhoodObjInfo.data);
             } else {
@@ -263,8 +264,8 @@ export default function CreateAgency() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhoods_id: values.neighborhood_id,
-                    latitude: values.latitude ?? "34.092809",
-                    longitude: values.longitude ?? "-118.328661",
+                    latitude: 34.092809,
+                    longitude: -118.328661,
                     meta_details: selectedAmenities,
                     address: "",
                 };
