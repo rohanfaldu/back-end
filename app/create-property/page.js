@@ -82,7 +82,6 @@ export default function CreateProperty() {
 
     useEffect(() => {
         const fetchData = async () => {
-            // console.log('propertyofTypes');
             try {
                 if(stateList.length === 0){
                     const stateObj = {};
@@ -92,17 +91,6 @@ export default function CreateProperty() {
                         setStateList(getStateInfo.data.states);
                     }
                 }
-                // console.log('cityList');
-                // console.log(cityList.length);
-                // if(cityList.length === 0){
-                //     const stateObj = {};
-                //     const getCityInfo = await insertData('api/city', stateObj, true);
-                //     console.log(getCityInfo);
-                //     if(getCityInfo) {
-                //         setCityList(getCityInfo.data);
-                //     }
-                // }
-
                 if(userList.length === 0){
                     const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
                     const developerList = getUsersDeveloperInfo.data.user_data;
@@ -111,7 +99,6 @@ export default function CreateProperty() {
                     const getalluserInfo = developerList.concat(agencyList);
                     setUserList(getalluserInfo);
                 }
-
                 if(propertyofTypesListing.length === 0){
                     const getPropertyTypeInfo = await insertData('api/property-type/', {page: 1, limit: 100}, true);
                     if(getPropertyTypeInfo.status) {
@@ -281,13 +268,6 @@ export default function CreateProperty() {
             setFieldValue("video", videoFile);
             setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
         }
-
-        // If image files are selected, set them in the "picture_img" field
-        // if (imageFiles.length > 0) {
-        //     console.log(imageFiles);
-        //     setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
-        //     setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
-        // }
     };
 
     const handleFileChange = (event, setFieldValue) => {
@@ -297,13 +277,6 @@ export default function CreateProperty() {
         //const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
         const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
         console.log(imageFiles);
-        // If video file is selected, set it in the "video" field
-        // if (videoFile) {
-        //     setFieldValue("video", videoFile);
-        //     setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
-        // }
-
-        // If image files are selected, set them in the "picture_img" field
         if (imageFiles.length > 0) {
             console.log(imageFiles);
             setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
@@ -342,11 +315,6 @@ export default function CreateProperty() {
                 setShowErrorPopup(true);
                 return;
             }
-
-            // setLoading(true); // Start loader
-
-
-            // Prepare amenities
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
                 .map((project) => ({ property_type_id: project.id, value: "true" }));
@@ -356,10 +324,6 @@ export default function CreateProperty() {
             }
 
             console.log("Selected Amenities:", selectedAmenities);
-                    // setLoading(true); // Start loader
-
-
-            // Prepare images and videos for upload
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
             uploadImageObj.push(values.video);
 
@@ -385,7 +349,6 @@ export default function CreateProperty() {
                     videoUrl = values.video_link;
                 }
 
-                // Prepare data for property creation
                 const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
@@ -401,8 +364,8 @@ export default function CreateProperty() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: values.latitude ? float(values.latitude) : "33.985047",
-                    longitude: values.longitude ? float(values.longitude) : "-118.469483",
+                    latitude: values.latitude ? float(values.latitude) : 33.985047,
+                    longitude: values.longitude ? float(values.longitude) : -118.469483,
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
@@ -413,8 +376,6 @@ export default function CreateProperty() {
                 };
 
                 console.log("Property Data:", propertyData);
-// return false;
-                // Create property
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
@@ -449,10 +410,6 @@ export default function CreateProperty() {
 
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
-	// const handleRadioChange = (event) => {
-	// 	const selectedRadioId = event.target.id
-	// 	setSelectedRadio(selectedRadioId)
-	// }
 
     const handleRadioChange = (event, setFieldValue) => {
         const isUpload = event.target.value === "upload";
@@ -492,10 +449,9 @@ export default function CreateProperty() {
                     description_en: "",
                     description_fr: "",
                     price: "",
-                  //vr_link: "",
-                    picture_img: [], // Set this to an empty array for multiple files
-                    video: null, // Use `null` for file inputs
-                    video_link: "", // Add this for YouTube video link
+                    picture_img: [],
+                    video: null,
+                    video_link: "",
                     credit: "",
                     state_id: "",
                     city_id: "",
