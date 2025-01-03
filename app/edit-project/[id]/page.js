@@ -68,35 +68,35 @@ export default function EditProject({params}) {
                 }
 
                 if (getProjectInfo.data.meta_details) {
-                // Create the checkedItems state based on meta_details
-                const initialCheckedItems = getProjectInfo.data.meta_details.reduce((acc, meta) => {
+                    // Create the checkedItems state based on meta_details
+                    const initialCheckedItems = getProjectInfo.data.meta_details.reduce((acc, meta) => {
 
-                    if (meta.value === "true") {
-                        acc[meta.key] = true; // Set the checkbox for this key as checked
-                    }
-                    return acc;
-                }, {});
-                console.log('initialCheckedItems',initialCheckedItems);
-                setCheckedItems(initialCheckedItems);
-            }
-            if (getProjectInfo.data.picture) {
-                setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
-            }
-            if (getProjectInfo.data.icon) {
-                setVideoPreview(getProjectInfo.data.icon); // Use URL for video preview
-            }
-            if (getProjectInfo.data.video) {
-                setVideoPreview(getProjectInfo.data.video); // Use URL for video preview
-            }
+                        if (meta.value === "true") {
+                            acc[meta.key] = true; // Set the checkbox for this key as checked
+                        }
+                        return acc;
+                    }, {});
+                    console.log('initialCheckedItems',initialCheckedItems);
+                    setCheckedItems(initialCheckedItems);
+                }
+                if (getProjectInfo.data.picture) {
+                    setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
+                }
+                if (getProjectInfo.data.icon) {
+                    setVideoPreview(getProjectInfo.data.icon); // Use URL for video preview
+                }
+                if (getProjectInfo.data.video) {
+                    setVideoPreview(getProjectInfo.data.video); // Use URL for video preview
+                }
 
             
-        
-            // setInitialValues((prevValues) => ({
-            //     ...prevValues,
-            //     city_id: resolveIdByName(getProjectInfo.data.city, cityList, 'city_name'),
-            //     districts_id: resolveIdByName(getProjectInfo.data.district, districtList, 'district_name'),
-            //     neighborhood_id: resolveIdByName(getProjectInfo.data.neighborhood, neighborhoodList),
-            // }));
+             
+                // setInitialValues((prevValues) => ({
+                //     ...prevValues,
+                //     city_id: resolveIdByName(getProjectInfo.data.city, cityList, 'city_name'),
+                //     districts_id: resolveIdByName(getProjectInfo.data.district, districtList, 'district_name'),
+                //     neighborhood_id: resolveIdByName(getProjectInfo.data.neighborhood, neighborhoodList),
+                // }));
 
 
                 if(stateList.length === 0){
@@ -106,16 +106,16 @@ export default function EditProject({params}) {
                     if(getStateInfo) {
                         setStateList(getStateInfo.data.states);
                     }
-                    const state_id = resolveIdByName(getProjectInfo.data.state, getStateInfo.data.states);
-                    console.log("Resolved State ID:", state_id);
+                    // const state_id = resolveIdByName(getProjectInfo.data.state, getStateInfo.data.states);
+                    // console.log("Resolved State ID:", state_id);
                 
-                    // Update the initialValues to set the correct state_id
-                    setInitialValues((prevValues) => ({
-                    ...prevValues,
-                    state_id: state_id, // Set resolved state_id
-                    }));
-                   
+                    // // Update the initialValues to set the correct state_id
+                    // setInitialValues((prevValues) => ({
+                    // ...prevValues,
+                    // state_id: state_id, // Set resolved state_id
+                    // }));
                 }
+                console.log('LKKKK');
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
                     const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
@@ -127,8 +127,11 @@ export default function EditProject({params}) {
                         setProjectOfBooleanListing(projectOfBlooeanType);
                     }
                 }
+                
                 if(developerList.length === 0){
                     const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
+                    console.log('getUsersDeveloperInfo');
+                    console.log(getUsersDeveloperInfo);
                     const developerList = getUsersDeveloperInfo.data.user_data;
                     if(developerList.length) {
                         setDeveloperList(developerList);
@@ -148,7 +151,8 @@ export default function EditProject({params}) {
 		};
 		fetchData(); // Fetch data on component mount
 	}, []);
-        console.log(projectDetail);
+        // console.log('developerList');
+        // console.log(developerList);
 
         
 
@@ -161,13 +165,11 @@ export default function EditProject({params}) {
             price: Yup.string().required("Price is required"),
             vr_link: Yup.string().url("Invalid VR URL").nullable(),
             picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
-            credit: Yup.string().required("Credit is required"),
             state_id: Yup.string().required("State is required"),
             city_id: Yup.string().required("City is required"),
             districts_id: Yup.string().required("District is required"),
             neighborhood_id: Yup.string().required("Neighborhood is required"),
             user_id: Yup.string().required("Developer is required"),
-            link_uuid: Yup.string().required("Link uuid is required"),
     });
     const router = useRouter();
     // Handle form submission
@@ -328,7 +330,8 @@ export default function EditProject({params}) {
         }));
     };
     const messageClass = (sucessMessage) ? "message success" : "message error";
-
+    console.log('user_id');
+    console.log(projectDetail);
 	return (
 		<>
             {loading?
@@ -347,13 +350,11 @@ export default function EditProject({params}) {
                             picture_img: projectDetail.picture_img || [],
                             icon: projectDetail.icon || null,
                             video: projectDetail.video || null,
-                            credit: projectDetail.credit || "",
                             state_id: "",
                             city_id: projectDetail.city || "",
                             districts_id: projectDetail.district || "",
                             neighborhood_id: projectDetail.neighborhood || "",
-                            user_id: projectDetail.user_id || "",
-                            link_uuid: projectDetail.link_uuid || ""
+                            user_id: projectDetail.user_id || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -404,41 +405,46 @@ export default function EditProject({params}) {
                                                 {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Listing:</label>
+                                                <Field
+                                                    as="select"
+                                                    name="user_id"
+                                                    className="nice-select country-code"
+                                                    value={values.user_id} // Bind the value to Formik's state
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setFieldValue("user_id", selectedState); // Update the Formik state
+                                                    }}
+                                                >
+                                                    <option value="">Select User Listing</option>
+                                                    {developerList && developerList.length > 0 ? (
+                                                        developerList.map((user) =>
+                                                            user.full_name !== null ? (
+                                                                <option key={user.id} value={user.id}>
+                                                                    {capitalizeFirstChar(user.full_name)}
+                                                                </option>
+                                                            ) : null
+                                                        )
+                                                    ) : null}
+                                                </Field>
+                                                {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
+                                            </fieldset>
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Link UUID:<span>*</span></label>
                                                 <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                                {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
-                                            </fieldset>
+                                            </fieldset> */}
                                         </div>
                                         <div className="box grid-3 gap-30">
-                                            <fieldset className="box box-fieldset">
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">License number:</label>
                                                 <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                                {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
+                                                
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Credit:</label>
                                                 <Field type="text" name="credit" className="box-fieldset"  />
-                                                {/* <ErrorMessage name="credit" component="div" className="error" /> */}
-                                            </fieldset>
-                                            <fieldset className="box box-fieldset">
-                                                <label htmlFor="title">User Listing:</label>
-                                                <Field as="select" name="user_id" className="nice-select country-code"
-                                                        onChange={(e) => {
-                                                            const selectedState = e.target.value;
-                                                            setFieldValue("user_id", selectedState);
-                                                        }}
-                                                    >
-                                                    <option value="">Select User Listing</option>
-                                                    {developerList && developerList.length > 0 ? (
-                                                        developerList.map((user) => (
-                                                            (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
-                                                        ))
-                                                    ) : (
-                                                        <></>
-                                                    )}
-                                                </Field>
-                                                {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
-                                            </fieldset>
+                                            </fieldset> */}
+                                            
                                                 {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                                     projectOfNumberListing.map((project) => (
                                                         <fieldset className="box box-fieldset">

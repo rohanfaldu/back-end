@@ -129,7 +129,7 @@ export default function ProjectListing() {
                               <td>
                                 <div className="listing-box">
                                   <div className="images">
-                                    <img src={property.picture || '/images/avatar/user-image.png'} alt="images" />
+                                    <img src={property.picture[0] || '/images/avatar/user-image.png'} alt="images" />
                                   </div>
                                 </div>
                               </td>
