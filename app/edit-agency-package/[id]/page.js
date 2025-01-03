@@ -9,10 +9,12 @@ import { userType } from "../../../components/common/functions";
 import React, { useEffect, useState } from 'react';
 import passwordShow from "../../../public/images/favicon/password-show.png";
 import passwordHide from "../../../public/images/favicon/password-hide.png";
-import { insertData } from "../../../components/api/Axios/Helper";
+import { insertData, updateData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
 import { useRouter } from 'next/navigation';
+import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
+
 
 export default function EditAgency({ params }) {
     const { id } = params;
@@ -31,34 +33,20 @@ export default function EditAgency({ params }) {
 
         const fetchData = async () => {
 
-            const requestData = {
-                   page: '',
-                   limit: '',
-                   lang: "en",
-                   searchTerm: '',
-                   status: '',
-                 };
-        const type = { type: "agency-packages" };
-
-                //  const response = await insertData("api/agency-packages", requestData, true);
-        const getUserInfo = await insertData('auth/getall', type, false);
-            console.log(getUserInfo); // Check if the API returns the expected data
-
             try {
                 const requestData = {
-                    lang: "en",
+                    agency_package_id: id,
                 };
-                const getUserInfo = await insertData("api/agency-packages/", false);
-
+                const getUserInfo = await insertData('api/agency-packages/getbyid', requestData, true);
                 console.log(getUserInfo); // Check if the API returns the expected data
 
-                // Assuming getUserInfo has a 'list' property containing the data
-                const allUsersList = getUserInfo.data.list;
-                const specificUserDetail = allUsersList.find(item => item.id === id);
 
-                if (specificUserDetail) {
-                    console.log(specificUserDetail); // Log to confirm correct user data
-                    setUserDetail(specificUserDetail);
+                // Assuming getUserInfo has a 'list' property containing the data
+                const allUsersList = getUserInfo.data;
+
+                if (allUsersList) {
+                    console.log(allUsersList); // Log to confirm correct user data
+                    setUserDetail(allUsersList);
                 } else {
                     setErrorMessage("User not found.");
                 }
@@ -85,12 +73,14 @@ export default function EditAgency({ params }) {
         setShowErrorPopup(false); // Reset popup
         try {
             const updatedAgency = {
+                id:id,
                 en_string: values.title_en,
                 fr_string: values.title_fr,
-                type: "BASIC", // Optional, depending on your API requirements
+                type: values.type, // Optional, depending on your API requirements
+                is_deleted: false, // Optional, depending on your API requirements
             };
 
-            const response = await updateData(`api/agency-packages/${id}/update`, updatedAgency, true);
+            const response = await updateData(`api/agency-packages/${id}`, updatedAgency, true);
 
             if (response.status) {
                 setSuccessMessage(true);
@@ -116,8 +106,9 @@ export default function EditAgency({ params }) {
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
                 initialValues={{
-                    title_en: userDetail?.name || "",
-                    title_fr: userDetail?.name || "",
+                    title_en: userDetail?.en_string || "",
+                    title_fr: userDetail?.fr_string || "",
+                    type: userDetail?.type || "",
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -140,6 +131,7 @@ export default function EditAgency({ params }) {
                             </div>
                             <button type="submit" className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency Type</button>
                         </div>
+
                         {/* Error Popup */}
                         {showErrorPopup && (Object.keys(errors).length > 0) && (
                             <ErrorPopup

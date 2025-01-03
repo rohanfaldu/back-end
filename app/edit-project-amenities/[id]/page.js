@@ -5,166 +5,162 @@ import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from 'axios';
-import { userType } from "../../components/common/functions";
-import { useState } from "react"
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png";
-import passwordHide from "../../public/images/favicon/password-hide.png";
-import { insertData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import { insertData,updateData } from "@/components/api/Axios/Helper";
+import { insertMultipleUploadImage } from "@/components/common/imageUpload";
+import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
-
-export default function CreatePropertyAmenities() {
-    const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+export default function EditProjectAmenities({ params }) {
+    const [errors, setErrors] = useState({});  // Initialize errors as an object
 	const [errorMessage, setErrorMessage] = useState('');
+    const { id } = params;
 	const [sucessMessage, setSucessMessage] = useState(false);
     const [filePreview, setFilePreview] = useState(null);
     const [uploadImage, setUploadImage] = useState(null);
     const [filePictureImg, setFilePictureImg] = useState(null);
+    const router = useRouter();
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [loading, setLoading] = useState(false); // Loader state
+    const [userDetail, setUserDetail] = useState(null);
 
-    const router = useRouter();
     const validationSchema = Yup.object({
         title_en: Yup.string().required("Title is required"),
         title_fr: Yup.string().required("Title is required"),
         key: Yup.string().required("Key is required for Unique ID"),
         type: Yup.string().required("Type is required"),
-        icon_img: Yup.mixed().required("Image is required"),
-    });
+        icon_img: Yup.mixed()
+        .test("file-required", "Image is required", function (value) {
+            const { icon } = this.options.context.userDetail || {}; // Access userDetail in the context
+            return value || icon; // Pass if a new image is uploaded or `userDetail.icon` exists
+        }),    });
+       useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const requestData = {
+                    property_type_id: id,
+                };
+                const getUserInfo = await insertData('api/project-type-listings/getbyid', requestData, true);
+                const allUsersList = getUserInfo.data;
+
+                console.log(allUsersList);
+
+                if (allUsersList) {
+                    setUserDetail(allUsersList);
+                } else {
+                    setErrorMessage("User not found.");
+                }
+
+                setLoading(false); // Stop loading
+            } catch (err) {
+                setLoading(false);
+                setErrorMessage("Failed to fetch user data");
+                console.error("Error fetching data:", err);
+            }
+        };
+
+        fetchData(); // Fetch data when id is ready
+    }, [id]);
 
     const handleSubmit = async (values, { resetForm, setErrors }) => {
-        console.log(values);
-        setShowErrorPopup('');
+    console.log(values);
+    setShowErrorPopup(false); // Ensure popup is initially closed.
 
-        try {
+    try {
+        /********* Handle Icon Image ***********/
+        let pictureUrl;
+
+        // Check if a new image was uploaded or use the existing one
+        if (typeof values.icon_img === "string") {
+            pictureUrl = values.icon_img; // Use the existing URL
+        } else if (values.icon_img) {
+            // Upload the new image if a file is selected
             const uploadImageObj = [values.icon_img];
-            const uploadImageUrl = await insertMultipleUploadImage('image', uploadImageObj);
+            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
             if (uploadImageUrl.files.length > 0) {
-                const fileUrls = uploadImageUrl.files.map(file => file.url);
-                let pictureUrl = null;
-                if (uploadImageUrl.files.length > 0) {
-                    pictureUrl = fileUrls[0];
-                }
-                                            setLoading(true); // Start loader
+                const fileUrls = uploadImageUrl.files.map((file) => file.url);
+                pictureUrl = fileUrls[0] || null;
+            }
+        }
+        // Ensure we have a valid pictureUrl
+        if (!pictureUrl) {
+            setErrors({ serverError: "Image not found or failed to upload." });
+            setShowErrorPopup(true);
+            return;
+        }
 
-                const checkPropertyInfo = await insertData('api/property-type-listings/check', { key: values.key }, true);
-                console.log(checkPropertyInfo);
+        setLoading(true); // Start loader
 
-                if (checkPropertyInfo.status) {
-                    try {
-                        const propertyData = {
-                            en_string: values.title_en,
-                            fr_string: values.title_fr,
-                            icon: pictureUrl,
-                            type: values.type,
-                            key: values.key,
-                            category: 1,
-                        };
+        /********* Check Property Info ***********/
+        const checkPropertyInfo = await insertData("api/project-type-listings/check", { key: values.key }, true);
 
-                        console.log('Property Data:', propertyData);
+        // if (checkPropertyInfo.status === true) {
+            /********* Create Property Info ***********/
+            const propertyData = {
+                id: id,
+                en_string: values.title_en,
+                fr_string: values.title_fr,
+                icon: pictureUrl, // Use either new image or existing URL
+                type: values.type,
+                key: values.key,
+                lang: "en",
+                category: 1,
+            };
 
-                        const createPropertyInfo = await insertData('api/property-type-listings/create', propertyData, true);
+            const createPropertyInfo = await updateData(`api/project-type-listings/${id}`, propertyData, true);
 
-                        if (createPropertyInfo.status) {
-                            setSucessMessage(true);
-                            setShowErrorPopup("Project of Amenities created successfully");
-                            router.push('/property-amenities-listing');
-                        } else {
-                            setErrors({ serverError: createPropertyInfo.message || "Failed to create project amenities." });
-                            setShowErrorPopup(true);
-                        }
-                    } catch (error) {
-                        setErrors({ serverError: error.message || "An unexpected error occurred." });
-                        setShowErrorPopup(true);
-                    }
-                } else {
-                    setErrors({ serverError: checkPropertyInfo.message || "Property check failed." });
-                    setShowErrorPopup(true);
-                }
+            if (createPropertyInfo.status) {
+                setSucessMessage(true);
+                resetForm();
+                setShowErrorPopup(true);
+                setErrors({ serverError: "Project of Amenities created successfully." });
+                router.push("/project-amenities-listing");
             } else {
-                setErrors({ serverError: "Image not found or failed to upload." });
+                setErrors({ serverError: createPropertyInfo.message || "Failed to create project amenities." });
                 setShowErrorPopup(true);
             }
-        } catch (error) {
-            setErrors({ serverError: error.message || "An unexpected error occurred." });
-            setShowErrorPopup(true);
-        }finally {
-            setLoading(false); // Stop loader
-        }
-    };
+        // } else {
+        //     console.log("errors", checkPropertyInfo.message);
+        //     setErrors({ serverError:  "Property check failed." });
+        //     setShowErrorPopup(true); // Trigger the popup
+        // }
+    } catch (error) {
+        setErrors({ serverError: error.message || "An unexpected error occurred." });
+        setShowErrorPopup(true);
+    } finally {
+        setLoading(false); // Stop loader
+    }
+};
 
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
-
-
-	const handleRadioChange = (event) => {
-		const selectedRadioId = event.target.id
-		setSelectedRadio(selectedRadioId)
-	}
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		 <>
-        {loading ? (
-            <Preloader />
-        ) : (
-        <>
+                {loading ? (
+                    <Preloader />
+                ) : (
+                <>
 
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
-                initialValues={{
-                    title_en: "",
-                    title_fr: "",
-                    type: "",
-                    key: "",
-                    icon_img: "",
+               initialValues={{
+                    title_en: userDetail ? userDetail.en_string : '', // Fallback to empty string
+                    title_fr: userDetail ? userDetail.fr_string : '', // Fallback for French title
+                    type: userDetail ? userDetail.type : '',         // Fallback for type
+                    key: userDetail ? userDetail.key : '',           // Fallback for key
+                    icon_img: userDetail ? userDetail.icon : '', // Fallback for icon image
                 }}
                 validationSchema={validationSchema}
+                enableReinitialize={true} // Allows form to reinitialize when data updates
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue,values }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Media</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                        type="file"
-                                        className="ip-file"
-                                        onChange={(event) => {
-                                            console.log(event.currentTarget);
-                                            const file = event.currentTarget.files[0];
-                                            setFieldValue("image", file);
-                                            setFilePreview(URL.createObjectURL(file));
-                                        }}
-                                        />
-                                    </div>
-                                    {filePreview && (
-                                        <img
-                                        src={filePreview}
-                                        alt="Preview"
-                                        style={{ width: "100px", marginTop: "10px" }}
-                                        />
-                                    )}
-                                    <p className="file-name fw-5">
-                                        Or drop image here to upload
-                                    </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
                             <div className="widget-box-2">
-                                <h6 className="title">Property Amenities Information</h6>
+                                <h6 className="title">Project Amenities Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
@@ -213,17 +209,29 @@ export default function CreatePropertyAmenities() {
                                                         setFilePictureImg(URL.createObjectURL(file));
                                                     }}
                                                 />
-                                                {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
+                                               {filePictureImg ? (
+                                                    <img
+                                                        src={filePictureImg}
+                                                        alt="Preview"
+                                                        className="uploadFileImage"
+                                                    />
+                                                ) : values.icon_img ? (
+                                                    <img
+                                                        src={values.icon_img} // Show the existing image URL as default
+                                                        alt="Preview"
+                                                        className="uploadFileImage"
+                                                    />
+                                                ) : null}
                                             </div>
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
-                                            {/* {errors.icon_img && touched.icon_img && ( <div className="error">{errors.icon_img}</div> )} */}
+
                                         </div>
                                     </fieldset>
                                 </div>
 
                             </div>
 
-                            <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Add Property Amenities</button>
+                            <button type="submit"  className="tf-btn primary"  onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Project Amenities</button>
                             {/* Error Popup */}
                             {showErrorPopup && Object.keys(errors).length > 0 && (
                                 <ErrorPopup

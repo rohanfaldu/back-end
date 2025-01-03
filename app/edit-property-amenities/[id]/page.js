@@ -16,7 +16,7 @@ import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 
-export default function CreatePropertyAmenities() {
+export default function EditPropertyAmenities() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');

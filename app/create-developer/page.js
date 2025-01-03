@@ -10,6 +10,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { allCountries } from "country-telephone-data";
 import { insertUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ export default function CreateAgency() {
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -62,17 +64,19 @@ export default function CreateAgency() {
         setShowErrorPopup(false); // Reset error popup initially
         try {
             console.log(values);
-    
+
             // Check if user exists
             const checkData = { email_address: values.email, phone_number: parseInt(values.phone, 10) };
             const getUserInfo = await insertData('auth/check/user', checkData, false);
-    
+
             if (getUserInfo.status === false) {
                 /********* Upload Image ***********/
                 const fileUrls = await insertUploadImage('image', values.image);
-    
+
                 if (fileUrls) {
                     try {
+                        setLoading(true); // Start loader
+
                         /********* Create User ***********/
                         const userData = {
                             full_name: values.username ?? null,
@@ -88,20 +92,21 @@ export default function CreateAgency() {
                             device_type: "web",
                             social_id: null
                         };
-    
+
                         const createUserInfo = await insertData('auth/create/user', userData, false);
-    
+
                         if (createUserInfo.status === true) {
                             setSucessMessage(true);
                             setShowErrorPopup("Developer created successfully");
-    
+
                             /********* Create Developer ***********/
                             const user_id = createUserInfo.data.userProfile.id;
                             const developerData = {
                                 user_id: user_id,
                                 sub_user_id: null,
                                 credit: values.credit ?? null,
-                                description: values.description ?? null,
+                                description_en: values.description_en ?? null,
+                                description_fr: values.description_fr ?? null,
                                 facebook_link: values.facebook_link ?? null,
                                 twitter_link: values.twitter_link ?? null,
                                 youtube_link: values.youtube_link ?? null,
@@ -109,17 +114,18 @@ export default function CreateAgency() {
                                 linkedin_link: values.linkedin_link ?? null,
                                 instagram_link: values.instagram_link ?? null,
                                 whatsup_number: values.whatsup_number ?? null,
-                                service_area: values.service_area ?? null,
+                                service_area_en: values.service_area_en ?? null,
+                                service_area_fr: values.service_area_fr ?? null,
                                 tax_number: values.tax_number ?? null,
                                 license_number: values.license_number ?? null,
                                 agency_packages: values.agency_packages ?? null,
                                 picture: null,
                                 cover: null
                             };
-    
+
                             console.log(developerData);
                             const createDeveloperInfo = await insertData('api/developer/create', developerData, true);
-    
+
                             if (createDeveloperInfo.status === true) {
                                 resetForm();
                                 router.push('/developer-listing');
@@ -146,9 +152,11 @@ export default function CreateAgency() {
         } catch (error) {
             setErrors({ serverError: error.message });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleRadioChange = (event) => {
@@ -159,6 +167,10 @@ export default function CreateAgency() {
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
+        {loading ? (
+            <Preloader />
+        ) : (
+        <>
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -169,6 +181,10 @@ export default function CreateAgency() {
                     image: null,
                     password: "",
                     fullname: "",
+                    description_en: "",
+                    description_fr: "",
+                    service_area_fr: "",
+                    service_area_en: "",
                     facebook_link: "",
                     twitter_link: "",
                     youtube_link: "",
@@ -282,11 +298,14 @@ export default function CreateAgency() {
                             <div className="widget-box-2">
                                 <h6 className="title">Developer Information</h6>
                                 <div className="grid-1 box gap-30">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Description:</label>
-
-                                        <Field type="textarea"  as="textarea"  id="description" name="description" className="textarea-tinymce" />
-                                    </fieldset>
+                                <fieldset className="box-fieldset">
+                                    <label htmlFor="description_en">Description English:</label>
+                                    <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
+                                </fieldset>
+                                <fieldset className="box-fieldset">
+                                    <label htmlFor="description_fr">Description French:</label>
+                                    <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
+                                </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
@@ -320,9 +339,12 @@ export default function CreateAgency() {
                                         {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Service Area:</label>
-                                        <Field type="text" name="service_area" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="service_area" component="div" className="error" /> */}
+                                    <label htmlFor="service_area_en">Service Area English:</label>
+                                        <Field type="text" name="service_area_en" className="box-fieldset"  />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Service Area French:</label>
+                                        <Field type="text" name="service_area_fr" className="box-fieldset"  />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Tax Number:</label>
@@ -459,5 +481,7 @@ export default function CreateAgency() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

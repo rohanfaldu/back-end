@@ -137,7 +137,11 @@ export default function MyProperty() {
               </div> */}
 
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Developer Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Developer Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-developer">Add Developers</Link>
+                </div>
+                
                   {(Array.isArray(filteredProperties) && filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">
@@ -176,26 +180,26 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li className="edit">
+                                      <li className="edit">
                                         <Link href={`/edit-developer/${user.id}`} className="item">
-                                          <Image 
+                                          <Image
                                             src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
                                           />
                                         </Link>
-                                      </li> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(user.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>
@@ -241,7 +245,7 @@ export default function MyProperty() {
                       </div>
                     </>
                   }
-                
+
               </div>
             </div>
           </LayoutAdmin>

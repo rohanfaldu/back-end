@@ -13,6 +13,7 @@ import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function CreateProjectAmenities() {
     const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +25,8 @@ export default function CreateProjectAmenities() {
     const [filePictureImg, setFilePictureImg] = useState(null);
     const router = useRouter();
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
+
 
     const validationSchema = Yup.object({
         title_en: Yup.string().required("Title is required"),
@@ -36,25 +39,26 @@ export default function CreateProjectAmenities() {
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
         setShowErrorPopup(false); // Ensure popup is initially closed.
-    
+
         try {
             /********* Upload Image ***********/
             const uploadImageObj = [values.icon_img];
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-    
+
             if (uploadImageUrl.files.length > 0) {
                 const fileUrls = uploadImageUrl.files.map((file) => file.url);
                 const pictureUrl = fileUrls[0] || null;
-    
+
                 if (!pictureUrl) {
                     setErrors({ serverError: "Image not found or failed to upload." });
                     setShowErrorPopup(true);
                     return;
                 }
-    
+                            setLoading(true); // Start loader
+
                 /********* Check Property Info ***********/
                 const checkPropertyInfo = await insertData("api/project-type-listings/check", { key: values.key }, true);
-    
+
                 if (checkPropertyInfo.status) {
                     /********* Create Property Info ***********/
                     const propertyData = {
@@ -65,9 +69,9 @@ export default function CreateProjectAmenities() {
                         key: values.key,
                         category: 1,
                     };
-    
+
                     const createPropertyInfo = await insertData("api/project-type-listings/create", propertyData, true);
-    
+
                     if (createPropertyInfo.status) {
                         setSucessMessage(true);
                         resetForm();
@@ -89,10 +93,12 @@ export default function CreateProjectAmenities() {
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+        }finally {
+            setLoading(false); // Stop loader
         }
     };
-    
-    
+
+
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 
@@ -102,9 +108,11 @@ export default function CreateProjectAmenities() {
 	}
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
-		<>
-
-			{/* <DeleteFile /> */}
+		 <>
+                {loading ? (
+                    <Preloader />
+                ) : (
+                <>
 
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
@@ -233,5 +241,7 @@ export default function CreateProjectAmenities() {
 
 			</LayoutAdmin >
 		</>
+           )}
+        </>
 	)
 }

@@ -94,7 +94,10 @@ export default function AgencyPackageListing() {
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Packages Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Packages Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency-type">Add Agency Package</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">
@@ -124,26 +127,26 @@ export default function AgencyPackageListing() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                    {/* <li className="edit">
+                                    <li className="edit">
                                         <Link href={`/edit-agency-package/${property.id}`} className="item">
-                                          <Image 
+                                          <Image
                                             src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
                                           />
                                         </Link>
-                                      </li> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>

@@ -95,7 +95,10 @@ export default function PropertyAmenitiesListing() {
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Property Types Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Property Types Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-property-type">Add Property Type</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">
@@ -112,7 +115,7 @@ export default function PropertyAmenitiesListing() {
                           <tbody>
                             {properties.map((property) => (
                               <tr key={property.id} className="file-delete">
-                                  
+
                               <td>{property.title}</td>
                               <td>{new Date(property.createdAt).toLocaleDateString()}</td>
                               <td>
@@ -123,25 +126,25 @@ export default function PropertyAmenitiesListing() {
                               <td>
                                 <ul className="list-action">
                                   {/* <li className="edit">
-                                    <Link href={`/edit-agency/${property.id}`} className="item">
-                                      <Image 
+                                    <Link href={`/edit-property-type/${property.id}`} className="item">
+                                      <Image
                                         src={EditIcon} // Imported image object or static path
-                                        alt="Edit icon" 
-                                        width={25} 
-                                        height={25} 
+                                        alt="Edit icon"
+                                        width={25}
+                                        height={25}
                                       />
                                     </Link>
                                   </li> */}
                                   <li className="delete">
                                     <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                      <Image 
+                                      <Image
                                           src={DeleteIcon} // Imported image object or static path
-                                          alt="Delete icon" 
-                                          width={25} 
-                                          height={25} 
+                                          alt="Delete icon"
+                                          width={25}
+                                          height={25}
                                         />
                                     </a>
-                                  </li>                                        
+                                  </li>
                                 </ul>
                               </td>
                             </tr>

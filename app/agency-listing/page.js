@@ -22,10 +22,11 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const type = { type: "agency" };
-        const getUserInfo = await insertData('auth/getall', type, false);
-        setProperties(getUserInfo.data.user_data); // Save all properties
-        setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
+
+        const type = { user_id: "" };
+        const getUserInfo = await insertData('api/agencies', type, true);
+        setProperties(getUserInfo.data); // Save all properties
+        setFilteredProperties(getUserInfo.data); // Initially display all properties
         setLoading(false); // Stop loading
         setError(null); // Clear errors
       } catch (err) {
@@ -108,7 +109,10 @@ export default function MyProperty() {
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency">Add Agnecy</Link>
+                </div>
                   {(filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">
@@ -147,26 +151,26 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li className="edit">
+                                      <li className="edit">
                                         <Link href={`/edit-agency/${user.id}`} className="item">
-                                          <Image 
+                                          <Image
                                             src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
                                           />
                                         </Link>
-                                      </li> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(user.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>
@@ -212,7 +216,7 @@ export default function MyProperty() {
                       </div>
                     </>
                   }
-                
+
               </div>
             </div>
           </LayoutAdmin>
