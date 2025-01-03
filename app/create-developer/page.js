@@ -105,7 +105,8 @@ export default function CreateAgency() {
                                 user_id: user_id,
                                 sub_user_id: null,
                                 credit: values.credit ?? null,
-                                description: values.description ?? null,
+                                description_en: values.description_en ?? null,
+                                description_fr: values.description_fr ?? null,
                                 facebook_link: values.facebook_link ?? null,
                                 twitter_link: values.twitter_link ?? null,
                                 youtube_link: values.youtube_link ?? null,
@@ -113,7 +114,8 @@ export default function CreateAgency() {
                                 linkedin_link: values.linkedin_link ?? null,
                                 instagram_link: values.instagram_link ?? null,
                                 whatsup_number: values.whatsup_number ?? null,
-                                service_area: values.service_area ?? null,
+                                service_area_en: values.service_area_en ?? null,
+                                service_area_fr: values.service_area_fr ?? null,
                                 tax_number: values.tax_number ?? null,
                                 license_number: values.license_number ?? null,
                                 agency_packages: values.agency_packages ?? null,
@@ -179,6 +181,10 @@ export default function CreateAgency() {
                     image: null,
                     password: "",
                     fullname: "",
+                    description_en: "",
+                    description_fr: "",
+                    service_area_fr: "",
+                    service_area_en: "",
                     facebook_link: "",
                     twitter_link: "",
                     youtube_link: "",
@@ -292,11 +298,14 @@ export default function CreateAgency() {
                             <div className="widget-box-2">
                                 <h6 className="title">Developer Information</h6>
                                 <div className="grid-1 box gap-30">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Description:</label>
-
-                                        <Field type="textarea"  as="textarea"  id="description" name="description" className="textarea-tinymce" />
-                                    </fieldset>
+                                <fieldset className="box-fieldset">
+                                    <label htmlFor="description_en">Description English:</label>
+                                    <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
+                                </fieldset>
+                                <fieldset className="box-fieldset">
+                                    <label htmlFor="description_fr">Description French:</label>
+                                    <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
+                                </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
@@ -330,9 +339,12 @@ export default function CreateAgency() {
                                         {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Service Area:</label>
-                                        <Field type="text" name="service_area" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="service_area" component="div" className="error" /> */}
+                                    <label htmlFor="service_area_en">Service Area English:</label>
+                                        <Field type="text" name="service_area_en" className="box-fieldset"  />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Service Area French:</label>
+                                        <Field type="text" name="service_area_fr" className="box-fieldset"  />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Tax Number:</label>

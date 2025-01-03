@@ -22,10 +22,11 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const type = { type: "agency" };
-        const getUserInfo = await insertData('auth/getall', type, false);
-        setProperties(getUserInfo.data.user_data); // Save all properties
-        setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
+
+        const type = { user_id: "" };
+        const getUserInfo = await insertData('api/agencies', type, true);
+        setProperties(getUserInfo.data); // Save all properties
+        setFilteredProperties(getUserInfo.data); // Initially display all properties
         setLoading(false); // Stop loading
         setError(null); // Clear errors
       } catch (err) {
@@ -150,7 +151,7 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li className="edit">
+                                      <li className="edit">
                                         <Link href={`/edit-agency/${user.id}`} className="item">
                                           <Image
                                             src={EditIcon} // Imported image object or static path
@@ -159,7 +160,7 @@ export default function MyProperty() {
                                             height={25}
                                           />
                                         </Link>
-                                      </li> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(user.id)}>
                                           <Image

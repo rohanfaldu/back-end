@@ -11,11 +11,11 @@ export default function Sidebar() {
 	useEffect(() => {
 		setCurrentMenuItem(pathname)
 	}, [pathname])
-	console.log(pathname);
-	
+	// console.log(pathname);
+
 	const checkCurrentMenuItem = (path) => currentMenuItem === path ? "current" : ""
 	const checkParentActive = (paths) => paths.some(path => currentMenuItem.startsWith(path)) ? "current" : ""
-	
+
 	const [isAccordion, setIsAccordion] = useState(1)
 
 	const handleAccordion = (key) => {
@@ -31,7 +31,7 @@ export default function Sidebar() {
 	}
 	return (
 		<>
-		
+
 			<div className="sidebar-menu-dashboard admin-sidebar">
 				<ul className="box-menu-dashboard">
 					<li className={`nav-menu-item ${pathname === '/dashboard' ? 'active' : ''}`}>
@@ -46,7 +46,7 @@ export default function Sidebar() {
 							<ul style={{ display: `${isAccordion  == 3 ? "block" : "none"}` }}>
 								<li className={`${checkCurrentMenuItem("/create-agency")}`}>
 									<Link href="/create-agency">Create Agnecy</Link>
-									
+
 								</li>
 								<li className={`${checkCurrentMenuItem("/agency-listing")}`}>
 									<Link href="/agency-listing">Agnecy List</Link>
@@ -66,7 +66,7 @@ export default function Sidebar() {
 							<ul style={{ display: `${isAccordion  == 13 ? "block" : "none"}` }}>
 								<li className={`${checkCurrentMenuItem("/create-agency-type")}`}>
 									<Link href="/create-agency-type">Create Agency Type</Link>
-									
+
 								</li>
 								<li className={`${checkCurrentMenuItem("/agency-types-listing")}`}>
 									<Link href="/agency-types-listing">Agency Type List</Link>
@@ -101,7 +101,7 @@ export default function Sidebar() {
 								</li>
 								<li className={`${checkCurrentMenuItem("/project-listing")}`}>
 									<Link href="/project-listing">Project Listing</Link>
-									
+
 								</li>
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (6)}/>
@@ -118,7 +118,7 @@ export default function Sidebar() {
 								</li>
 								<li className={`${checkCurrentMenuItem("/project-amenities-listing")}`}>
 									<Link href="/project-amenities-listing">Project amenities Listing</Link>
-									
+
 								</li>
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (10)}/>
@@ -135,7 +135,7 @@ export default function Sidebar() {
 								</li>
 								<li className={`${checkCurrentMenuItem("/property-listing")}`}>
 									<Link href="/property-listing">Property Listing</Link>
-									
+
 								</li>
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (8)}/>
@@ -152,7 +152,7 @@ export default function Sidebar() {
 								</li>
 								<li className={`${checkCurrentMenuItem("/property-amenities-listing")}`}>
 									<Link href="/property-amenities-listing">Property amenities Listing</Link>
-									
+
 								</li>
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (12)}/>
@@ -169,7 +169,7 @@ export default function Sidebar() {
 								</li>
 								<li className={`${checkCurrentMenuItem("/property-type-listing")}`}>
 									<Link href="/property-type-listing">Property Type Listing</Link>
-									
+
 								</li>
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (9)}/>
@@ -190,7 +190,7 @@ export default function Sidebar() {
 							</ul>
 							<div className="dropdown2-btn" onClick={() => handleAccordion (4)}/>
 					</li>
-					
+
 					<li className={`nav-menu-item ${pathname === '/reviews' ? 'active' : ''}`}>
 						<Link className="nav-menu-link" href="/reviews">
 						<svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
