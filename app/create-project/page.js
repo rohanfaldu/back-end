@@ -205,7 +205,7 @@ export default function CreateAgency() {
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-
+        setLoading(true);
         // Validation for video upload
         // if (isVideoUpload && !values.video) {
         //         setErrors({ serverError: "Please upload a video file." });
