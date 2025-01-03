@@ -426,7 +426,7 @@ export default function CreateProperty() {
                 console.log("Property Data:", propertyData);
 // return false;
                 // Create property
-                /*const createPropertyInfo = await insertData("api/property/create", propertyData, true);
+                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
                     setErrors({ serverError: "Property created successfully." });
@@ -436,7 +436,7 @@ export default function CreateProperty() {
                 } else {
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
-                }*/
+                }
             } else {
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
