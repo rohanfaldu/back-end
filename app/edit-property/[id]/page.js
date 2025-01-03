@@ -8,14 +8,15 @@ import * as Yup from "yup";
 import { useFormik } from 'formik';
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import { insertData, insertImageData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import { capitalizeFirstChar } from "../../components/common/functions";
+import { insertData, insertImageData } from "@/components/api/Axios/Helper";
+import { insertMultipleUploadImage } from "@/components/common/imageUpload";
+import { capitalizeFirstChar } from "@/components/common/functions";
 import Preloader from "@/components/elements/Preloader";
-import  "../../components/errorPopup/ErrorPopup.css";
-import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import  "@/components/errorPopup/ErrorPopup.css";
+import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
 
-export default function EditProperty() {
+export default function EditProperty({params}) {
+    const { id } = params;
     const [loading, setLoading] = useState(false); // Loader state
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
@@ -46,7 +47,7 @@ export default function EditProperty() {
         zoom: 6
     });
     const [address, setAddress] = useState('');
-
+    const [propertyDetail, setPropertyDetail] = useState(null);
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -77,7 +78,45 @@ export default function EditProperty() {
 
     useEffect(() => {
         const fetchData = async () => {
-            // console.log('propertyofTypes');
+            const requestData = {
+                property_id: id,
+            };
+            const getPropertyInfo = await insertData('api/property/getbyIds', requestData, true);
+                 console.log('getPropertyInfo');
+                 console.log(getPropertyInfo);
+
+            if (getPropertyInfo.data) {
+                setPropertyDetail(getPropertyInfo.data);
+            } else {
+                setErrorMessage("property not found.");
+            }
+            if (getPropertyInfo.data.meta_details) {
+                // Create the checkedItems state based on meta_details
+                const initialCheckedItems = getPropertyInfo.data.meta_details.reduce((acc, meta) => {
+
+                    if (meta.value === "true") {
+                        acc[meta.key] = true; // Set the checkbox for this key as checked
+                    }
+                    return acc;
+                }, {});
+                console.log('initialCheckedItems',initialCheckedItems);
+                setCheckedItems(initialCheckedItems);
+            }
+            if (getPropertyInfo.data.picture) {
+                setFilePreviews(getPropertyInfo.data.picture.map((url) => url)); // Use URLs for preview
+            }
+            
+            if (getPropertyInfo.data.icon) {
+                setIconPreview(getPropertyInfo.data.icon); // Use URL for video preview
+            }
+            if (getPropertyInfo.data.video) {
+                // const videoLink = getPropertyInfo.data.video;
+                // const check  = videoLink.toLowerCase().endsWith(".mp4");
+                setVideoPreview(getPropertyInfo.data.video); // Use URL for video preview
+            }
+
+
+
             try {
                 if(stateList.length === 0){
                     const stateObj = {};
@@ -87,17 +126,7 @@ export default function EditProperty() {
                         setStateList(getStateInfo.data.states);
                     }
                 }
-                // console.log('cityList');
-                // console.log(cityList.length);
-                // if(cityList.length === 0){
-                //     const stateObj = {};
-                //     const getCityInfo = await insertData('api/city', stateObj, true);
-                //     console.log(getCityInfo);
-                //     if(getCityInfo) {
-                //         setCityList(getCityInfo.data);
-                //     }
-                // }
-
+                           
                 if(userList.length === 0){
                     const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
                     const developerList = getUsersDeveloperInfo.data.user_data;
@@ -467,10 +496,7 @@ export default function EditProperty() {
 
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
-	// const handleRadioChange = (event) => {
-	// 	const selectedRadioId = event.target.id
-	// 	setSelectedRadio(selectedRadioId)
-	// }
+
 
     const handleRadioChange = (event, setFieldValue) => {
         const isUpload = event.target.value === "upload";
@@ -505,82 +531,54 @@ export default function EditProperty() {
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
                 initialValues={{
-                    title_en: "",
-                    title_fr: "",
-                    description_en: "",
-                    description_fr: "",
-                    price: "",
-                  //vr_link: "",
-                    picture_img: [], // Set this to an empty array for multiple files
-                    video: null, // Use `null` for file inputs
-                    video_link: "", // Add this for YouTube video link
-                    credit: "",
-                    state_id: "",
-                    city_id: "",
-                    districts_id: "",
-                    neighborhood_id: "",
-                    transaction_type: "",
-                    property_type: "",
-                    user_id: "",
-                    size_sqft: "",
+                    // title_en: propertyDetail.title_en || "",
+                    // title_fr: propertyDetail.title_fr || "",
+                    // description_en: propertyDetail.description_en || "",
+                    // description_fr: propertyDetail.description_fr || "",
+                    // price: propertyDetail.price || "",
+                    // picture_img: propertyDetail.picture_img || [], // Default to empty array
+                    // video: propertyDetail.video || null, // Default to null
+                    // video_link: propertyDetail.video_link || "",
+                    // credit: propertyDetail.credit || "",
+                    // state_id: propertyDetail.state_id || "",
+                    // city_id: propertyDetail.city_id || "",
+                    // districts_id: propertyDetail.districts_id || "",
+                    // neighborhood_id: propertyDetail.neighborhood_id || "",
+                    // transaction_type: propertyDetail.transaction_type || "",
+                    // property_type: propertyDetail.property_type || "",
+                    // user_id: propertyDetail.user_id || "",
+                    // size_sqft: propertyDetail.size_sqft || "",
                  }}
+
+                 
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
                 {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Agency User Image</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                            type="file"
-                                            className="ip-file"
-                                            onChange={(event) => {
-                                                const file = event.currentTarget.files[0];
-                                                setFieldValue("image", file);
-                                                setFilePreview(URL.createObjectURL(file));
-                                            }}
-                                        />
-                                    </div>
-                                    {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
-                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
                             <div className="widget-box-2">
                                 <h6 className="title">Property Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -599,7 +597,6 @@ export default function EditProperty() {
                                             <option value="sale">Fore Sale</option>
                                             <option value="rental">For Rental</option>
                                         </Field>
-                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Property Type:<span>*</span></label>
@@ -618,7 +615,6 @@ export default function EditProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
@@ -637,7 +633,6 @@ export default function EditProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
@@ -656,7 +651,6 @@ export default function EditProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -685,35 +679,21 @@ export default function EditProperty() {
                                                 </Field>
                                                 <Field type="text" id="price" name="price" className="form-control style-1" />
                                             </div>
-                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
+                                           
                                     </fieldset>
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">VR Link:</label>
-                                        <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        // <ErrorMessage name="vr_link" component="div" className="error" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:</label>
-                                        <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
-                                    </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
-                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -728,7 +708,6 @@ export default function EditProperty() {
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
-                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (

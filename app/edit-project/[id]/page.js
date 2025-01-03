@@ -59,8 +59,7 @@ export default function EditProject({params}) {
                     project_id: id,
                 };
                 const getProjectInfo = await insertData('api/projects/getbyIds', requestData, true);
-                     console.log('getProjectInfo');
-                     console.log(getProjectInfo);
+                    // console.log(getProjectInfo);
 
                 if (getProjectInfo.data) {
                     setProjectDetail(getProjectInfo.data);
@@ -69,57 +68,56 @@ export default function EditProject({params}) {
                 }
 
                 if (getProjectInfo.data.meta_details) {
-                    // Create the checkedItems state based on meta_details
-                    const initialCheckedItems = getProjectInfo.data.meta_details.reduce((acc, meta) => {
+                // Create the checkedItems state based on meta_details
+                const initialCheckedItems = getProjectInfo.data.meta_details.reduce((acc, meta) => {
 
-                        if (meta.value === "true") {
-                            acc[meta.key] = true; // Set the checkbox for this key as checked
-                        }
-                        return acc;
-                    }, {});
-                    console.log('initialCheckedItems',initialCheckedItems);
-                    setCheckedItems(initialCheckedItems);
-                }
-                if (getProjectInfo.data.picture) {
-                    setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
-                }
-                
-                if (getProjectInfo.data.icon) {
-                    setIconPreview(getProjectInfo.data.icon); // Use URL for video preview
-                }
-                if (getProjectInfo.data.video) {
-                    // const videoLink = getProjectInfo.data.video;
-                    // const check  = videoLink.toLowerCase().endsWith(".mp4");
-                    setVideoPreview(getProjectInfo.data.video); // Use URL for video preview
-                }
-
-            
-             
-                // setInitialValues((prevValues) => ({
-                //     ...prevValues,
-                //     city_id: resolveIdByName(getProjectInfo.data.city, cityList, 'city_name'),
-                //     districts_id: resolveIdByName(getProjectInfo.data.district, districtList, 'district_name'),
-                //     neighborhood_id: resolveIdByName(getProjectInfo.data.neighborhood, neighborhoodList),
-                // }));
-
-
-                if(stateList.length === 0){
-                    const stateObj = {};
-                    const getStateInfo = await insertData('api/state', stateObj, true);
-                    // console.log(getStateInfo.data.states[0].id);
-                    if(getStateInfo) {
-                        setStateList(getStateInfo.data.states);
+                    if (meta.value === "true") {
+                        acc[meta.key] = true; // Set the checkbox for this key as checked
                     }
-                    // const state_id = resolveIdByName(getProjectInfo.data.state, getStateInfo.data.states);
-                    // console.log("Resolved State ID:", state_id);
-                
-                    // // Update the initialValues to set the correct state_id
-                    // setInitialValues((prevValues) => ({
-                    // ...prevValues,
-                    // state_id: state_id, // Set resolved state_id
-                    // }));
+                    return acc;
+                }, {});
+                setCheckedItems(initialCheckedItems);
+            }
+            if (getProjectInfo.data.picture) {
+                setFilePreviews(getProjectInfo.data.picture.map((url) => url)); // Use URLs for preview
+            }
+            if (getProjectInfo.data.icon) {
+                setIconPreview(getProjectInfo.data.icon); // Use URL for video preview
+            }
+           
+            if (getProjectInfo.data.video) {
+                const videoLink = getProjectInfo.data.video;
+                if (videoLink.toLowerCase().endsWith(".mp4")) {
+                    setIsVideoUpload(true); // Set to 'Upload Video' if it's an .mp4
+                    setVideoPreview(videoLink); // Set video preview (for .mp4)
+                } else {
+                    console.log(videoLink);
+                    setIsVideoUpload(false); // Set to 'YouTube Link' otherwise
                 }
-                console.log('LKKKK');
+            }
+            if(stateList.length === 0){
+                const stateObj = {};
+                const getStateInfo = await insertData('api/state', stateObj, true);
+                // console.log(getStateInfo.data.states[0].id);
+                if(getStateInfo) {
+                    setStateList(getStateInfo.data.states);
+                }
+               
+            }
+           
+    
+            // if (getProjectInfo.data.length === 0 && getProjectInfo.data.city) {
+            //     handleCityChange(getProjectInfo.data.city);
+            // }
+    
+            // if (getProjectInfo.data.length === 0 && getProjectInfo.data.district) {
+            //     handleDistrictChange(getProjectInfo.data.district);
+            // }
+
+                
+
+
+        
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
                     const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
@@ -131,22 +129,14 @@ export default function EditProject({params}) {
                         setProjectOfBooleanListing(projectOfBlooeanType);
                     }
                 }
-                
                 if(developerList.length === 0){
                     const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
-                    console.log('getUsersDeveloperInfo');
-                    console.log(getUsersDeveloperInfo);
                     const developerList = getUsersDeveloperInfo.data.user_data;
                     if(developerList.length) {
                         setDeveloperList(developerList);
                     }
                 }
-                const type = { project_id: id };
-                const getUserInfo = await insertData('api/projects', type, true);
-                const allUsersList = getUserInfo.data.user_data;
-                const specifcUserDetail = allUsersList.find(item => item.id === id);
-                setUserDetail(specifcUserDetail);
-                setFilePreview(specifcUserDetail.image);
+                
                 setLoading(false); // Stop loading
                 setError(null); // Clear errors
 		} catch (err) {
@@ -155,12 +145,8 @@ export default function EditProject({params}) {
 		};
 		fetchData(); // Fetch data on component mount
 	}, []);
-        // console.log('developerList');
-        // console.log(developerList);
 
-        
-
-
+   
     const validationSchema = Yup.object({
             title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
             title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -169,35 +155,46 @@ export default function EditProject({params}) {
             price: Yup.string().required("Price is required"),
             vr_link: Yup.string().url("Invalid VR URL").nullable(),
             picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
+            credit: Yup.string().required("Credit is required"),
             state_id: Yup.string().required("State is required"),
             city_id: Yup.string().required("City is required"),
             districts_id: Yup.string().required("District is required"),
             neighborhood_id: Yup.string().required("Neighborhood is required"),
             user_id: Yup.string().required("Developer is required"),
+            link_uuid: Yup.string().required("Link uuid is required"),
     });
     const router = useRouter();
     // Handle form submission
 
     const handleStateChange = async (stateId) => {
-        // console.log('State ID:', stateId);
+        // Ensure that stateId exists in the stateList
         const selectedState = stateList.find((state) => state.id === stateId);
+
+        if (!selectedState) {
+            console.error('State not found:', stateId);
+            return; // Exit the function if state is not found
+        }
+    
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
             longitude: longitude
         });
-        if(cityList.length === 0){
+    
+        if (cityList.length === 0) {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                // console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
+            } else {
+                console.error('Failed to fetch cities');
             }
         }
     };
+    
+    
     const handleCityChange = async (cityId) => {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        // console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
@@ -225,7 +222,6 @@ export default function EditProject({params}) {
     const handleDistrictChange = async (DistrictId) => {
         // console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        // console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
@@ -240,7 +236,7 @@ export default function EditProject({params}) {
             const districtObj = { district_id: DistrictId , lang:"en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
-                setNeighborhoodList(getNeighborhoodObjInfo.data);
+                setNeighborhoodList(getNeighborhoodObjInfo.data.neighborhoods);
             } else {
                 setNeighborhoodList([]);
             }
@@ -325,7 +321,6 @@ export default function EditProject({params}) {
 
 
     };
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 	const handleCheckboxChange = (key) => {
         setCheckedItems((prevState) => ({
@@ -334,8 +329,7 @@ export default function EditProject({params}) {
         }));
     };
     const messageClass = (sucessMessage) ? "message success" : "message error";
-    console.log('user_id');
-    console.log(projectDetail);
+
 	return (
 		<>
             {loading?
@@ -354,11 +348,14 @@ export default function EditProject({params}) {
                             picture_img: projectDetail.picture_img || [],
                             icon: projectDetail.icon || null,
                             video: projectDetail.video || null,
-                            state_id: "",
+                            video_link: projectDetail.video || null,
+                            credit: projectDetail.credit || "",
+                            state_id: projectDetail.state || "",
                             city_id: projectDetail.city || "",
                             districts_id: projectDetail.district || "",
                             neighborhood_id: projectDetail.neighborhood || "",
-                            user_id: projectDetail.user || ""
+                            user_id: projectDetail.user || "",
+                            link_uuid: projectDetail.link_uuid || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -409,47 +406,43 @@ export default function EditProject({params}) {
                                                 {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="title">User Listing:</label>
-                                                <Field
-                                                    as="select"
-                                                    name="user_id"
-                                                    className="nice-select country-code"
-                                                    value={values.user_id} // Bind the value to Formik's state
-                                                    onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setFieldValue("user_id", selectedState); // Update the Formik state
-                                                    }}
-                                                >
-                                                    <option value="">Select User Listing</option>
-                                                    {developerList && developerList.length > 0 ? (
-                                                        developerList.map((user) =>
-                                                            user.full_name !== null ? (
-                                                                <option key={user.id} value={user.id}>
-                                                                    {capitalizeFirstChar(user.full_name)}
-                                                                </option>
-                                                            ) : null
-                                                        )
-                                                    ) : null}
-                                                </Field>
-                                                {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
-                                            </fieldset>
-                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Link UUID:<span>*</span></label>
                                                 <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                            </fieldset> */}
+                                                {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
+                                            </fieldset>
                                         </div>
                                         <div className="box grid-3 gap-30">
-                                            {/* <fieldset className="box box-fieldset">
+                                            <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">License number:</label>
                                                 <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                                
+                                                {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Credit:</label>
                                                 <Field type="text" name="credit" className="box-fieldset"  />
-                                            </fieldset> */}
-                                            
-                                                {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                                {/* <ErrorMessage name="credit" component="div" className="error" /> */}
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Listing:</label>
+                                                <Field as="select" name="user_id" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedUSer = e.target.value;
+                                                            setFieldValue("user_id", selectedUSer);
+                                                        }}
+                                                        value={values.user_id || projectDetail.user || ""}
+                                                    >
+                                                    <option value="">Select User Listing</option>
+                                                    {developerList && developerList.length > 0 ? (
+                                                        developerList.map((user) => (
+                                                            (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                                {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
+                                            </fieldset>
+                                                {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                                     projectOfNumberListing.map((project) => (
                                                         <fieldset className="box box-fieldset">
                                                             <label htmlFor="desc">{project.name}:</label>
@@ -458,7 +451,7 @@ export default function EditProject({params}) {
                                                     ))
                                                 ) : (
                                                     <></>
-                                                )}
+                                                )} */}
                                         </div>
                                         <div className="grid-2 box gap-30">
                                             <fieldset className="box-fieldset">
@@ -563,52 +556,52 @@ export default function EditProject({params}) {
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="picture_img">Icon Images:</label>
                                                 <Field
-                                            name="icon"
-                                            component={({ field, form }) => (
-                                                <div className="box-floor-img uploadfile">
-                                                {/* Upload Button */}
-                                                <div className="btn-upload">
-                                                    <label className="tf-btn primary">
-                                                    Choose Files
-                                                    <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            className="ip-file"
-                                                            onChange={(event) => {
-                                                            const file = event.target.files[0]; // Get the first file
-                                                            if (file) {
-                                                                // Perform size validation
-                                                                if (file.size < 1000) {
-                                                                alert(`Please upload a file above the size of 1KB`);
-                                                                return;
-                                                                }
-
-                                                                const img = new Image();
-                                                                const reader = new FileReader();
-
-                                                                reader.onload = (e) => {
-                                                                img.src = e.target.result;
-
-                                                                img.onload = () => {
-                                                                    const imageHeight = img.height;
-                                                                    const imageWidth = img.width;
-
-                                                                    // Perform dimension validation
-                                                                    if (imageHeight > 200 || imageWidth > 200) {
-                                                                    alert(
-                                                                        "Please upload an image with a maximum height and width of 200px."
-                                                                    );
-                                                                    } else {
-                                                                    setFieldValue("icon", file); // Set the file in Formik state
-                                                                    setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                    name="icon"
+                                                    component={({ field, form }) => (
+                                                    <div className="box-floor-img uploadfile">
+                                                    {/* Upload Button */}
+                                                    <div className="btn-upload">
+                                                        <label className="tf-btn primary">
+                                                        Choose Files
+                                                        <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                className="ip-file"
+                                                                onChange={(event) => {
+                                                                const file = event.target.files[0]; // Get the first file
+                                                                if (file) {
+                                                                    // Perform size validation
+                                                                    if (file.size < 1000) {
+                                                                    alert(`Please upload a file above the size of 1KB`);
+                                                                    return;
                                                                     }
-                                                                };
-                                                                };
 
-                                                                reader.readAsDataURL(file); // Read file as Data URL
-                                                            }
-                                                            }}
-                                                            style={{ display: "none" }}
+                                                                    const img = new Image();
+                                                                    const reader = new FileReader();
+
+                                                                    reader.onload = (e) => {
+                                                                    img.src = e.target.result;
+
+                                                                    img.onload = () => {
+                                                                        const imageHeight = img.height;
+                                                                        const imageWidth = img.width;
+
+                                                                        // Perform dimension validation
+                                                                        if (imageHeight > 200 || imageWidth > 200) {
+                                                                        alert(
+                                                                            "Please upload an image with a maximum height and width of 200px."
+                                                                        );
+                                                                        } else {
+                                                                        setFieldValue("icon", file); // Set the file in Formik state
+                                                                        setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                        }
+                                                                    };
+                                                                    };
+
+                                                                    reader.readAsDataURL(file); // Read file as Data URL
+                                                                }
+                                                                }}
+                                                                style={{ display: "none" }}
                                                         />
                                                     </label>
                                                 </div>
@@ -649,10 +642,17 @@ export default function EditProject({params}) {
                                                 {/* Video Option Radio Buttons */}
                                                 <div>
                                                     <fieldset className="fieldset-radio">
-                                                        <input type="radio" className="tf-radio video-upload"  value="upload" name="videoOption" onChange={() => {
-                                                                setIsVideoUpload(true); // Update the state for conditional rendering
+                                                        <input
+                                                            type="radio"
+                                                            className="tf-radio video-upload"
+                                                            value="upload"
+                                                            name="videoOption"
+                                                            onChange={() => {
+                                                                setIsVideoUpload(true); // Update the state for 'Upload Video'
                                                                 setFieldValue("video", null); // Reset the file field in Formik state
-                                                            }} defaultChecked />
+                                                            }}
+                                                            checked={isVideoUpload} // Ensure this radio is checked if it's an .mp4
+                                                        />
                                                         <label htmlFor="upload" className="text-radio">Upload Video</label>
 
                                                         <input
@@ -661,9 +661,10 @@ export default function EditProject({params}) {
                                                             name="videoOption"
                                                             value="link"
                                                             onChange={() => {
-                                                                setIsVideoUpload(false); // Update the state for conditional rendering
+                                                                setIsVideoUpload(false); // Update the state for 'YouTube Link'
                                                                 setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
                                                             }}
+                                                            checked={!isVideoUpload} // Ensure this radio is checked if it's not an .mp4
                                                         />
                                                         <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
                                                         </fieldset>
@@ -671,48 +672,48 @@ export default function EditProject({params}) {
 
                                                 {/* Conditional Fields */}
                                                 {isVideoUpload ? (
-                                                    // Video Upload Field
-                                                    <div className="box-floor-img uploadfile">
-                                                        <div className="btn-upload">
-                                                            <label className="tf-btn primary">
-                                                                Choose File
-                                                                <input
-                                                                    type="file"
-                                                                    accept="video/mp4"
-                                                                    className="ip-file"
-                                                                    onChange={(event) => {
-                                                                        const file = event.target.files[0];
-                                                                        if (file) {
-                                                                            setFieldValue("video", file); // Set the video file in Formik state
-                                                                            setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                                        }
-                                                                    }}
-                                                                    style={{ display: "none" }}
-                                                                />
-                                                            </label>
+                                                        // Video Upload Field
+                                                        <div className="box-floor-img uploadfile">
+                                                            <div className="btn-upload">
+                                                                <label className="tf-btn primary">
+                                                                    Choose File
+                                                                    <input
+                                                                        type="file"
+                                                                        accept="video/mp4"
+                                                                        className="ip-file"
+                                                                        onChange={(event) => {
+                                                                            const file = event.target.files[0];
+                                                                            if (file) {
+                                                                                setFieldValue("video", file); // Set the video file in Formik state
+                                                                                setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                            }
+                                                                        }}
+                                                                        style={{ display: "none" }}
+                                                                    />
+                                                                </label>
+                                                            </div>
+                                                            {videoPreview && (
+                                                                <video controls className="uploadFileImage">
+                                                                    <source src={videoPreview} type="video/mp4" />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )}
+                                                            <p className="file-name fw-5">Or drop video here to upload</p>
+                                                            {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                                         </div>
-                                                        {videoPreview && (
-                                                            <video controls className="uploadFileImage">
-                                                                <source src={videoPreview} type="video/mp4" />
-                                                                Your browser does not support the video tag.
-                                                            </video>
-                                                        )}
-                                                        <p className="file-name fw-5">Or drop video here to upload</p>
-                                                        {/* <ErrorMessage name="video" component="div" className="error" /> */}
-                                                    </div>
-                                                ) : (
-                                                    // YouTube Link Input Field
-                                                    <div>
-                                                        <label htmlFor="video_link">YouTube Link:</label>
-                                                        <Field
-                                                            type="text"
-                                                            name="video_link"
-                                                            className="form-control"
-                                                            placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
-                                                        />
-                                                        {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
-                                                    </div>
-                                                )}
+                                                    ) : (
+                                                        // YouTube Link Input Field
+                                                        <div>
+                                                            <label htmlFor="video_link">YouTube Link:</label>
+                                                            <Field
+                                                                type="text"
+                                                                name="video_link"
+                                                                className="form-control"
+                                                                placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
+                                                            />
+                                                            {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
+                                                        </div>
+                                                    )}
                                             </fieldset>
 
                                         </div>
@@ -721,16 +722,16 @@ export default function EditProject({params}) {
                                         <h6 className="title">Location</h6>
                                         <div className="box grid-4 gap-30">
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">State:</label>{values.state_id}
+                                                <label htmlFor="desc">State:</label>
                                                 <Field
                                                     as="select"
                                                     name="state_id"
                                                     className="nice-select country-code"
                                                     value={values.state_id}
                                                     onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setFieldValue("state_id", selectedState);
-                                                        handleStateChange(selectedState);
+                                                        const selectedStateId = e.target.value;
+                                                        setFieldValue("state_id", selectedStateId);
+                                                        handleStateChange(selectedStateId);
                                                     }}
                                                 >
                                                 <option value="">Select State</option>
@@ -747,70 +748,84 @@ export default function EditProject({params}) {
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Cities:</label>
-                                                    <Field as="select" name="city_id" className="nice-select country-code"
-                                                        onChange={(e) => {
-                                                            const selectedState = e.target.value;
-                                                            setFieldValue("city_id", selectedState);
-                                                            handleCityChange(selectedState);
-                                                        }}
-                                                    >
-                                                        <option value="">Select Cities</option>
-                                                        {cityList && cityList.length > 0 ? (
-                                                            cityList.map((cities) => (
-                                                                <option key={cities.id} value={cities.id}>
-                                                                    {cities.city_name}
-                                                                </option>
-                                                            ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </Field>
+                                                <Field
+                                                    as="select"
+                                                    name="city_id"
+                                                    className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedCity = e.target.value;
+                                                        setFieldValue("city_id", selectedCity);
+                                                        handleCityChange(selectedCity);
+                                                    }}
+                                                    value={values.city_id || projectDetail.city || ""}
+                                                >
+                                                    <option value="">Select Cities</option>
+                                                    {cityList && cityList.length > 0 ? (
+                                                        cityList.map((cities) => (
+                                                            <option key={cities.id} value={cities.id}>
+                                                                {cities.city_name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
                                             </fieldset>
+
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">District:</label>
-                                                    <Field as="select" name="districts_id" className="nice-select country-code"  onChange={(e) => {
-                                                            const selectedDistrict = e.target.value;
-                                                            setFieldValue("districts_id", selectedDistrict);
-                                                            handleDistrictChange(selectedDistrict);
-                                                        }}>
-                                                        <option value="">Select District</option>
-                                                        {districtList && districtList.length > 0 ? (
-                                                            districtList.map((districts) => (
-                                                                <option key={districts.id} value={districts.id}>
-                                                                    {districts.district_name}
-                                                                </option>
-                                                            ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </Field>
+                                                <Field
+                                                    as="select"
+                                                    name="districts_id"
+                                                    className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedDistrict = e.target.value;
+                                                        setFieldValue("districts_id", selectedDistrict);
+                                                        handleDistrictChange(selectedDistrict);
+                                                    }}
+                                                    value={values.districts_id || projectDetail.district || ""}
+                                                >
+                                                    <option value="">Select District</option>
+                                                    {districtList && districtList.length > 0 ? (
+                                                        districtList.map((districts) => (
+                                                            <option key={districts.id} value={districts.id}>
+                                                                {districts.district_name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
                                             </fieldset>
+
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Neighborhood:</label>
-                                                    <Field as="select" name="neighborhood_id" className="nice-select country-code"  onChange={(e) => {
+                                                    <Field
+                                                        as="select"
+                                                        name="neighborhood_id"
+                                                        className="nice-select country-code"
+                                                        onChange={(e) => {
                                                             const selectedNeighborhood = e.target.value;
                                                             setFieldValue("neighborhood_id", selectedNeighborhood);
                                                             handleNeighborhoodChange(selectedNeighborhood);
-                                                        }}>
-                                                        <option value="">Select Neighborhood</option>
-                                                        {neighborhoodList && neighborhoodList.length > 0 ? (
-                                                            neighborhoodList.map((neighborhoods) => (
-                                                                <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                                    {neighborhoods.name}
-                                                                </option>
-                                                            ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </Field>
+                                                        }}
+                                                        value={values.neighborhood_id || projectDetail.neighborhood || ""}
+                                                    >
+                                                    <option value="">Select Neighborhood</option>
+                                                    {neighborhoodList && neighborhoodList.length > 0 ? (
+                                                        neighborhoodList.map((neighborhoods) => (
+                                                            <option key={neighborhoods.id} value={neighborhoods.id}>
+                                                                {neighborhoods.neighborhood_name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
                                             </fieldset>
+
                                         </div>
                                         <div className="box box-fieldset">
-                                            {/* <label htmlFor="location">Address:<span>*</span></label>
-                                            <div className="box-ip">
-                                                <input type="text" className="form-control style-1" name="address" />
-                                                <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                            </div> */}
                                             <PropertyMapMarker
                                                 latitude={propertyMapCoords.latitude}
                                                 longitude={propertyMapCoords.longitude}
@@ -822,22 +837,22 @@ export default function EditProject({params}) {
                                         <h6 className="title">Amenities </h6>
                                         <div className="box-amenities-property">
                                             <div className="box-amenities">
-                                            {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
-                                                    projectOfBooleanListing.map((project) => (
-                                                        <fieldset         className="amenities-item">
-                                                            <Field
-                                                                type="checkbox" name={project.id}
-                                                                className="tf-checkbox style-1 primary"
-                                                                checked={!!checkedItems[project.key]} // Set checked status
-                                                                onChange={() => handleCheckboxChange(project.key)}
-                                                            />
-                                                            <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                            {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
-                                                        </fieldset>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )}
+                                                {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
+                                                        projectOfBooleanListing.map((project) => (
+                                                            <fieldset         className="amenities-item">
+                                                                <Field
+                                                                    type="checkbox" name={project.id}
+                                                                    className="tf-checkbox style-1 primary"
+                                                                    checked={!!checkedItems[project.key]} // Set checked status
+                                                                    onChange={() => handleCheckboxChange(project.key)}
+                                                                />
+                                                                <label for="cb1" className="text-cb-amenities">{project.name}</label>
+                                                                {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
+                                                            </fieldset>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
                                             </div>
                                         </div>
                                     </div>

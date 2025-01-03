@@ -143,7 +143,7 @@ export default function CreateProperty() {
         fetchData();
         console.log(stateList);
     });
-
+  
     const handleStateChange = async (stateId) => {
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
@@ -156,7 +156,7 @@ export default function CreateProperty() {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                console.log(getCityInfo.data.cities);
+                // console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
@@ -329,13 +329,25 @@ export default function CreateProperty() {
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
                 .map((project) => ({ property_type_id: project.id, value: "true" }));
+                
 
-            if (propertyOfMetaNumberValue.length > 0) {
-                selectedAmenities.push(...propertyOfMetaNumberValue);
-            }
+                if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
+                    // Iterate over the keys in the JSON object
+                    Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
+                        // Check if the key matches any property_type_id in the array
+                        const index = selectedAmenities.findIndex(item => item.property_type_id === key);
+                        if (index !== -1) {
+                            // Update the value if a match is found
+                            selectedAmenities[index].value = value;
+                        } else {
+                            // Add a new object if no match is found
+                            selectedAmenities.push({ property_type_id: key, value });
+                        }
+                    });
+                }
 
-            console.log("Selected Amenities:", selectedAmenities);
-            setLoading(true);
+            console.log("Selected Amenities:", selectedAmenities); 
+          //  setLoading(true);
             const uploadImageObj = Array.isArray(values.picture_img) 
             ? values.picture_img.filter(item => item !== null) 
             : [values.picture_img].filter(item => item !== null);
@@ -378,8 +390,8 @@ export default function CreateProperty() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: isNaN(parseFloat(values.latitude)) ? 20.2323 : parseFloat(values.latitude),
-                    longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
+                    latitude: isNaN(parseFloat(values.latitude)) ? "20.2323" : String(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? "20.2323" : String(values.longitude),
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
@@ -389,7 +401,7 @@ export default function CreateProperty() {
                     address: values.address,
                 };
 
-                console.log("Property Data:", propertyData);
+                console.log("Property Data:", propertyData); 
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
@@ -446,7 +458,7 @@ export default function CreateProperty() {
         setFieldValue("video_link", event.target.value); // Update Formik state
 
     };
-    console.log(checkedItems);
+    // console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
         <>

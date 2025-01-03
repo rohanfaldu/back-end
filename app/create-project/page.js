@@ -207,17 +207,7 @@ export default function CreateAgency() {
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
        
-        // Validation for video upload
-        // if (isVideoUpload && !values.video) {
-        //         setErrors({ serverError: "Please upload a video file." });
-        //         setShowErrorPopup(true);
-        //         return;
-        // }
-        // if (!isVideoUpload && !values.video_link) {
-        //         setErrors({ serverError: "Please enter a YouTube video link." });
-        //         setShowErrorPopup(true);
-        //         return;
-        //     }
+      
 
 
         const selectedAmenities = projectOfBooleanListing
@@ -375,31 +365,7 @@ export default function CreateAgency() {
                 {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Agency User Image</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                            type="file"
-                                            className="ip-file"
-                                            onChange={(event) => {
-                                                const file = event.currentTarget.files[0];
-                                                setFieldValue("image", file);
-                                                setFilePreview(URL.createObjectURL(file));
-                                            }}
-                                        />
-                                    </div>
-                                    {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
-                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
+                         
                             <div className="widget-box-2">
                                 <h6 className="title">Project Information</h6>
                                 <div className="box grid-2 gap-30">
@@ -482,10 +448,7 @@ export default function CreateAgency() {
                                         </Field>
                                         {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:<span>*</span></label>
-                                        <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                    </fieldset> */}
+                                   
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     {/* <fieldset className="box box-fieldset">
@@ -496,7 +459,7 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                     </fieldset> */}
-                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                         {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="project">{project.name}:</label>
@@ -505,7 +468,7 @@ export default function CreateAgency() {
                                             ))
                                         ) : (
                                             <></>
-                                        )}
+                                        )} */}
                                 </div>
                                 <div className="grid-2 box gap-30">
                                     <fieldset className="box-fieldset">
