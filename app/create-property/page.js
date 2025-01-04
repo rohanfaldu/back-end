@@ -371,7 +371,11 @@ export default function CreateProperty() {
             const uploadImageObj = Array.isArray(values.picture_img) 
             ? values.picture_img.filter(item => item !== null) 
             : [values.picture_img].filter(item => item !== null);
-            uploadImageObj.push(values.video);
+            
+            if (values.video != null) {
+                uploadImageObj.push(values.video);
+            }
+    
             setLoading(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
