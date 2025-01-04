@@ -83,67 +83,90 @@ export default function CreateProperty() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if(stateList.length === 0){
-                    const stateObj = {};
-                    const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo);
-                    if(getStateInfo) {
-                        setStateList(getStateInfo.data.states);
-                    }
-                }
-                if(userList.length === 0){
-                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
-                    const developerList = getUsersDeveloperInfo.data.user_data;
-                    const getUsersAgencyInfo = await insertData('auth/get/agency', {}, false);
-                    const agencyList = getUsersAgencyInfo.data.user_data;
-                    const getalluserInfo = developerList.concat(agencyList);
-                    setUserList(getalluserInfo);
-                }
-                if(propertyofTypesListing.length === 0){
-                    const getPropertyTypeInfo = await insertData('api/property-type/', {page: 1, limit: 100}, true);
-                    if(getPropertyTypeInfo.status) {
-                        console.log(getPropertyTypeInfo.data.list);
-                        setpropertyofTypesListing(getPropertyTypeInfo.data.list);
-                    }
+                // Collect API calls in an array for concurrent execution
+                const apiCalls = [];
+
+                if (stateList.length === 0) {
+                    apiCalls.push(
+                        insertData('api/state', {}, true).then((res) => {
+                            if (res) setStateList(res.data.states);
+                        })
+                    );
                 }
 
-                if(projectOfListing.length === 0){
-                    const getProjectListInfo = await insertData('api/projects/', {page: 1, limit: 1000}, true);
-                    if(getProjectListInfo.status) {
-                        setProjectOfListing(getProjectListInfo.data.projects);
-                    }
+                if (userList.length === 0) {
+                    apiCalls.push(
+                        Promise.all([
+                            insertData('auth/get/developer', {}, false),
+                            insertData('auth/get/agency', {}, false),
+                        ]).then(([devRes, agencyRes]) => {
+                            const allUsers = [
+                                ...devRes.data.user_data,
+                                ...agencyRes.data.user_data,
+                            ];
+                            setUserList(allUsers);
+                        })
+                    );
                 }
 
-                if(!propertyMeta){
-                    const projectMetaObj = { page: 1, limit: 100 };
-                    const getPropertyInfo = await insertData('api/property-type-listings', projectMetaObj, true);
-                    if(getPropertyInfo) {
-                        const projectOfNumberType = getPropertyInfo.data.list.filter(item => item.type === "number");
-                        const projectOfBlooeanType = getPropertyInfo.data.list.filter(item => item.type === "boolean");
-                        setProjectOfNumberListing(projectOfNumberType);
-                        setProjectOfBooleanListing(projectOfBlooeanType);
-                    }
-                    setPropertyMeta(true);
-                }
-                if(currencyList.length === 0){
-                    // console.log(1);
-                    const currencyObj = {};
-                    const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
-
-                    if(getCurrencyInfo.status) {
-                        setCurrencyList(getCurrencyInfo.data);
-                    }
+                if (propertyofTypesListing.length === 0) {
+                    apiCalls.push(
+                        insertData('api/property-type/', { page: 1, limit: 100 }, true).then((res) => {
+                            if (res.status) setpropertyofTypesListing(res.data.list);
+                        })
+                    );
                 }
 
-                //console.log(propertyofTypes)
+                if (projectOfListing.length === 0) {
+                    apiCalls.push(
+                        insertData('api/projects/', { page: 1, limit: 1000 }, true).then((res) => {
+                            if (res.status) setProjectOfListing(res.data.projects);
+                        })
+                    );
+                }
+
+                if (!propertyMeta) {
+                    apiCalls.push(
+                        insertData('api/property-type-listings', { page: 1, limit: 100 }, true).then((res) => {
+                            if (res) {
+                                setProjectOfNumberListing(
+                                    res.data.list.filter((item) => item.type === "number")
+                                );
+                                setProjectOfBooleanListing(
+                                    res.data.list.filter((item) => item.type === "boolean")
+                                );
+                            }
+                            setPropertyMeta(true);
+                        })
+                    );
+                }
+
+                if (currencyList.length === 0) {
+                    apiCalls.push(
+                        insertData('api/currency/get', {}, true).then((res) => {
+                            if (res.status) setCurrencyList(res.data);
+                        })
+                    );
+                }
+
+                // Execute all API calls concurrently
+                await Promise.all(apiCalls);
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching data:", error);
             }
         };
+
         fetchData();
-        console.log(stateList);
-    });
-  
+    }, [
+        stateList.length,
+        userList.length,
+        propertyofTypesListing.length,
+        projectOfListing.length,
+        propertyMeta,
+        currencyList.length,
+    ]);
+    console.log('propertyofTypesListing');
+    console.log(propertyofTypesListing);
     const handleStateChange = async (stateId) => {
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
