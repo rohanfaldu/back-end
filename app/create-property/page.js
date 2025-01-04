@@ -352,7 +352,7 @@ export default function CreateProperty() {
             ? values.picture_img.filter(item => item !== null) 
             : [values.picture_img].filter(item => item !== null);
             uploadImageObj.push(values.video);
-
+            setLoading(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
             if (uploadImageUrl.files.length > 0) {
@@ -405,19 +405,23 @@ export default function CreateProperty() {
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
+                    setLoading(false);
                     setErrors({ serverError: "Property created successfully." });
                     setShowErrorPopup(true);
                     resetForm();
                     router.push("/property-listing");
                 } else {
+                    setLoading(false);
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
                 }
             } else {
+                setLoading(false);
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
+            setLoading(false);
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
         }
