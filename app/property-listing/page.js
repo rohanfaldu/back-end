@@ -138,8 +138,7 @@ export default function PropertyListing() {
                                 </td>
                                 <td>{property.title}</td>
                                 <td>
-                                  {property.currency ?? "$"}
-                                  {property.price}
+                                  {property.price} {property.currency ?? "USD"}
                                   <br />
                                   {property.user_name}
                                 </td>
