@@ -12,7 +12,7 @@ import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar } from "../../components/common/functions";
 import Preloader from "@/components/elements/Preloader";
-
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 // Adjust the path based on your project structure
 //import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
@@ -51,7 +51,6 @@ export default function CreateProperty() {
         zoom: 6
     });
     const [address, setAddress] = useState('');
-
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -406,8 +405,9 @@ export default function CreateProperty() {
 
                 if (createPropertyInfo.status) {
                     //setLoading(false);
-                    setErrors({ serverError: "Property created successfully." });
-                    setShowErrorPopup(true);
+                    setSucessMessage(createPropertyInfo.message || "Property created successfully.");
+                    //setErrors({ serverError: "Property created successfully." });
+                    //setShowErrorPopup(true);
                     resetForm();
                     router.push("/property-listing");
                 } else {
@@ -1017,13 +1017,19 @@ export default function CreateProperty() {
                             <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
                         </div >
                           {/* Error Popup */}
-                          {showErrorPopup && Object.keys(errors).length > 0 && (
-                            <ErrorPopup
-                                errors={errors}
-                                validationSchema={validationSchema}
-                                onClose={() => setShowErrorPopup(false)}
-                            />
-                        )}
+                            {showErrorPopup && Object.keys(errors).length > 0 && (
+                                <ErrorPopup
+                                    errors={errors}
+                                    validationSchema={validationSchema}
+                                    onClose={() => setShowErrorPopup(false)}
+                                />
+                            )}
+                            {sucessMessage && (
+                                <SuccessPopup
+                                    message={sucessMessage}
+                                    onClose={() => setSucessMessage(false)}
+                                />
+                            )}
                     </Form>
 
                 )}
