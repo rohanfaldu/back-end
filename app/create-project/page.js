@@ -15,7 +15,7 @@ import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
-
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -293,9 +293,8 @@ export default function CreateAgency() {
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
 
                 if (createUserInfo.status) {
-                    setSucessMessage(true);
-                    setErrors({ serverError: "Project created successfully." });
-                    setShowErrorPopup(true);
+                    //setSucessMessage(true);
+                    setSucessMessage(createUserInfo.message || "Project created successfully.");
                     resetForm();
                     router.push("/project-listing");
                 } else {
@@ -866,6 +865,12 @@ export default function CreateAgency() {
                                 errors={errors}
                                 validationSchema={validationSchema}
                                 onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
+                        {sucessMessage && (
+                            <SuccessPopup
+                                message={sucessMessage}
+                                onClose={() => setSucessMessage(false)}
                             />
                         )}
                     </Form>

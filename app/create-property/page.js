@@ -10,7 +10,7 @@ import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import { capitalizeFirstChar } from "../../components/common/functions";
+import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
 import Preloader from "@/components/elements/Preloader";
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -376,7 +376,7 @@ export default function CreateProperty() {
                 uploadImageObj.push(values.video);
             }
     
-            setLoading(true);
+            //setLoading(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
             if (uploadImageUrl.files.length > 0) {
@@ -396,7 +396,13 @@ export default function CreateProperty() {
                 console.log("Video URL:", videoUrl);
 
                 if (!videoUrl) {
-                    videoUrl = values.video_link;
+                    const isValid = validateYouTubeURL(values.video_link);
+                    if (!isValid) {
+                        setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                        setShowErrorPopup(true);
+                        return false;
+                    }
+                    videoUrl = values.video_link ?? null; // Use values.video_link as fallback
                 }
 
                 const propertyData = {
@@ -427,7 +433,9 @@ export default function CreateProperty() {
 
                 console.log("Property Data:", propertyData); 
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
-
+                console.log('response');
+                console.log(createPropertyInfo.status);
+                console.log('status');
                 if (createPropertyInfo.status) {
                     //setLoading(false);
                     setSucessMessage(createPropertyInfo.message || "Property created successfully.");
@@ -436,17 +444,17 @@ export default function CreateProperty() {
                     resetForm();
                     router.push("/property-listing");
                 } else {
-                    setLoading(false);
+                    //setLoading(false);
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
                 }
             } else {
-                setLoading(false);
+               // setLoading(false);
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
-            setLoading(false);
+            //setLoading(false);
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
         }
