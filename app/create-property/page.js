@@ -65,7 +65,6 @@ export default function CreateProperty() {
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
         picture_img: Yup.array().min(1, "At least three image is required").required("Image is required"),
-        credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
@@ -504,7 +503,6 @@ export default function CreateProperty() {
                     picture_img: [],
                     video: null,
                     video_link: "",
-                    credit: "",
                     state_id: "",
                     city_id: "",
                     districts_id: "",
@@ -701,16 +699,16 @@ export default function CreateProperty() {
                                     </fieldset> */}
                                 </div>
                                 <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
+                                        
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
-                                    </fieldset>
+                                        
+                                    </fieldset> */}
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
