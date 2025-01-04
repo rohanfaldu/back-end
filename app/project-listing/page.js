@@ -85,8 +85,8 @@ export default function ProjectListing() {
     }
   };
 
-  const handleView = (id) => {
-    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/project/${id}`;
+  const handleView = (slug) => {
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/project/${slug}`;
       window.open(URL, '_blank')
   };
 
@@ -146,7 +146,7 @@ export default function ProjectListing() {
                               <td>
                                 <ul className="list-action">
                                   <li className="edit">
-                                    <Link href={`/edit-project/${property.id}`} className="item">
+                                    <Link href={`/edit-project/${property.slug}`} className="item">
                                       <Image
                                         src={EditIcon} // Imported image object or static path
                                         alt="Edit icon"
@@ -168,7 +168,7 @@ export default function ProjectListing() {
                                   <li className="delete">
                                     <a
                                       className="remove-file item"
-                                      onClick={() => handleView(property.id)}
+                                      onClick={() => handleView(property.slug)}
                                       style={{ border: 'none', background: 'transparent', padding: 0 }}
                                       target="_blank"
                                       rel="noopener noreferrer"

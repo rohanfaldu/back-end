@@ -289,7 +289,7 @@ export default function CreateAgency() {
                     longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
                     currency_id: values.currency_id,
                     meta_details: selectedAmenities,
-                    address: "",
+                    address: values.address,
                 };
 
                 console.log("Project Data:", projectData); 

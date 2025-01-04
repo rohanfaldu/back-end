@@ -10,16 +10,20 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import passwordShow from "../../../public/images/favicon/password-show.png";
 import passwordHide from "../../../public/images/favicon/password-hide.png";
-import { insertData } from "../../../components/api/Axios/Helper";
+import { insertData, updateData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
-import { capitalizeFirstChar } from "@/components/common/functions";
+import { capitalizeFirstChar, validateYouTubeURL } from "../../../components/common/functions";
+import { insertMultipleUploadImage } from "../../../components/common/imageUpload";
+import  "../../../components/errorPopup/ErrorPopup.css";
+import ErrorPopup from "../../../components/errorPopup/ErrorPopup.js";
+
 const resolveIdByName = (stateName, statesList) => {
     const state = statesList.find((state) => state.name === stateName);
     return state ? state.id : ""; // Return the state id or empty string if not found
   };
 export default function EditProject({params}) {
-    const { id } = params;
+    const { slug } = params;
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -33,6 +37,7 @@ export default function EditProject({params}) {
     const [projectOfBooleanListing, setProjectOfBooleanListing] = useState([]);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
+    const [cityname, setCityName] = useState("");
     const [districtList, setDistrictList] = useState([]);
     const [checkedItems, setCheckedItems] = useState({});
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
@@ -56,7 +61,7 @@ export default function EditProject({params}) {
 
 		try {
                 const requestData = {
-                    project_id: id,
+                    project_slug: slug,
                 };
                 const getProjectInfo = await insertData('api/projects/getbyIds', requestData, true);
                     // console.log(getProjectInfo);
@@ -136,7 +141,8 @@ export default function EditProject({params}) {
                         setDeveloperList(developerList);
                     }
                 }
-                
+                setCityName(getProjectInfo.data.city.city_name);
+                console.log(getProjectInfo.data.city.city_name)
                 setLoading(false); // Stop loading
                 setError(null); // Clear errors
 		} catch (err) {
@@ -145,8 +151,10 @@ export default function EditProject({params}) {
 		};
 		fetchData(); // Fetch data on component mount
 	}, []);
+    
+   console.log(projectDetail);
+   console.log(projectDetail);
 
-   
     const validationSchema = Yup.object({
             title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
             title_fr: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -155,13 +163,11 @@ export default function EditProject({params}) {
             price: Yup.string().required("Price is required"),
             vr_link: Yup.string().url("Invalid VR URL").nullable(),
             picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
-            credit: Yup.string().required("Credit is required"),
             state_id: Yup.string().required("State is required"),
             city_id: Yup.string().required("City is required"),
             districts_id: Yup.string().required("District is required"),
             neighborhood_id: Yup.string().required("Neighborhood is required"),
             user_id: Yup.string().required("Developer is required"),
-            link_uuid: Yup.string().required("Link uuid is required"),
     });
     const router = useRouter();
     // Handle form submission
@@ -190,6 +196,8 @@ export default function EditProject({params}) {
                 console.error('Failed to fetch cities');
             }
         }
+        console.log('cityList');
+        console.log(cityList);
     };
     
     
@@ -259,66 +267,135 @@ export default function EditProject({params}) {
             console.error('Neighborhood not found');
         }
     };
-    const handleSubmit = async (values, {resetForm}) => {
-        console.log(values);
-        setErrorMessage('');
-        const formData = new FormData();
-        formData.append('image', values.image);
+    console.log(projectDetail);
+    const handleSubmit = async (values, {resetForm, setErrors }) => {
+       console.log(values);
+              
+                console.log(projectOfBooleanListing);
+       
+       
+               const selectedAmenities = projectOfBooleanListing
+                   .filter((project) => checkedItems[project.key])
+                   .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
+       
+               console.log("Selected Amenities:", selectedAmenities);
+       
+               try {
+                  
+                   // const uploadImageObj = [values.picture_img, values.video];
+                   // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+                   // Ensure picture_img, video, and icon are arrays
+                   const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
+                   const videoObj = values.video ? [values.video] : [];
+                   const iconObj = values.icon ? [values.icon] : [];
+                   
+                   // Combine all files (images, video, icons) for upload
+                   const allUploadFiles = [...uploadImageObj, ...videoObj];
+                   const allUploadFilesICon = [...iconObj];
+                   console.log('uploadImageIconUrl');
+                   console.log(allUploadFiles);
 
-        try {
-            let imageUrl = filePreview;
-            if (values.image instanceof File) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                });
-                imageUrl = response.data.data.files.map(file => file.url);// New uploaded image URL
-            }
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
-                headers: {
-                'Content-Type': 'multipart/form-data',
-                },
-            });
+                   const hasFile = allUploadFiles.some((item) => item instanceof File);
+                   console.log("Contains a File:", hasFile);
+                   // Upload files
+                   let  uploadImageUrl = values.picture_img;
+                   let uploadImageIconUrl = [];
+                   if(hasFile){
+                        const uploadImageUrlFIles = await insertMultipleUploadImage("image", allUploadFiles);
+                        uploadImageUrl = uploadImageUrlFIles.files;
+                        uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
+                   }
 
-            if(imageUrl) {
-                const userData = {
-                    full_name: values.username,
-                    user_name: values.username,
-                    email_address: values.email,
-                    fcm_token: '',
-                    image_url: imageUrl,
-                    type: "developer",
-                    user_login_type	: userType("NONE"),
-                    phone_number: values.phone.toString(),
-                    password: "",
-                    user_id: id,
-                }
-                console.log(userData);
-                const checkData = {
-                    email_address: values.email,
-                    phone_number: parseInt(values.phone,10)
-                }
-
-
-                const getUserInfo = await insertData('auth/check/user', checkData, false);
-                if(getUserInfo.status === false) {
-                    const createUserInfo = await insertData('auth/update/user', userData, false);
-                    if(createUserInfo.status === true) {
-                        setSucessMessage(true);
-                        setErrorMessage(createUserInfo.message);
-                        router.push('/developer-listing');
-                    }else{
-                        setErrorMessage(createUserInfo.message);
-                    }
-                }else{
-                    setErrorMessage(getUserInfo.message);
-                }
-            }else{
-                setErrorMessage(response.data.message);
-            }
-        } catch (error) {
-          console.error('Error uploading file:', error);
-        }
-
+                   
+                   if (uploadImageUrl.length > 0) {
+                       const imageUrls = [];
+                       let videoUrl = values.video;
+                       let iconUrl = values.icon; // Initialize as null for a single URL
+                   
+                       // Process uploaded files to separate URLs
+                        if(hasFile){
+                            uploadImageUrl.forEach((file) => {
+                                if (file.mimeType.startsWith("image")) {
+                                    imageUrls.push(file.url); // Collect image URLs
+                                } else if (file.mimeType.startsWith("video")) {
+                                    videoUrl = file.url; // Assign video URL
+                                }
+                            });
+                        } else{
+                            uploadImageUrl.forEach((file) => {
+                                imageUrls.push(file);
+                            })
+                            
+                        }
+                       // Assign the first icon file's URL to iconUrl
+                       if (uploadImageIconUrl?.files?.length > 0) {
+                           iconUrl = uploadImageIconUrl.files[0].url; // Use the first file's URL
+                       }else{
+                            iconUrl = values.icon;
+                       }
+                   
+                       console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
+                   
+                       // Default video URL if not uploaded
+                       if (!videoUrl) {
+                           const isValid = validateYouTubeURL(values.video_link);
+                           if (!isValid) {
+                               setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                               setShowErrorPopup(true);
+                               return false;
+                           }
+                           videoUrl = values.video_link ?? null; // Use values.video_link as fallback
+                       }
+                       console.log('values');
+                       console.log(values);
+       
+                       const projectData = {
+                            project_id: values.project_id,
+                           title_en: values.title_en,
+                           title_fr: values.title_fr,
+                           description_en: values.description_en,
+                           description_fr: values.description_fr,
+                           price: parseInt(values.price) ?? 0,
+                           vr_link: values.vr_link,
+                           picture: imageUrls,
+                           icon: iconUrl,
+                           video: videoUrl,
+                           user_id: values.user_id,
+                           state_id: values.state_id,
+                           city_id: values.city_id,
+                           district_id: values.districts_id, // Fixed
+                           neighborhoods_id: values.neighborhood_id, // Fixed
+                           latitude: isNaN(parseFloat(values.latitude)) ? 20.2323 : parseFloat(values.latitude),
+                           longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
+                           currency_id: values.currency_id,
+                           meta_details: selectedAmenities,
+                           address: values.address,
+                       };
+       
+                       console.log("Project Data:", projectData); 
+                      const createUserInfo = await updateData("api/projects/"+values.project_id, projectData, true);
+       
+                       if (createUserInfo.status) {
+                           setSucessMessage(true);
+                           setErrors({ serverError: "Project created successfully." });
+                           setShowErrorPopup(true);
+                           resetForm();
+                           router.push("/project-listing");
+                       } else {
+                           setErrors({ serverError: createUserInfo.message || "Failed to create project." });
+                           setShowErrorPopup(true);
+                       }
+                   } else {
+                       setErrors({ serverError: "File upload failed." });
+                       setShowErrorPopup(true);
+                   }
+               } catch (error) {
+                   setErrors({ serverError: error.message || "An unexpected error occurred." });
+                   setShowErrorPopup(true);
+               }finally {
+                  // setLoading(false); // Stop loader
+               }
+            
 
     };
 
@@ -339,23 +416,22 @@ export default function EditProject({params}) {
                     {errorMessage && <div className={messageClass}>{errorMessage}</div>}
                     <Formik
                         initialValues={{
+                            project_id: projectDetail.id,
                             title_en: projectDetail.title_en || "",
                             title_fr: projectDetail.title_fr || "",
                             description_en: projectDetail.description_en || "",
                             description_fr: projectDetail.description_fr || "",
                             price: projectDetail.price || 0,
                             vr_link: projectDetail.vr_link || "",
-                            picture_img: projectDetail.picture_img || [],
+                            picture_img: projectDetail.picture || [],
                             icon: projectDetail.icon || null,
                             video: projectDetail.video || null,
                             video_link: projectDetail.video || null,
-                            credit: projectDetail.credit || "",
                             state_id: projectDetail.state || "",
                             city_id: projectDetail.city || "",
                             districts_id: projectDetail.district || "",
                             neighborhood_id: projectDetail.neighborhood || "",
-                            user_id: projectDetail.user || "",
-                            link_uuid: projectDetail.link_uuid || ""
+                            user_id: projectDetail.user || ""
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -366,6 +442,7 @@ export default function EditProject({params}) {
                                     <div className="widget-box-2">
                                         <h6 className="title">Project Information</h6>
                                         <div className="box grid-2 gap-30">
+                                            {/* <Field type="hidden" id="project_id" name="project_id" className="form-control style-1" /> */}
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">Title English:<span>*</span></label>
                                                 <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
@@ -403,25 +480,21 @@ export default function EditProject({params}) {
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">VR Link:</label>
                                                 <Field type="text" name="vr_link" className="box-fieldset"  />
-                                                {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
                                             </fieldset>
-                                            <fieldset className="box box-fieldset">
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Link UUID:<span>*</span></label>
                                                 <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                                {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
-                                            </fieldset>
+                                            </fieldset> */}
                                         </div>
                                         <div className="box grid-3 gap-30">
-                                            <fieldset className="box box-fieldset">
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">License number:</label>
                                                 <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                                {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Credit:</label>
                                                 <Field type="text" name="credit" className="box-fieldset"  />
-                                                {/* <ErrorMessage name="credit" component="div" className="error" /> */}
-                                            </fieldset>
+                                            </fieldset> */}
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">User Listing:</label>
                                                 <Field as="select" name="user_id" className="nice-select country-code"
@@ -454,75 +527,97 @@ export default function EditProject({params}) {
                                                 )} */}
                                         </div>
                                         <div className="grid-2 box gap-30">
-                                            <fieldset className="box-fieldset">
-                                                <label htmlFor="picture_img">Picture Images:</label>
-                                                <Field
-                                                    name="picture_img"
-                                                    component={({ field, form }) => (
-                                                        <div className="box-floor-img uploadfile">
-                                                        {/* Upload Button */}
-                                                        <div className="btn-upload">
-                                                            <label className="tf-btn primary">
-                                                            Choose Files
-                                                            <input
-                                                                type="file"
-                                                                multiple
-                                                                className="ip-file"
-                                                                onChange={(event) => {
-                                                                let imageList = [];
-                                                                const files = Array.from(event.target.files); // Convert to an array
-                                                                const validPreviews = [];
-                                                                files.forEach((file) => {
-                                                                    // Check file size (less than 150KB)
-                                                                    if (file.size < 150000) {
-                                                                    alert(`Please upload files above the size of 150KB`);
+                                        <fieldset className="box-fieldset">
+                                            <label htmlFor="picture_img">Picture Images:</label>
+                                            <Field
+                                                name="picture_img"
+                                                component={({ field, form }) => ( 
+                                                <div className="box-floor-img uploadfile">
+                                                    {/* Existing Image Previews */}
+                                                    {/* <div className="image-previews">
+                                                    {field.value?.map((img, index) => (
+                                                        <div key={index} className="image-preview">
+                                                        <img
+                                                            src={typeof img === 'string' ? img : URL.createObjectURL(img)}
+                                                            alt={`Preview ${index}`}
+                                                            className="preview-img"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="remove-btn"
+                                                            onClick={() => {
+                                                            const updatedImages = [...field.value];
+                                                            updatedImages.splice(index, 1); // Remove the image from the array
+                                                            form.setFieldValue(field.name, updatedImages);
+                                                            }}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                        </div>
+                                                    ))}
+                                                    </div> */}
+
+                                                    {/* Upload Button */}
+                                                    <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                        Choose Files
+                                                        <input
+                                                        type="file"
+                                                        multiple
+                                                        className="ip-file"
+                                                        onChange={(event) => {
+                                                            let imageList = [];
+                                                            const files = Array.from(event.target.files); // Convert to an array
+                                                            const validPreviews = [];
+                                                            files.forEach((file) => {
+                                                                // Check file size (less than 150KB)
+                                                                // if (file.size < 150000) {
+                                                                // alert(`Please upload files above the size of 150KB`);
+                                                                // } else {
+                                                                // Create an Image object to check its dimensions
+                                                                const img = new Image();
+                                                                const reader = new FileReader();
+                                                                reader.onload = (e) => {
+                                                                    img.src = e.target.result; // Set image src to the file's data URL
+    
+                                                                    // Once the image is loaded, check its dimensions
+                                                                    img.onload = () => {
+                                                                    const imageHeight = img.height;  // Get image height
+                                                                    const imageWidth = img.width;    // Get image width
+    
+                                                                    // You can add your dimension validation here
+                                                                    if (imageHeight <= 800 || imageWidth <= 1100) {
+                                                                        alert('Please upload images with a maximum height of 800px and a maximum width of 1100px.');
                                                                     } else {
-                                                                    // Create an Image object to check its dimensions
-                                                                    const img = new Image();
-                                                                    const reader = new FileReader();
-                                                                    reader.onload = (e) => {
-                                                                        img.src = e.target.result; // Set image src to the file's data URL
-
-                                                                        // Once the image is loaded, check its dimensions
-                                                                        img.onload = () => {
-                                                                        const imageHeight = img.height;  // Get image height
-                                                                        const imageWidth = img.width;    // Get image width
-
-                                                                        // You can add your dimension validation here
-                                                                        if (imageHeight <= 800 || imageWidth <= 1100) {
-                                                                            alert('Please upload images with a maximum height of 800px and a maximum width of 1100px.');
-                                                                        } else {
-                                                                            // Add the file as a valid image and generate the preview
-                                                                            validPreviews.push(URL.createObjectURL(file));
-                                                                            imageList.push(file); // Add valid file to the list
-                                                                        }
-
-                                                                        // Update state and Formik with valid files
-                                                                        setFilePreviews(validPreviews); // Set previews for valid files
-                                                                        form.setFieldValue(field.name, imageList);
-                                                                        };
+                                                                        // Add the file as a valid image and generate the preview
+                                                                        validPreviews.push(URL.createObjectURL(file));
+                                                                        imageList.push(file); // Add valid file to the list
+                                                                    }   
+                                                                    console.log(validPreviews);
+                                                                    // Update state and Formik with valid files
+                                                                    setFilePreviews(validPreviews); // Set previews for valid files
+                                                                    setFieldValue(field.name, imageList);
                                                                     };
+                                                                };
+    
+                                                                // Read the file as a Data URL to create a preview
+                                                                reader.readAsDataURL(file);
+                                                                //}
+                                                            });
+                                                        }}
+                                                        style={{ display: "none" }}
+                                                        />
+                                                    </label>
+                                                    </div>
 
-                                                                    // Read the file as a Data URL to create a preview
-                                                                    reader.readAsDataURL(file);
-                                                                    }
-                                                                });
-                                                                }}
-                                                                style={{ display: "none" }}
-                                                            />
-                                                            </label>
-                                                        </div>
-
-
-                                                        <p className="file-name fw-5">Or drop images here to upload</p>
-
-                                                        {/* Error Message */}
-                                                        {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
-                                                        </div>
-                                                    )}
-                                                    />
-
+                                                    <p className="file-name fw-5">Or drop images here to upload</p>
+                                                </div>
+                                                )}
+                                            />
                                             </fieldset>
+
+
+                   
                                             <fieldset className="box-fieldset">
                                                 {/* Image Previews */}
                                                 <div className="image-preview-container image-gallery">
@@ -727,7 +822,7 @@ export default function EditProject({params}) {
                                                     as="select"
                                                     name="state_id"
                                                     className="nice-select country-code"
-                                                    value={values.state_id}
+                                                    value={ projectDetail.state.id || values.state_id}
                                                     onChange={(e) => {
                                                         const selectedStateId = e.target.value;
                                                         setFieldValue("state_id", selectedStateId);
@@ -742,8 +837,9 @@ export default function EditProject({params}) {
                                                         </option>
                                                     ))
                                                 ) : (
-                                                    <></>
-                                                )}
+                                                    <>  </>
+                                                    )
+                                                }
                                             </Field>
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
@@ -757,7 +853,7 @@ export default function EditProject({params}) {
                                                         setFieldValue("city_id", selectedCity);
                                                         handleCityChange(selectedCity);
                                                     }}
-                                                    value={values.city_id || projectDetail.city || ""}
+                                                    value={projectDetail.city.id || values.city_id }
                                                 >
                                                     <option value="">Select Cities</option>
                                                     {cityList && cityList.length > 0 ? (
@@ -767,7 +863,12 @@ export default function EditProject({params}) {
                                                             </option>
                                                         ))
                                                     ) : (
-                                                        <></>
+                                                        // Show the projectDetail city name when cityList is empty
+                                                        projectDetail?.city?.id && (
+                                                            <option value={projectDetail.city.id}>
+                                                                {projectDetail.city.name}
+                                                            </option>
+                                                        )
                                                     )}
                                                 </Field>
                                             </fieldset>
@@ -783,9 +884,10 @@ export default function EditProject({params}) {
                                                         setFieldValue("districts_id", selectedDistrict);
                                                         handleDistrictChange(selectedDistrict);
                                                     }}
-                                                    value={values.districts_id || projectDetail.district || ""}
+                                                    value={projectDetail.district.id || values.districts_id || ""}
                                                 >
                                                     <option value="">Select District</option>
+                                                    
                                                     {districtList && districtList.length > 0 ? (
                                                         districtList.map((districts) => (
                                                             <option key={districts.id} value={districts.id}>
@@ -793,7 +895,11 @@ export default function EditProject({params}) {
                                                             </option>
                                                         ))
                                                     ) : (
-                                                        <></>
+                                                        projectDetail?.district?.id && (
+                                                            <option value={projectDetail.district.id}>
+                                                                {projectDetail.district.name}
+                                                            </option>
+                                                        )
                                                     )}
                                                 </Field>
                                             </fieldset>
@@ -809,7 +915,7 @@ export default function EditProject({params}) {
                                                             setFieldValue("neighborhood_id", selectedNeighborhood);
                                                             handleNeighborhoodChange(selectedNeighborhood);
                                                         }}
-                                                        value={values.neighborhood_id || projectDetail.neighborhood || ""}
+                                                        value={projectDetail.neighborhood.id || values.neighborhood_id || ""}
                                                     >
                                                     <option value="">Select Neighborhood</option>
                                                     {neighborhoodList && neighborhoodList.length > 0 ? (
@@ -819,7 +925,11 @@ export default function EditProject({params}) {
                                                             </option>
                                                         ))
                                                     ) : (
-                                                        <></>
+                                                        projectDetail?.neighborhood?.id && (
+                                                            <option value={projectDetail.neighborhood.id}>
+                                                                {projectDetail.neighborhood.name}
+                                                            </option>
+                                                        )
                                                     )}
                                                 </Field>
                                             </fieldset>
@@ -830,6 +940,14 @@ export default function EditProject({params}) {
                                                 latitude={propertyMapCoords.latitude}
                                                 longitude={propertyMapCoords.longitude}
                                                 zoom={propertyMapCoords.zoom}
+                                                address={projectDetail.address}
+                                                onPlaceSelected={(newAddress, newLocation) => {
+                                                    setFieldValue('address', newAddress);
+                                                    setFieldValue('latitude', newLocation.lat);
+                                                    setFieldValue('longitude', newLocation.lng);
+                                                    //handleAddressSelect(newAddress, newLocation);
+                                                }
+                                            }
                                             />
                                         </div>
                                     </div>
@@ -858,6 +976,13 @@ export default function EditProject({params}) {
                                     </div>
                                     <button type="submit"  className="tf-btn primary" >Update Developer</button>
                                 </div >
+                                {showErrorPopup && Object.keys(errors).length > 0 && (
+                                 <ErrorPopup
+                                    errors={errors}
+                                    validationSchema={validationSchema}
+                                    onClose={() => setShowErrorPopup(false)}
+                                />
+                            )}
                             </Form>
                         )}
                         </Formik>
