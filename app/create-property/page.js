@@ -378,6 +378,7 @@ export default function CreateProperty() {
     
             //setLoading(true);
             setErrors({ serverError: "Processing ........." });
+            setShowErrorPopup(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
 
             if (uploadImageUrl.files.length > 0) {
