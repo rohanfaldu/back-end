@@ -206,10 +206,6 @@ export default function CreateAgency() {
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-       
-      
-
-
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
@@ -217,6 +213,7 @@ export default function CreateAgency() {
         console.log("Selected Amenities:", selectedAmenities);
 
         try {
+            setLoading(true); // Start loader
             /********* Upload Image ***********/
             // const uploadImageObj = [values.picture_img, values.video];
             // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
@@ -296,20 +293,24 @@ export default function CreateAgency() {
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
 
                 if (createUserInfo.status) {
+                    setLoading(false); 
                     setSucessMessage(true);
                     setErrors({ serverError: "Project created successfully." });
                     setShowErrorPopup(true);
                     resetForm();
                     router.push("/project-listing");
                 } else {
+                    setLoading(false); 
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
                 }
             } else {
+                setLoading(false); 
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
+            setLoading(false); 
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
         }finally {

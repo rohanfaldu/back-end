@@ -25,6 +25,7 @@ export default function MyProperty() {
 
         const type = { user_id: "" };
         const getUserInfo = await insertData('api/agencies', type, true);
+        console.log(getUserInfo);
         setProperties(getUserInfo.data); // Save all properties
         setFilteredProperties(getUserInfo.data); // Initially display all properties
         setLoading(false); // Stop loading
