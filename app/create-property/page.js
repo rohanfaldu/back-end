@@ -64,7 +64,7 @@ export default function CreateProperty() {
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
-        picture_img: Yup.array().min(1, "At least three image is required").required("Image is required"),
+        picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
@@ -701,6 +701,11 @@ export default function CreateProperty() {
                                         </Field>
                                         {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
+                                    <fieldset className="box-fieldset">
+                                        <label htmlFor="description">Size of SqMeter:<span>*</span></label>
+                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
+                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
+                                    </fieldset>
                                     {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
@@ -723,11 +728,7 @@ export default function CreateProperty() {
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         
                                     </fieldset> */}
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Size of SqMeter:<span>*</span></label>
-                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
-                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
-                                    </fieldset>
+                                    
                                 </div>
                                 <div className="box grid-3 gap-30">
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (

@@ -281,7 +281,7 @@ export default function EditProject({params}) {
                console.log("Selected Amenities:", selectedAmenities);
        
                try {
-                  
+                    
                    // const uploadImageObj = [values.picture_img, values.video];
                    // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
                    // Ensure picture_img, video, and icon are arrays

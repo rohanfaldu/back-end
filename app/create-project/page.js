@@ -213,7 +213,9 @@ export default function CreateAgency() {
         console.log("Selected Amenities:", selectedAmenities);
 
         try {
-            setLoading(true); // Start loader
+            setErrors({ serverError: "Processing ........." });
+            setShowErrorPopup(true);
+            //setLoading(true); // Start loader
             /********* Upload Image ***********/
             // const uploadImageObj = [values.picture_img, values.video];
             // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
@@ -298,17 +300,17 @@ export default function CreateAgency() {
                     resetForm();
                     router.push("/project-listing");
                 } else {
-                    setLoading(false); 
+                    //setLoading(false); 
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
                 }
             } else {
-                setLoading(false); 
+                //setLoading(false); 
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
-            setLoading(false); 
+            //setLoading(false); 
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
         }finally {
