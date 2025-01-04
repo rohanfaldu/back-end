@@ -405,7 +405,6 @@ export default function CreateProperty() {
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
 
                 if (createPropertyInfo.status) {
-                    setLoading(false);
                     setErrors({ serverError: "Property created successfully." });
                     setShowErrorPopup(true);
                     resetForm();

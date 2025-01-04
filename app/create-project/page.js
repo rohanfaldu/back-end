@@ -293,7 +293,6 @@ export default function CreateAgency() {
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
 
                 if (createUserInfo.status) {
-                    setLoading(false); 
                     setSucessMessage(true);
                     setErrors({ serverError: "Project created successfully." });
                     setShowErrorPopup(true);
