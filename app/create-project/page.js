@@ -1,15 +1,11 @@
 'use client'
 import PropertyMap from "@/components/elements/PropertyMap"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
-import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png";
-import passwordHide from "../../public/images/favicon/password-hide.png";
-import { insertData, insertImageData } from "../../components/api/Axios/Helper";
+import { insertData} from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
@@ -18,16 +14,9 @@ import Preloader from "@/components/elements/Preloader"; // Import Preloader com
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
 export default function CreateAgency() {
-    const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
-    const [filePreview, setFilePreview] = useState(null);
-    const [filePictureImg, setFilePictureImg] = useState(null);
-    const [fileCoverImg, setFileCoverImg] = useState(null);
-    const [uploadImage, setUploadImage] = useState(null);
     const [neighborhoodList, setNeighborhoodList] = useState([]);
-    const [uploadFile, setUploadFile] = useState(null);
     const [isVideoUpload, setIsVideoUpload] = useState(true);
     const [stateList, setStateList] = useState([]);
     const [developerList, setDeveloperList] = useState([]);
@@ -74,7 +63,6 @@ export default function CreateAgency() {
                 if(stateList.length === 0){
                     const stateObj = {};
                     const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
                         setStateList(getStateInfo.data.states);
                     }
@@ -82,7 +70,6 @@ export default function CreateAgency() {
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
                     const stateObj = {};
                     const getProjectListingInfo = await insertData('api/project-type-listings', stateObj, true);
-                    console.log(getProjectListingInfo);
                     if(getProjectListingInfo) {
                         const projectOfNumberType = getProjectListingInfo.data.list.filter(item => item.type === "number");
                         const projectOfBlooeanType = getProjectListingInfo.data.list.filter(item => item.type === "boolean");
@@ -98,7 +85,6 @@ export default function CreateAgency() {
                     }
                 }
                 if(currencyList.length === 0){
-                    // console.log(1);
                     const currencyObj = {};
                     const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
 
@@ -111,11 +97,8 @@ export default function CreateAgency() {
             }
         };
         fetchData();
-        console.log(stateList);
     });
     const handleStateChange = async (stateId) => {
-        console.log('State ID:', stateId);
-
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
@@ -127,7 +110,6 @@ export default function CreateAgency() {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
@@ -136,7 +118,6 @@ export default function CreateAgency() {
     
     const handleCityChange = async (cityId) => {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
@@ -163,9 +144,7 @@ export default function CreateAgency() {
     };
 
     const handleDistrictChange = async (DistrictId) => {
-        console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
@@ -192,10 +171,8 @@ export default function CreateAgency() {
     };
 
     const handleNeighborhoodChange = async (NeighborhoodId) => {
-        console.log('NeighborhoodId ID:', NeighborhoodId);
         const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
         if (selecteNeighborhood) {
-            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
             const { latitude, longitude } = selecteNeighborhood;
             setPropertyMapCoords({
                 latitude: latitude,
@@ -209,34 +186,20 @@ export default function CreateAgency() {
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
-        console.log(values);
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-
-        console.log("Selected Amenities:", selectedAmenities);
-
         try {
             setErrors({ serverError: "Processing ........." });
             setShowErrorPopup(true);
-            //setLoading(true); // Start loader
-            /********* Upload Image ***********/
-            // const uploadImageObj = [values.picture_img, values.video];
-            // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-            // Ensure picture_img, video, and icon are arrays
+           
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
             const videoObj = values.video ? [values.video] : [];
             const iconObj = values.icon ? [values.icon] : [];
-            
-            // Combine all files (images, video, icons) for upload
             const allUploadFiles = [...uploadImageObj, ...videoObj];
             const allUploadFilesICon = [...iconObj];
-            
-            // Upload files
             const uploadImageUrl = await insertMultipleUploadImage("image", allUploadFiles);
             const uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
-            
-            console.log(uploadImageIconUrl);
             
             if (uploadImageUrl.files.length > 0) {
                 const imageUrls = [];
@@ -257,8 +220,6 @@ export default function CreateAgency() {
                     iconUrl = uploadImageIconUrl.files[0].url; // Use the first file's URL
                 }
             
-                console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
-            
                 // Default video URL if not uploaded
                 if (!videoUrl) {
                     const isValid = validateYouTubeURL(values.video_link);
@@ -269,8 +230,6 @@ export default function CreateAgency() {
                     }
                     videoUrl = values.video_link ?? null; // Use values.video_link as fallback
                 }
-                console.log('values');
-                console.log(values);
 
                 /********* Create Project ***********/
                 const projectData = {
@@ -295,7 +254,6 @@ export default function CreateAgency() {
                     address: values.address,
                 };
 
-                console.log("Project Data:", projectData); 
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
 
                 if (createUserInfo.status) {
@@ -329,10 +287,6 @@ export default function CreateAgency() {
             [key]: !prevState[key], // Toggle the checked state
         }));
     };
-
-
-
-    console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
         <>
@@ -410,10 +364,9 @@ export default function CreateAgency() {
                                                     id="country-code"
                                                     value={currencyCode}
                                                     onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setCurrencyCode(selectedState);
-                                                        setFieldValue("currency_id", selectedState);
-                                                        //handleCityChange(selectedState);
+                                                        const selectedCurrencyCode = e.target.value;
+                                                        setCurrencyCode(selectedCurrencyCode);
+                                                        setFieldValue("currency_id", selectedCurrencyCode);
                                                     }}
                                                 >
                                                     <option value="">Select Currency</option>
@@ -432,14 +385,13 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
                                         <Field as="select" name="user_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("user_id", selectedState);
+                                                    const selectedUserList = e.target.value;
+                                                    setFieldValue("user_id", selectedUserList);
                                                 }}
                                             >
                                             <option value="">Select User Listing</option>
@@ -451,29 +403,8 @@ export default function CreateAgency() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                    
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                    </fieldset> */}
-                                         {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
-                                            projectOfNumberListing.map((project) => (
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="project">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" />
-                                                </fieldset>
-                                            ))
-                                        ) : (
-                                            <></>
-                                        )} */}
                                 </div>
                                 <div className="grid-2 box gap-30">
                                     <fieldset className="box-fieldset">
@@ -495,11 +426,7 @@ export default function CreateAgency() {
                                                         const files = Array.from(event.target.files); // Convert to an array
                                                         const validPreviews = [];
                                                         files.forEach((file) => {
-                                                            // Check file size (less than 150KB)
-                                                            // if (file.size < 150000) {
-                                                            // alert(`Please upload files above the size of 150KB`);
-                                                            // } else {
-                                                            // Create an Image object to check its dimensions
+                                                            
                                                             const img = new Image();
                                                             const reader = new FileReader();
                                                             reader.onload = (e) => {
@@ -534,12 +461,7 @@ export default function CreateAgency() {
                                                     />
                                                     </label>
                                                 </div>
-
-
                                                 <p className="file-name fw-5">Or drop images here to upload</p>
-
-                                                {/* Error Message */}
-                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
                                             />
@@ -593,33 +515,13 @@ export default function CreateAgency() {
                                                             onChange={(event) => {
                                                             const file = event.target.files[0]; // Get the first file
                                                             if (file) {
-                                                                // Perform size validation
-                                                                // if (file.size < 1000) {
-                                                                // alert(`Please upload a file above the size of 1KB`);
-                                                                // return;
-                                                                // }
-
                                                                 const img = new Image();
                                                                 const reader = new FileReader();
-
                                                                 reader.onload = (e) => {
                                                                 img.src = e.target.result;
-
                                                                 img.onload = () => {
-                                                                    const imageHeight = img.height;
-                                                                    const imageWidth = img.width;
-
                                                                     setFieldValue("icon", file); // Set the file in Formik state
                                                                     setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                                    // Perform dimension validation
-                                                                    // if (imageHeight > 200 || imageWidth > 200) {
-                                                                    // alert(
-                                                                    //     "Please upload an image with a maximum height and width of 200px."
-                                                                    // );
-                                                                    // } else {
-                                                                    // setFieldValue("icon", file); // Set the file in Formik state
-                                                                    // setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                                    // }
                                                                 };
                                                                 };
 
@@ -716,7 +618,6 @@ export default function CreateAgency() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -728,7 +629,6 @@ export default function CreateAgency() {
                                                     className="form-control"
                                                     placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
                                                 />
-                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -755,15 +655,14 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
                                             <Field as="select" name="city_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("city_id", selectedState);
-                                                    handleCityChange(selectedState);
+                                                    const selectedCity= e.target.value;
+                                                    setFieldValue("city_id", selectedCity);
+                                                    handleCityChange(selectedCity);
                                                 }}
                                             >
                                                 <option value="">Select Cities</option>
@@ -777,7 +676,6 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -797,7 +695,6 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -817,15 +714,9 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    {/* <label htmlFor="location">Address:<span>*</span></label>
-                                    <div className="box-ip">
-                                        <input type="text" className="form-control style-1" name="address" />
-                                        <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
@@ -834,7 +725,6 @@ export default function CreateAgency() {
                                             setFieldValue('address', newAddress);
                                             setFieldValue('latitude', newLocation.lat);
                                             setFieldValue('longitude', newLocation.lng);
-                                            //handleAddressSelect(newAddress, newLocation);
                                         }
                                     }
                                     />
@@ -854,7 +744,6 @@ export default function CreateAgency() {
                                                         onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (

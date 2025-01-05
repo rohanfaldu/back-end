@@ -74,14 +74,11 @@ export default function MyProperty() {
     };
 
   const handleDelete = async (id) => {
-    console.log(id);
     try {
       const deleteData = { id: id, type: "agency" };
-      console.log(deleteData);
       const deleteUserInfo = await insertData('auth/delete/user', deleteData);
       if(deleteUserInfo.status){
         const filteredData = filteredProperties.filter((item) => item.id !== id);
-        console.log(filteredData);
         setProperties(filteredData); // Save all properties
         setFilteredProperties(filteredData); // Initially display all properties
         setLoading(false); // Stop loading

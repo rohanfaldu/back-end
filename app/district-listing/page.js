@@ -57,16 +57,7 @@ export default function ProjectAmenitiesListing() {
     fetchDistricts(pagination.currentPage, searchTerm, statusFilter);
   }, [pagination.currentPage, searchTerm, statusFilter]);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on search
-  };
-
-  const handleStatusChange = (e) => {
-    setStatusFilter(e.target.value);
-    setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on filter
-  };
-
+ 
   const handleDelete = async (id) => {
     console.log(id);
     try {

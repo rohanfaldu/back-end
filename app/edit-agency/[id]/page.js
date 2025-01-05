@@ -1,15 +1,11 @@
 'use client'
-import PropertyMap from "@/components/elements/PropertyMap"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from 'axios';
-import { userType } from "../../../components/common/functions";
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../../public/images/favicon/password-show.png";
-import passwordHide from "../../../public/images/favicon/password-hide.png";
 import { updateData, insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
@@ -18,8 +14,6 @@ import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
 
 export default function EditAgency({params}) {
     const { id } = params;
-    const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
 	const [loading, setLoading] = useState(true);
@@ -30,12 +24,7 @@ export default function EditAgency({params}) {
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [fileCoverImg, setFileCoverImg] = useState(null);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
-    const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
-
-
-
-
-
+    
     useEffect(() => {
         console.log(id);
         const fetchData = async () => {
@@ -202,7 +191,6 @@ export default function EditAgency({params}) {
                                                                     const selectedState = e.target.value;
                                                                     setSelectedWhatsupCode(selectedState);
                                                                     setFieldValue("whatsup_country_code", selectedState);
-                                                                    //handleCityChange(selectedState);
                                                                 }}
                                                             >
                                                                 <option value="">Select Country Code</option>
@@ -219,8 +207,6 @@ export default function EditAgency({params}) {
                                                             </Field>
                                                             <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
                                                         </div>
-                                                    {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
-                                                    {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="service_area_en">Service Area English:</label>
@@ -233,19 +219,16 @@ export default function EditAgency({params}) {
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Tax Number:</label>
                                                     <Field type="text"  name="tax_number" className="box-fieldset" />
-                                                    {/* <ErrorMessage name="tax_number" component="div" className="error" /> */}
                                                 </fieldset>
                                             </div>
                                             <div className="box grid-3 gap-30">
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">License number:</label>
                                                     <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                                    {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="credit">Credit:</label>
                                                     <Field type="text" name="credit" className="box-fieldset"  />
-                                                    {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Agency Packages:</label>
@@ -253,7 +236,6 @@ export default function EditAgency({params}) {
                                                             onChange={(e) => {
                                                                 const selectedState = e.target.value;
                                                                 setFieldValue("agency_packages", selectedState);
-                                                                //handleAgencyPackageChange(selectedState);
                                                             }}
                                                         >
                                                             <option value="">Select Agency Packages</option>
@@ -267,7 +249,6 @@ export default function EditAgency({params}) {
                                                                 <></>
                                                             )}
                                                         </Field>
-                                                    {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                                 </fieldset>
                                             </div>
                                             <div className="grid-2 box gap-30">
@@ -332,34 +313,28 @@ export default function EditAgency({params}) {
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Facebook Link:</label>
                                                 <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
-                                                {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Twitter Link:</label>
                                                 <Field type="text" name="twitter_link" className="box-fieldset"  />
-                                                {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Youtube Link:</label>
                                                 <Field type="text"  name="youtube_link" className="box-fieldset" />
-                                                {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                         <div className="box grid-3 gap-30">
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Pinterest Link:</label>
                                                 <Field type="text" name="pinterest_link" className="box-fieldset" />
-                                                {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Linkedin Link:</label>
                                                 <Field type="text" name="linkedin_link" className="box-fieldset" />
-                                                {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Instagram Link:</label>
                                                 <Field type="text" name="instagram_link" className="box-fieldset" />
-                                                {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                         </div>

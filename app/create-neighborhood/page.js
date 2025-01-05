@@ -1,17 +1,10 @@
 'use client'
-import PropertyMap from "@/components/elements/PropertyMap"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
-import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
-import { userType } from "../../components/common/functions";
 import { useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png";
-import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
@@ -119,24 +112,20 @@ export default function CreatePropertyAmenities() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Latitude:<span>*</span></label>
                                         <Field type="text" id="latitude" name="latitude" className="form-control style-1" />
-                                        {/* <ErrorMessage name="key" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Longitude:<span>*</span></label>
                                         <Field type="text" id="longitude" name="longitude" className="form-control style-1" />
-                                        {/* <ErrorMessage name="key" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">

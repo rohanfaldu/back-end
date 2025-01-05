@@ -154,14 +154,6 @@ export default function CreateAgency() {
         }
     };
 
-
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
-
-	const handleRadioChange = (event) => {
-		const selectedRadioId = event.target.id
-		setSelectedRadio(selectedRadioId)
-	}
-
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		<>
@@ -219,9 +211,6 @@ export default function CreateAgency() {
                                     {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
                                     <p className="file-name fw-5"> Or drop image here to upload </p>
                                     </label>
-                                    {/* {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )} */}
                                 </div>
                             </div>
                             <div className="widget-box-2">
@@ -230,12 +219,10 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Name:<span>*</span></label>
                                         <Field type="text" id="username" name="username" className="form-control style-1" />
-                                        {/* <ErrorMessage name="username" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Full Name:<span>*</span></label>
                                         <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
-                                        {/* <ErrorMessage name="fullname" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset ">
                                         <label htmlFor="name">Mobile Number<span>*</span>:</label>
@@ -244,10 +231,9 @@ export default function CreateAgency() {
                                                     id="country-code"
                                                     value={selectedCode}
                                                     onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setSelectedCode(selectedState);
-                                                        setFieldValue("country_code", selectedState);
-                                                        //handleCityChange(selectedState);
+                                                        const selectedCountryCode = e.target.value;
+                                                        setSelectedCode(selectedCountryCode);
+                                                        setFieldValue("country_code", selectedCountryCode);
                                                     }}
                                                 >
                                                     <option value="">Select Country Code</option>
@@ -264,15 +250,12 @@ export default function CreateAgency() {
                                                 </Field>
                                                 <Field type="text" id="phone" name="phone" className="form-control style-1" />
                                             </div>
-                                        {/* <ErrorMessage name="phone" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="country_code" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Email:<span>*</span></label>
                                         <Field type="email" id="email" name="email" />
-                                        {/* <ErrorMessage name="email" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="pass">Password<span>*</span>:</label>
@@ -290,7 +273,6 @@ export default function CreateAgency() {
                                             >
                                             {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
                                         </span>
-                                        {/* <ErrorMessage name="password" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -317,7 +299,6 @@ export default function CreateAgency() {
                                                         const selectedState = e.target.value;
                                                         setSelectedWhatsupCode(selectedState);
                                                         setFieldValue("whatsup_country_code", selectedState);
-                                                        //handleCityChange(selectedState);
                                                     }}
                                                 >
                                                     <option value="">Select Country Code</option>
@@ -334,8 +315,6 @@ export default function CreateAgency() {
                                                 </Field>
                                                 <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
                                             </div>
-                                        {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                     <label htmlFor="service_area_en">Service Area English:</label>
@@ -348,19 +327,16 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Tax Number:</label>
                                         <Field type="text"  name="tax_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="tax_number" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="credit">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Agency Packages:</label>
@@ -368,7 +344,6 @@ export default function CreateAgency() {
                                                 onChange={(e) => {
                                                     const selectedState = e.target.value;
                                                     setFieldValue("agency_packages", selectedState);
-                                                    //handleAgencyPackageChange(selectedState);
                                                 }}
                                             >
                                                 <option value="">Select Agency Packages</option>
@@ -382,7 +357,6 @@ export default function CreateAgency() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-2 box gap-30">
@@ -432,34 +406,28 @@ export default function CreateAgency() {
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Facebook Link:</label>
                                         <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
-                                        {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Twitter Link:</label>
                                         <Field type="text" name="twitter_link" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Youtube Link:</label>
                                         <Field type="text"  name="youtube_link" className="box-fieldset" />
-                                        {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Pinterest Link:</label>
                                         <Field type="text" name="pinterest_link" className="box-fieldset" />
-                                        {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Linkedin Link:</label>
                                         <Field type="text" name="linkedin_link" className="box-fieldset" />
-                                        {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Instagram Link:</label>
                                         <Field type="text" name="instagram_link" className="box-fieldset" />
-                                        {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>

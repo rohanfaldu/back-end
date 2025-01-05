@@ -93,12 +93,6 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 											<p className="name">{userName??""}<span className="icon icon-arr-down" /></p>
 										</a>
 										<div className={`dropdown-menu  ${isToggled ? "show" : ""}`} >
-											{/* <Link className="dropdown-item" href="/my-favorites">My Properties</Link>
-											<Link className="dropdown-item" href="/my-invoices">My Invoices</Link>
-											<Link className="dropdown-item" href="/my-favorites">My Favorites</Link>
-											<Link className="dropdown-item" href="/reviews">Reviews</Link>
-											<Link className="dropdown-item" href="/my-profile">My Profile</Link>
-											<Link className="dropdown-item" href="/add-property">Add Property</Link> */}
 											<Link className="dropdown-item" href="/" onClick={handleLogout}>Logout</Link>
 										</div>
 

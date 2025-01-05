@@ -4,7 +4,7 @@ import DeleteFile from "@/components/elements/DeleteFile";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
 import Link from "next/link";
 import Image from 'next/image';
-import { insertData, deletedData } from "../../components/api/Axios/Helper";
+import { insertData} from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
 import EditIcon from "../../public/images/favicon/edit.png";
@@ -24,7 +24,6 @@ export default function MyProperty() {
       try {
         const type = { type: "developer" };
         const getUserInfo = await insertData('auth/getall', type, false);
-        console.log(getUserInfo);
         setProperties(getUserInfo.data.user_data); // Save all properties
         setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
         setLoading(false); // Stop loading
@@ -37,8 +36,7 @@ export default function MyProperty() {
 
     fetchData(); // Fetch data on component mount
   }, []);
-  // console.log('filteredProperties');
-  // console.log(filteredProperties.length);
+  
   useEffect(() => {
     filterAndPaginateData(); // Apply filter and pagination whenever inputs change
   }, [searchTerm, statusFilter, currentPage, properties]);
@@ -65,14 +63,7 @@ export default function MyProperty() {
 
     setFilteredProperties(paginated);
   };
-
-  // Handle search input
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
-  };
-
-  const handleDelete = async (id) => {
+ const handleDelete = async (id) => {
       console.log(id);
       try {
         const deleteData = { id: id, type: "developer" };
@@ -109,33 +100,6 @@ export default function MyProperty() {
           <DeleteFile />
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
-              {/* <div className="row">
-                <div className="col-md-3">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="status">Post Status:<span>*</span></label>
-                    <select className="nice-select" onChange={handleStatusChange}>
-                      <option value="">Select</option>
-                      <option value="Published">Publish</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Hidden">Hidden</option>
-                      <option value="Sold">Sold</option>
-                    </select>
-                  </fieldset>
-                </div>
-                <div className="col-md-9">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="search">Search by Title:<span>*</span></label>
-                    <input
-                      type="text"
-                      className="form-control style-1"
-                      placeholder="Search by title"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                  </fieldset>
-                </div>
-              </div> */}
-
               <div className="widget-box-2 wd-listing">
                 <div class="top d-flex justify-content-between align-items-center">
                   <h6 className="title">Developer Listing</h6>

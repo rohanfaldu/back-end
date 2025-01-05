@@ -1,22 +1,15 @@
 'use client'
-import PropertyMap from "@/components/elements/PropertyMap"
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
-import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useFormik } from 'formik';
-import { use, useState, useEffect } from "react"
+import {useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
 import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
 import Preloader from "@/components/elements/Preloader";
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
-// import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-// Adjust the path based on your project structure
-//import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
-
 import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 
@@ -25,7 +18,6 @@ export default function CreateProperty() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
 	const [propertyMeta, setPropertyMeta] = useState(false);
-    const [filePictureImg, setFilePictureImg] = useState(null);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
     const [userList, setUserList] = useState([]);
@@ -39,8 +31,6 @@ export default function CreateProperty() {
     const [propertyOfMetaNumberValue, setPropertyOfMetaNumberValue] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const [isVideoUpload, setIsVideoUpload] = useState(true);
-    const [video, setVideo] = useState(null);
-    const [videoLink, setVideoLink] = useState("");
     const [filePreviews, setFilePreviews] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [currencyList, setCurrencyList] = useState([]);
@@ -176,15 +166,12 @@ export default function CreateProperty() {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                // console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
     };
     const handleDistrictChange = async (DistrictId) => {
-        console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
@@ -229,9 +216,7 @@ export default function CreateProperty() {
 
 
     const handleCityChange = async (cityId) => {
-        console.log('City ID:', cityId);
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
@@ -263,72 +248,10 @@ export default function CreateProperty() {
             ...prev,
             [id]: value,
         }));
-    
-        //setPropertyOfMetaNumberValue((prev) => {
-            
-        //   const propertyOfMetaNumberValue = [...prev];
-        //   const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
-        //   console.log('index');
-        //   console.log(index);
-        //   console.log('propertyOfMetaNumberValue');
-        //   console.log(propertyOfMetaNumberValue);
-        //   if (index > -1) {
-        //     propertyOfMetaNumberValue[index].value = value;
-        //   } else {
-        //     const propertyOfMetaNumberObj = {property_type_id: id, value: value};
-        //     propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
-        //   }
-        //   return propertyOfMetaNumberValue;
-        //});
     };
-
-
-
-
-
-    const handleFileChangeVideo = (event, setFieldValue) => {
-        console.log( 'video' );
-        console.log( event );
-        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
-        const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
-        //const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
-        console.log(videoFile);
-        // If video file is selected, set it in the "video" field
-        if (videoFile) {
-            setFieldValue("video", videoFile);
-            setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
-        }
-    };
-
-    const handleFileChange = (event, setFieldValue) => {
-        console.log( 'image' );
-        console.log( event );
-        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
-        //const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
-        const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
-        console.log(imageFiles);
-        if (imageFiles.length > 0) {
-            console.log(imageFiles);
-            setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
-            setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
-        }
-    };
-
-    const handlePlaceSelect = (place) => {
-        // You can access selected place details here
-        console.log("place");
-        console.log(place);
-        // Update address state with the selected place's formatted address
-        setAddress(place.description);
-    };
-
     const handleAddressSelect = (newAddress, newLocation) => {
 
     };
-
-      // Handler for image remove
-
-
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
@@ -366,7 +289,6 @@ export default function CreateProperty() {
                     });
                 }
 
-            console.log("Selected Amenities:", selectedAmenities); 
           //  setLoading(true);
             const uploadImageObj = Array.isArray(values.picture_img) 
             ? values.picture_img.filter(item => item !== null) 
@@ -376,7 +298,6 @@ export default function CreateProperty() {
                 uploadImageObj.push(values.video);
             }
     
-            //setLoading(true);
             setErrors({ serverError: "Processing ........." });
             setShowErrorPopup(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
@@ -532,57 +453,28 @@ export default function CreateProperty() {
                 {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Agency User Image</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                            type="file"
-                                            className="ip-file"
-                                            onChange={(event) => {
-                                                const file = event.currentTarget.files[0];
-                                                setFieldValue("image", file);
-                                                setFilePreview(URL.createObjectURL(file));
-                                            }}
-                                        />
-                                    </div>
-                                    {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
-                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
                             <div className="widget-box-2">
                                 <h6 className="title">Property Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -593,22 +485,21 @@ export default function CreateProperty() {
                                         <label htmlFor="title">Transaction Type:<span>*</span></label>
                                         <Field as="select" name="transaction_type" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("transaction_type", selectedState);
+                                                    const selectedTransactionType = e.target.value;
+                                                    setFieldValue("transaction_type", selectedTransactionType);
                                                 }}
                                             >
                                             <option value="">Select Transaction Type</option>
                                             <option value="sale">Fore Sale</option>
                                             <option value="rental">For Rental</option>
                                         </Field>
-                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Property Type:<span>*</span></label>
                                         <Field as="select" name="property_type" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("property_type", selectedState);
+                                                    const selectedPropertyType = e.target.value;
+                                                    setFieldValue("property_type", selectedPropertyType);
                                                 }}
                                             >
                                             <option value="">Select Property Type</option>
@@ -620,14 +511,13 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
                                         <Field as="select" name="project_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("project_id", selectedState);
+                                                    const selectedProjectId = e.target.value;
+                                                    setFieldValue("project_id", selectedProjectId);
                                                 }}
                                             >
                                             <option value="">Select Project Listing</option>
@@ -639,14 +529,13 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
                                         <Field as="select" name="user_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("user_id", selectedState);
+                                                    const selectedUserId = e.target.value;
+                                                    setFieldValue("user_id", selectedUserId);
                                                 }}
                                             >
                                             <option value="">Select User Listing</option>
@@ -658,7 +547,6 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -669,10 +557,9 @@ export default function CreateProperty() {
                                                     id="country-code"
                                                     value={currencyCode}
                                                     onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setCurrencyCode(selectedState);
-                                                        setFieldValue("currency_id", selectedState);
-                                                        //handleCityChange(selectedState);
+                                                        const selectedCurrencyCode = e.target.value;
+                                                        setCurrencyCode(selectedCurrencyCode);
+                                                        setFieldValue("currency_id", selectedCurrencyCode);
                                                     }}
                                                 >
                                                     <option value="">Select Currency</option>
@@ -687,8 +574,6 @@ export default function CreateProperty() {
                                                 </Field>
                                                 <Field type="text" id="price" name="price" className="form-control style-1" />
                                             </div>
-                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Direction:<span>*</span></label>
@@ -699,36 +584,11 @@ export default function CreateProperty() {
                                             <option value="east">East</option>
                                             <option value="west">West</option>
                                         </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
-                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
                                     </fieldset>
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">VR Link:</label>
-                                        <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        // <ErrorMessage name="vr_link" component="div" className="error" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:</label>
-                                        <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
-                                    </fieldset> */}
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                        
-                                    </fieldset> */}
-                                    
                                 </div>
                                 <div className="box grid-3 gap-30">
                                         {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
@@ -742,7 +602,6 @@ export default function CreateProperty() {
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
-                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -805,12 +664,7 @@ export default function CreateProperty() {
                                                     />
                                                     </label>
                                                 </div>
-
-
                                                 <p className="file-name fw-5">Or drop images here to upload</p>
-
-                                                {/* Error Message */}
-                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
                                             />
@@ -900,7 +754,6 @@ export default function CreateProperty() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -912,7 +765,6 @@ export default function CreateProperty() {
                                                     className="form-control"
                                                     placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
                                                 />
-                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -939,15 +791,14 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
                                             <Field as="select" name="city_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("city_id", selectedState);
-                                                    handleCityChange(selectedState);
+                                                    const selectedCity = e.target.value;
+                                                    setFieldValue("city_id", selectedCity);
+                                                    handleCityChange(selectedCity);
                                                 }}
                                             >
                                                 <option value="">Select Cities</option>
@@ -961,7 +812,6 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -981,7 +831,6 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -1001,25 +850,9 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    {/* <label htmlFor="location">Address:<span>*</span></label> */}
-                                    {/* <div className="box-ip"> */}
-
-                                        {/* <GooglePlacesAutocomplete /> */}
-
-
-                                     {/* <ReactGooglePlacesAutocomplete
-                                        apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
-                                        selectProps={{
-                                            value: address,
-                                            onChange: (selected) => handlePlaceSelect(selected),
-                                        }}
-                                    /> <br/> */}
-                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div><br/><br/><br/> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
@@ -1048,7 +881,6 @@ export default function CreateProperty() {
                                                         onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
