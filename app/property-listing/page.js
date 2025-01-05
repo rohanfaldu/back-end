@@ -163,7 +163,7 @@ export default function PropertyListing() {
                                     </Link>
                                   </li> */}
                                    <li className="edit">
-                                        <Link href={`/edit-property/${property.id}`} className="item">
+                                        <Link href={`/edit-property/${property.slug}`} className="item">
                                           <Image 
                                             src={EditIcon} // Imported image object or static path
                                             alt="Edit icon" 
