@@ -1,10 +1,7 @@
 'use client';
-import PropertyMap from "@/components/elements/PropertyMap";
 import LayoutAdmin from "@/components/layout/LayoutAdmin";
-import Link from "next/link";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Preloader from '@/components/elements/Preloader';
@@ -17,7 +14,6 @@ export default function EditState({ params }) {
     const [loading, setLoading] = useState(true);
     const [state, setState] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState(false);
     const [sucessMessage, setSucessMessage] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const router = useRouter();
@@ -40,7 +36,7 @@ export default function EditState({ params }) {
                     setShowErrorPopup(true);
                 }
             } catch (err) {
-                
+
                 setShowErrorPopup(true);
             } finally {
                 setLoading(false);

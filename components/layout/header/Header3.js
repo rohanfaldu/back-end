@@ -22,7 +22,7 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 			return false;
         }
 		const userDetail = JSON.parse(localStorage.getItem('user'));
-	  	
+
 		if(userDetail !== null){
 			setLoading(false);
 	  		setUserImage(userDetail.image);
@@ -38,8 +38,8 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 	// 		router.push('/');
 	// 		setLoading(true);
 	// 		return false;
-	//   	} 
-		
+	//   	}
+
 	// 	if(userDetail !== null){
 	// 		setLoading(false);
 	//   		setUserImage(userDetail.image);
@@ -59,10 +59,10 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 
 	return (
 		<>
-			{isLoading 
-				? 
-					<Preloader /> 
-				: 
+			{isLoading
+				?
+					<Preloader />
+				:
 					<header className="main-header fixed-header header-dashboard">
 					{/* Header Lower */}
 					<div className="header-lower">
@@ -125,7 +125,7 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 										</ul>
 									</div>
 								</div>
-			
+
 								{/* <div className="button-mobi-sell">
 									<Link className="tf-btn primary" href="/add-property">Submit Property</Link>
 								</div> */}
@@ -148,6 +148,3 @@ export default function Header3({ scroll, isSidebar, handleSidebar, isMobileMenu
 		</>
 	)
 }
-
-
-
