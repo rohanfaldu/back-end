@@ -62,13 +62,12 @@ export default function EditProperty({params}) {
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
         picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
-        credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
         currency_id: Yup.string().required("Currency is required"),
         districts_id: Yup.string().required("District is required"),
-        neighborhood_id: Yup.string().required("Neighborhood is required"),
+        // neighborhood_id: Yup.string().required("Neighborhood is required"),
         transaction_type: Yup.string().required("Transaction type is required"),
         property_type: Yup.string().required("Property type is required"),
         user_id: Yup.string().required("User is required"),
@@ -134,6 +133,36 @@ export default function EditProperty({params}) {
                     }
                    
                 }
+                if(cityList.length === 0){
+                    const cityObj = { state_id: getpropertyInfo.data.state, lang: "en" };
+                    const getCityInfo = await insertData('api/city', cityObj, true);
+                    if (getCityInfo.status) {
+                        console.log(getCityInfo.data.cities);
+                        setCityList(getCityInfo.data.cities);
+                    }
+                }
+                if(districtList.length === 0){
+                    const districtObj = { city_id: getpropertyInfo.data.city, lang: "en" };
+                    const getDistrictInfo = await insertData('api/district', districtObj, true);
+                    if (getDistrictInfo.status) {
+                        setDistrictList(getDistrictInfo.data.districts);
+                    } else {
+                        setDistrictList([]);
+                    }
+                }
+                if(neighborhoodList.length === 0){
+                    console.log("tdsd");
+                    const neighborhoodObj = { district_id: getpropertyInfo.data.district, lang: "en" };
+                    const getNeighborhoodObjInfo = await insertData('api/neighborhood', neighborhoodObj, true);
+                    if (getNeighborhoodObjInfo.status) {
+                        setNeighborhoodList(getNeighborhoodObjInfo.data);
+                    } else {
+                        setNeighborhoodList([]);
+                    }
+                }
+
+
+                
                 if (propertyofTypesListing.length === 0) {
                     const stateObj = {};
                     const res = await insertData('api/property-type/', stateObj, true);
@@ -192,8 +221,6 @@ export default function EditProperty({params}) {
                         setDeveloperList(developerList);
                     }
                 }
-                setCityName(getpropertyInfo.data.city.city_name);
-                console.log(getpropertyInfo.data.city.city_name)
                 setLoading(false); // Stop loading
                 setError(null); // Clear errors
             } catch (err) {
@@ -202,7 +229,7 @@ export default function EditProperty({params}) {
             };
             fetchData(); // Fetch data on component mount
         }, []);
-    console.log(propertyOfNumberListing);
+        console.log(propertyOfNumberListing);
 
     const handleStateChange = async (stateId) => {
         const selectedState = stateList.find((state) => state.id === stateId);
@@ -249,25 +276,6 @@ export default function EditProperty({params}) {
             setNeighborhoodList([]);
         }
     };
-    const handleNeighborhoodChange = async (NeighborhoodId) => {
-        console.log('NeighborhoodId ID:', NeighborhoodId);
-        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
-        if (selecteNeighborhood) {
-            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
-            const { latitude, longitude } = selecteNeighborhood;
-            setPropertyMapCoords({
-                latitude: latitude,
-                longitude: longitude,
-                zoom: 14
-            });
-        } else {
-            console.error('Neighborhood not found');
-        }
-    };
-
-
-
-
     const handleCityChange = async (cityId) => {
         console.log('City ID:', cityId);
         const selectedCites = cityList.find((cities) => cities.id === cityId);
@@ -296,7 +304,21 @@ export default function EditProperty({params}) {
             setDistrictList([]);
         }
     };
-
+    const handleNeighborhoodChange = async (NeighborhoodId) => {
+        console.log('NeighborhoodId ID:', NeighborhoodId);
+        const selecteNeighborhood = neighborhoodList.find((neighborhoods) => neighborhoods.id === NeighborhoodId);
+        if (selecteNeighborhood) {
+            console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
+            const { latitude, longitude } = selecteNeighborhood;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 14
+            });
+        } else {
+            console.error('Neighborhood not found');
+        }
+    };
 
     const handleNumberChange = (id, value) => {
         setPropertyOfMetaNumberValue((prev) => {
@@ -311,41 +333,6 @@ export default function EditProperty({params}) {
           return propertyOfMetaNumberValue;
         });
     };
-
-
-
-
-
- 
-
-    const handleAddressSelect = (newAddress, newLocation) => {
-
-    };
-
-      // Handler for image remove
-      const handleImageRemove = (index) => {
-        // Log current Formik values and filePreviews before removal
-        console.log('Before removal - filePreviews:', filePreviews);
-        console.log('Before removal - Formik picture_img:', form.values.picture_img);
-
-        // Remove the image from preview and Formik field
-        const newFilePreviews = filePreviews.filter((_, i) => i !== index);
-        const newImageList = form.values.picture_img.filter((_, i) => i !== index);
-
-        // Log the new state and new image list
-        console.log('After removal - newFilePreviews:', newFilePreviews);
-        console.log('After removal - newImageList:', newImageList);
-
-        // Update preview state
-        setFilePreviews(newFilePreviews);
-
-        // Update Formik field
-        form.setFieldValue('picture_img', newImageList);
-
-        // Log Formik values after updating to ensure it's updated
-        console.log('Formik picture_img after update:', form.values.picture_img);
-    };
-
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
@@ -381,31 +368,74 @@ export default function EditProperty({params}) {
                     setLoading(true); // Start loader
 
 
-            // Prepare images and videos for upload
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-            uploadImageObj.push(values.video);
+            const videoObj = values.video ? [values.video] : [];
+            const iconObj = values.icon ? [values.icon] : [];
+            
+            // Combine all files (images, video, icons) for upload
+            const allUploadFiles = [...uploadImageObj, ...videoObj];
+            const allUploadFilesICon = [...iconObj];
+            console.log('uploadImageIconUrl');
+            console.log(allUploadFiles);
 
-            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+            const hasFile = allUploadFiles.some((item) => item instanceof File);
+            const hasFileIcon = allUploadFilesICon.some((item) => item instanceof File);
+            console.log("Contains a File:", hasFileIcon);
+            // Upload files
+            let  uploadImageUrl = values.picture_img;
+            let uploadImageIconUrl = [];
+            if(hasFile){
+                const uploadImageUrlFIles = await insertMultipleUploadImage("image", allUploadFiles);
+                uploadImageUrl = uploadImageUrlFIles.files;
+            }
+            if(hasFileIcon){
+            uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
+            }
 
-            if (uploadImageUrl.files.length > 0) {
+            if (uploadImageUrl.length > 0) {
                 const imageUrls = [];
-                let videoUrl = null;
+                let videoUrl = values.video;
+                let iconUrl = values.icon; // Initialize as null for a single URL
+            
+                // Process uploaded files to separate URLs
+                if(hasFile){
+                    uploadImageUrl.forEach((file) => {
 
-                uploadImageUrl.files.forEach((file) => {
-                    if (file.mimeType.startsWith("image")) {
-                        imageUrls.push(file.url);
-                    } else if (file.mimeType.startsWith("video")) {
-                        videoUrl = file.url;
-                    }
-                });
 
-                const pictureUrl = imageUrls.join(", ");
-                console.log("Image URLs:", pictureUrl);
-                console.log("Video URL:", videoUrl);
-
-                if (!videoUrl) {
-                    videoUrl = values.video_link;
+                        if (file.mimeType.startsWith("image")) {
+                            imageUrls.push(file.url); // Collect image URLs
+                        } else if (file.mimeType.startsWith("video")) {
+                            videoUrl = file.url; // Assign video URL
+                        }
+                    });
+                } else{
+                    uploadImageUrl.forEach((file) => {
+                        imageUrls.push(file);
+                    })
+                    
                 }
+                // Assign the first icon file's URL to iconUrl
+                if (uploadImageIconUrl?.files?.length > 0) {
+                    iconUrl = uploadImageIconUrl.files[0].url; // Use the first file's URL
+                }else{
+                    iconUrl = values.icon;
+                }
+            
+                
+                console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
+            
+                // Default video URL if not uploaded
+                if (!videoUrl) {
+                    const isValid = validateYouTubeURL(values.video_link);
+                    if (!isValid) {
+                        setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                        setShowErrorPopup(true);
+                        return false;
+                    }
+                    videoUrl = values.video_link ?? null; // Use values.video_link as fallback
+                }
+                console.log('values');
+                console.log(values);
 
                 // Prepare data for property creation
                 const propertyData = {
@@ -415,7 +445,7 @@ export default function EditProperty({params}) {
                     description_fr: values.description_fr ?? null,
                     price: parseInt(values.price) ?? 0,
                     vr_link: values.vr_link ?? null,
-                    picture: imageUrls,
+                    picture: imageUrls.length > 0 ? imageUrls : values.picture_img, // Default to an empty array if `values.picture_img` is undefined
                     video: videoUrl,
                     user_id: values.user_id,
                     link_uuid: values.link_uuid ?? null,
@@ -461,40 +491,6 @@ export default function EditProperty({params}) {
         }
     };
 
-
-    const handleCheckboxChange = (key) => {
-        setCheckedItems((prevState) => ({
-            ...prevState,
-            [key]: !prevState[key], // Toggle the checked state
-        }));
-    };
-
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
-
-
-
-    const handleRadioChange = (event, setFieldValue) => {
-        const isUpload = event.target.value === "upload";
-        setIsVideoUpload(isUpload);
-
-        if (!isUpload) {
-          // Switching to YouTube Link
-          setVideoPreview(null); // Clear video preview
-          setFieldValue("video", null); // Clear Formik video field
-        }else if(isUpload){
-
-          setFieldValue("video_link", null);
-          setVideoLink(null); // Update YouTube link manually
-
-        }
-    };
-
-    const handleVideoLinkChange = (event, setFieldValue) => {
-        setVideoLink(event.target.value); // Update YouTube link manually
-        setFieldValue("video_link", event.target.value); // Update Formik state
-
-    };
-    console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
         <>
@@ -517,16 +513,16 @@ export default function EditProperty({params}) {
                     video_link: propertyDetail?.video || null,
                     currency_id: propertyDetail?.currency || "",
                     credit: propertyDetail?.credit || "",
-                    state_id: propertyDetail?.state_id || "",
-                    city_id: propertyDetail?.city_id || "",
-                    districts_id: propertyDetail?.districts_id || "",
-                    neighborhood_id: propertyDetail?.neighborhood_id || "",
+                    state_id: propertyDetail?.state || "",
+                    city_id: propertyDetail?.city || "",
+                    districts_id: propertyDetail?.district || "",
+                    neighborhood_id: propertyDetail?.neighborhood || "",
                     transaction_type: propertyDetail?.transaction_type || "",
                     property_type: propertyDetail?.type_details?.id || "",
                     project_id: propertyDetail?.project_id || "",
                     user_id: propertyDetail?.user || "",
                     size_sqft: propertyDetail?.size || "",
-                    
+                    direction: propertyDetail?.direction || "",
                 }}
 
                  
@@ -664,12 +660,14 @@ export default function EditProperty({params}) {
                                 </div>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
+                                        <label htmlFor="title">Direction:<span>*</span></label>
+                                        <Field as="select" name="direction" className="nice-select country-code">
+                                            <option value="">Select Direction</option>
+                                            <option value="north">North</option>
+                                            <option value="south">South</option>
+                                            <option value="east">East</option>
+                                            <option value="west">West</option>
+                                        </Field>
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>

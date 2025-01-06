@@ -37,7 +37,6 @@ export default function EditProject({params}) {
     const [projectOfBooleanListing, setProjectOfBooleanListing] = useState([]);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
-    const [cityname, setCityName] = useState("");
     const [districtList, setDistrictList] = useState([]);
     const [checkedItems, setCheckedItems] = useState({});
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
@@ -129,8 +128,6 @@ export default function EditProject({params}) {
                         setDeveloperList(developerList);
                     }
                 }
-                setCityName(getProjectInfo.data.city.city_name);
-                console.log(getProjectInfo.data.city.city_name)
                 setLoading(false); // Stop loading
                 setError(null); // Clear errors
 		} catch (err) {
@@ -140,7 +137,6 @@ export default function EditProject({params}) {
 		fetchData(); // Fetch data on component mount
 	}, []);
     
-   console.log(projectDetail);
 
     const validationSchema = Yup.object({
             title_en: Yup.string() .min(3, "Title must be at least 3 characters") .required("Title is required"),
@@ -282,18 +278,23 @@ export default function EditProject({params}) {
                    console.log(allUploadFiles);
 
                    const hasFile = allUploadFiles.some((item) => item instanceof File);
-                   console.log("Contains a File:", hasFile);
+                   const hasFileIcon = allUploadFilesICon.some((item) => item instanceof File);
+                   console.log("Contains a File:", hasFileIcon);
                    // Upload files
                    let  uploadImageUrl = values.picture_img;
                    let uploadImageIconUrl = [];
                    if(hasFile){
                         const uploadImageUrlFIles = await insertMultipleUploadImage("image", allUploadFiles);
                         uploadImageUrl = uploadImageUrlFIles.files;
-                        uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
                    }
+                   if(hasFileIcon){
+                    uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
+                  }
 
                    
                    if (uploadImageUrl.length > 0) {
+
+
                        const imageUrls = [];
                        let videoUrl = values.video;
                        let iconUrl = values.icon; // Initialize as null for a single URL
@@ -301,6 +302,8 @@ export default function EditProject({params}) {
                        // Process uploaded files to separate URLs
                         if(hasFile){
                             uploadImageUrl.forEach((file) => {
+
+
                                 if (file.mimeType.startsWith("image")) {
                                     imageUrls.push(file.url); // Collect image URLs
                                 } else if (file.mimeType.startsWith("video")) {
@@ -320,6 +323,7 @@ export default function EditProject({params}) {
                             iconUrl = values.icon;
                        }
                    
+                       
                        console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
                    
                        // Default video URL if not uploaded
@@ -343,7 +347,7 @@ export default function EditProject({params}) {
                            description_fr: values.description_fr,
                            price: parseInt(values.price) ?? 0,
                            vr_link: values.vr_link,
-                           picture: imageUrls,
+                           picture: imageUrls.length > 0 ? imageUrls : values.picture_img, // Default to an empty array if `values.picture_img` is undefined
                            icon: iconUrl,
                            video: videoUrl,
                            user_id: values.user_id,
@@ -413,10 +417,10 @@ export default function EditProject({params}) {
                             icon: projectDetail.icon || null,
                             video: projectDetail.video || null,
                             video_link: projectDetail.video || null,
-                            state_id: projectDetail.state || "",
-                            city_id: projectDetail.city || "",
-                            districts_id: projectDetail.district || "",
-                            neighborhood_id: projectDetail.neighborhood || "",
+                            state_id: projectDetail.state.id || "",
+                            city_id: projectDetail.city.id || "",
+                            districts_id: projectDetail.district.id || "",
+                            neighborhood_id: projectDetail.neighborhood.id || "",
                             user_id: projectDetail.user || ""
                         }}
                         validationSchema={validationSchema}
@@ -665,7 +669,6 @@ export default function EditProject({params}) {
                                         <div className="box grid-1 box gap-50">
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="picture_img">Video Option:</label>
-                                                {/* Video Option Radio Buttons */}
                                                 <div>
                                                     <fieldset className="fieldset-radio">
                                                         <input
@@ -674,10 +677,10 @@ export default function EditProject({params}) {
                                                             value="upload"
                                                             name="videoOption"
                                                             onChange={() => {
-                                                                setIsVideoUpload(true); // Update the state for 'Upload Video'
-                                                                setFieldValue("video", null); // Reset the file field in Formik state
+                                                                setIsVideoUpload(true); 
+                                                                setFieldValue("video", null); 
                                                             }}
-                                                            checked={isVideoUpload} // Ensure this radio is checked if it's an .mp4
+                                                            checked={isVideoUpload} 
                                                         />
                                                         <label htmlFor="upload" className="text-radio">Upload Video</label>
 
@@ -687,10 +690,10 @@ export default function EditProject({params}) {
                                                             name="videoOption"
                                                             value="link"
                                                             onChange={() => {
-                                                                setIsVideoUpload(false); // Update the state for 'YouTube Link'
-                                                                setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
+                                                                setIsVideoUpload(false);
+                                                                setFieldValue("video_link", "");
                                                             }}
-                                                            checked={!isVideoUpload} // Ensure this radio is checked if it's not an .mp4
+                                                            checked={!isVideoUpload}
                                                         />
                                                         <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
                                                         </fieldset>
@@ -698,48 +701,52 @@ export default function EditProject({params}) {
 
                                                 {/* Conditional Fields */}
                                                 {isVideoUpload ? (
-                                                        // Video Upload Field
-                                                        <div className="box-floor-img uploadfile">
-                                                            <div className="btn-upload">
-                                                                <label className="tf-btn primary">
-                                                                    Choose File
-                                                                    <input
-                                                                        type="file"
-                                                                        accept="video/mp4"
-                                                                        className="ip-file"
-                                                                        onChange={(event) => {
-                                                                            const file = event.target.files[0];
-                                                                            if (file) {
-                                                                                setFieldValue("video", file); // Set the video file in Formik state
-                                                                                setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                                            }
-                                                                        }}
-                                                                        style={{ display: "none" }}
-                                                                    />
-                                                                </label>
-                                                            </div>
-                                                            {videoPreview && (
-                                                                <video controls className="uploadFileImage">
-                                                                    <source src={videoPreview} type="video/mp4" />
-                                                                    Your browser does not support the video tag.
-                                                                </video>
-                                                            )}
-                                                            <p className="file-name fw-5">Or drop video here to upload</p>
-                                                            {/* <ErrorMessage name="video" component="div" className="error" /> */}
+                                                    // Video Upload Field
+                                                    <div className="box-floor-img uploadfile">
+                                                        <div className="btn-upload">
+                                                            <label className="tf-btn primary">
+                                                                Choose File
+                                                                <input
+                                                                    type="file"
+                                                                    accept="video/mp4"
+                                                                    className="ip-file"
+                                                                    onChange={(event) => {
+                                                                        const file = event.target.files[0];
+                                                                        if (file) {
+                                                                            setFieldValue("video", file); // Set the video file in Formik state
+                                                                            setFieldValue("video_link", ""); // Clear the video link field
+                                                                            setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                        }
+                                                                    }}
+                                                                    style={{ display: "none" }}
+                                                                />
+                                                            </label>
                                                         </div>
-                                                    ) : (
-                                                        // YouTube Link Input Field
-                                                        <div>
-                                                            <label htmlFor="video_link">YouTube Link:</label>
-                                                            <Field
-                                                                type="text"
-                                                                name="video_link"
-                                                                className="form-control"
-                                                                placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
-                                                            />
-                                                            {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
-                                                        </div>
-                                                    )}
+                                                        {videoPreview && (
+                                                            <video controls className="uploadFileImage">
+                                                                <source src={videoPreview} type="video/mp4" />
+                                                                Your browser does not support the video tag.
+                                                            </video>
+                                                        )}
+                                                        <p className="file-name fw-5">Or drop video here to upload</p>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <label htmlFor="video_link">YouTube Link:</label>
+                                                        <Field
+                                                            type="text"
+                                                            name="video_link"
+                                                            className="form-control"
+                                                            placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
+                                                            onChange={(event) => {
+                                                                const value = event.target.value;
+                                                                setFieldValue("video_link", value); // Set the video link in Formik state
+                                                                setFieldValue("video", null); // Clear the video file field
+                                                                setVideoPreview(null); // Remove the video preview
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
                                             </fieldset>
 
                                         </div>
@@ -753,12 +760,13 @@ export default function EditProject({params}) {
                                                     as="select"
                                                     name="state_id"
                                                     className="nice-select country-code"
-                                                    value={ projectDetail.state.id || values.state_id}
                                                     onChange={(e) => {
                                                         const selectedStateId = e.target.value;
                                                         setFieldValue("state_id", selectedStateId);
                                                         handleStateChange(selectedStateId);
                                                     }}
+                                                    value={ projectDetail.state.id || values.state_id}
+
                                                 >
                                                 <option value="">Select State</option>
                                                 {stateList.length > 0 ? (
@@ -794,7 +802,6 @@ export default function EditProject({params}) {
                                                             </option>
                                                         ))
                                                     ) : (
-                                                        // Show the projectDetail city name when cityList is empty
                                                         projectDetail?.city?.id && (
                                                             <option value={projectDetail.city.id}>
                                                                 {projectDetail.city.name}
@@ -907,7 +914,7 @@ export default function EditProject({params}) {
                                     </div>
                                     <button type="submit"  className="tf-btn primary" >Update Developer</button>
                                 </div >
-                                {showErrorPopup && Object.keys(errors).length > 0 && (
+                                {Object.keys(errors).length > 0 && (
                                  <ErrorPopup
                                     errors={errors}
                                     validationSchema={validationSchema}
@@ -917,8 +924,6 @@ export default function EditProject({params}) {
                             </Form>
                         )}
                         </Formik>
-
-
                     </LayoutAdmin >
             }
 		</>
