@@ -5,18 +5,17 @@ import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from 'axios';
-import { userType } from "../../components/common/functions";
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import passwordShow from "../../public/images/favicon/password-show.png";
 import passwordHide from "../../public/images/favicon/password-hide.png";
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import { capitalizeFirstChar } from "../../components/common/functions";
+import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
-
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +43,6 @@ export default function CreateAgency() {
     const [currencyCode, setCurrencyCode] = useState([]);
     const [currencyList, setCurrencyList] = useState([]);
 
-
     const router = useRouter();
     const [propertyMapCoords, setPropertyMapCoords] = useState({
         latitude: 33.5945144,
@@ -62,13 +60,12 @@ export default function CreateAgency() {
         currency_id: Yup.string().required("Currency is required"),
         vr_link: Yup.string().url("Invalid VR URL").nullable(),
         picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
-        credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         city_id: Yup.string().required("City is required"),
         districts_id: Yup.string().required("District is required"),
         neighborhood_id: Yup.string().required("Neighborhood is required"),
         user_id: Yup.string().required("Developer is required"),
-        link_uuid: Yup.string().required("Link uuid is required"),
+        
     });
 
     useEffect(() => {
@@ -123,7 +120,8 @@ export default function CreateAgency() {
         const { latitude, longitude } = selectedState;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 10
         });
         if(cityList.length === 0){
             const cityObj = { state_id: stateId, lang: "en" };
@@ -134,13 +132,16 @@ export default function CreateAgency() {
             }
         }
     };
+
+    
     const handleCityChange = async (cityId) => {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
         console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!cityId) {
@@ -168,7 +169,8 @@ export default function CreateAgency() {
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 14
         });
 
         if (!DistrictId) {
@@ -179,7 +181,7 @@ export default function CreateAgency() {
             const districtObj = { district_id: DistrictId , lang:"en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
-                setNeighborhoodList(getNeighborhoodObjInfo.data.neighborhoods);
+                setNeighborhoodList(getNeighborhoodObjInfo.data);
             } else {
                 setNeighborhoodList([]);
             }
@@ -198,6 +200,7 @@ export default function CreateAgency() {
             setPropertyMapCoords({
                 latitude: latitude,
                 longitude: longitude,
+                zoom: 14
             });
         } else {
             console.error('Neighborhood not found');
@@ -207,20 +210,6 @@ export default function CreateAgency() {
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-
-        // Validation for video upload
-        // if (isVideoUpload && !values.video) {
-        //         setErrors({ serverError: "Please upload a video file." });
-        //         setShowErrorPopup(true);
-        //         return;
-        // }
-        // if (!isVideoUpload && !values.video_link) {
-        //         setErrors({ serverError: "Please enter a YouTube video link." });
-        //         setShowErrorPopup(true);
-        //         return;
-        //     }
-
-
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
@@ -228,6 +217,9 @@ export default function CreateAgency() {
         console.log("Selected Amenities:", selectedAmenities);
 
         try {
+            setErrors({ serverError: "Processing ........." });
+            setShowErrorPopup(true);
+            //setLoading(true); // Start loader
             /********* Upload Image ***********/
             // const uploadImageObj = [values.picture_img, values.video];
             // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
@@ -269,9 +261,16 @@ export default function CreateAgency() {
             
                 // Default video URL if not uploaded
                 if (!videoUrl) {
+                    const isValid = validateYouTubeURL(values.video_link);
+                    if (!isValid) {
+                        setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                        setShowErrorPopup(true);
+                        return false;
+                    }
                     videoUrl = values.video_link ?? null; // Use values.video_link as fallback
                 }
-
+                console.log('values');
+                console.log(values);
 
                 /********* Create Project ***********/
                 const projectData = {
@@ -285,7 +284,6 @@ export default function CreateAgency() {
                     icon: iconUrl,
                     video: videoUrl,
                     user_id: values.user_id,
-                    link_uuid: values.link_uuid,
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id, // Fixed
@@ -294,27 +292,29 @@ export default function CreateAgency() {
                     longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
                     currency_id: values.currency_id,
                     meta_details: selectedAmenities,
-                    address: "",
+                    address: values.address,
                 };
 
                 console.log("Project Data:", projectData); 
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
 
                 if (createUserInfo.status) {
-                    setSucessMessage(true);
-                    setErrors({ serverError: "Project created successfully." });
-                    setShowErrorPopup(true);
+                    //setSucessMessage(true);
+                    setSucessMessage(createUserInfo.message || "Project created successfully.");
                     resetForm();
                     router.push("/project-listing");
                 } else {
+                    //setLoading(false); 
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
                 }
             } else {
+                //setLoading(false); 
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
+            //setLoading(false); 
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
         }finally {
@@ -357,13 +357,12 @@ export default function CreateAgency() {
                     picture_img: [], // Set this to an empty array for multiple files
                     icon: null, // Set this to an empty array for multiple files
                     video: null, // Use `null` for file inputs
-                    credit: "",
                     state_id: "",
                     city_id: "",
                     districts_id: "",
                     neighborhood_id: "",
                     user_id: "",
-                    link_uuid: "",
+                    
                  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -371,31 +370,7 @@ export default function CreateAgency() {
                 {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Agency User Image</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                            type="file"
-                                            className="ip-file"
-                                            onChange={(event) => {
-                                                const file = event.currentTarget.files[0];
-                                                setFieldValue("image", file);
-                                                setFilePreview(URL.createObjectURL(file));
-                                            }}
-                                        />
-                                    </div>
-                                    {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
-                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
+                         
                             <div className="widget-box-2">
                                 <h6 className="title">Project Information</h6>
                                 <div className="box grid-2 gap-30">
@@ -444,7 +419,7 @@ export default function CreateAgency() {
                                                     <option value="">Select Currency</option>
                                                     {currencyList && currencyList.length > 0 ? (
                                                         currencyList.map((currency, index) =>(
-                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            <option key={index} value={currency.id}>{currency.name}
                                                             </option>
                                                         ))
                                                     ) : (
@@ -458,23 +433,6 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">VR Link:</label>
                                         <Field type="text" name="vr_link" className="box-fieldset"  />
                                         {/* <ErrorMessage name="vr_link" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:<span>*</span></label>
-                                        <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        {/* <ErrorMessage name="link_uuid" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
@@ -495,7 +453,18 @@ export default function CreateAgency() {
                                         </Field>
                                         {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
-                                        {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                   
+                                </div>
+                                <div className="box grid-3 gap-30">
+                                    {/* <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">License number:</label>
+                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
+                                    </fieldset>
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Credit:</label>
+                                        <Field type="text" name="credit" className="box-fieldset"  />
+                                    </fieldset> */}
+                                         {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="project">{project.name}:</label>
@@ -527,9 +496,9 @@ export default function CreateAgency() {
                                                         const validPreviews = [];
                                                         files.forEach((file) => {
                                                             // Check file size (less than 150KB)
-                                                            if (file.size < 150000) {
-                                                            alert(`Please upload files above the size of 150KB`);
-                                                            } else {
+                                                            // if (file.size < 150000) {
+                                                            // alert(`Please upload files above the size of 150KB`);
+                                                            // } else {
                                                             // Create an Image object to check its dimensions
                                                             const img = new Image();
                                                             const reader = new FileReader();
@@ -558,7 +527,7 @@ export default function CreateAgency() {
 
                                                             // Read the file as a Data URL to create a preview
                                                             reader.readAsDataURL(file);
-                                                            }
+                                                            //}
                                                         });
                                                         }}
                                                         style={{ display: "none" }}
@@ -610,64 +579,66 @@ export default function CreateAgency() {
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="picture_img">Icon Images:</label>
                                         <Field
-                                    name="icon"
-                                    component={({ field, form }) => (
-                                        <div className="box-floor-img uploadfile">
-                                        {/* Upload Button */}
-                                        <div className="btn-upload">
-                                            <label className="tf-btn primary">
-                                            Choose Files
-                                            <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="ip-file"
-                                                    onChange={(event) => {
-                                                    const file = event.target.files[0]; // Get the first file
-                                                    if (file) {
-                                                        // Perform size validation
-                                                        if (file.size < 1000) {
-                                                        alert(`Please upload a file above the size of 1KB`);
-                                                        return;
-                                                        }
+                                            name="icon"
+                                            component={({ field, form }) => (
+                                                <div className="box-floor-img uploadfile">
+                                                {/* Upload Button */}
+                                                <div className="btn-upload">
+                                                    <label className="tf-btn primary">
+                                                    Choose Files
+                                                    <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                            const file = event.target.files[0]; // Get the first file
+                                                            if (file) {
+                                                                // Perform size validation
+                                                                // if (file.size < 1000) {
+                                                                // alert(`Please upload a file above the size of 1KB`);
+                                                                // return;
+                                                                // }
 
-                                                        const img = new Image();
-                                                        const reader = new FileReader();
+                                                                const img = new Image();
+                                                                const reader = new FileReader();
 
-                                                        reader.onload = (e) => {
-                                                        img.src = e.target.result;
+                                                                reader.onload = (e) => {
+                                                                img.src = e.target.result;
 
-                                                        img.onload = () => {
-                                                            const imageHeight = img.height;
-                                                            const imageWidth = img.width;
+                                                                img.onload = () => {
+                                                                    const imageHeight = img.height;
+                                                                    const imageWidth = img.width;
 
-                                                            // Perform dimension validation
-                                                            if (imageHeight > 200 || imageWidth > 200) {
-                                                            alert(
-                                                                "Please upload an image with a maximum height and width of 200px."
-                                                            );
-                                                            } else {
-                                                            setFieldValue("icon", file); // Set the file in Formik state
-                                                            setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                    setFieldValue("icon", file); // Set the file in Formik state
+                                                                    setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                    // Perform dimension validation
+                                                                    // if (imageHeight > 200 || imageWidth > 200) {
+                                                                    // alert(
+                                                                    //     "Please upload an image with a maximum height and width of 200px."
+                                                                    // );
+                                                                    // } else {
+                                                                    // setFieldValue("icon", file); // Set the file in Formik state
+                                                                    // setIconPreview(URL.createObjectURL(file)); // Generate a preview URL
+                                                                    // }
+                                                                };
+                                                                };
+
+                                                                reader.readAsDataURL(file); // Read file as Data URL
                                                             }
-                                                        };
-                                                        };
-
-                                                        reader.readAsDataURL(file); // Read file as Data URL
-                                                    }
-                                                    }}
-                                                    style={{ display: "none" }}
-                                                />
-                                            </label>
-                                        </div>
-                                        <p className="file-name fw-5">Or drop images here to upload</p>
-                                        </div>
-                                    )}
-                                    />
+                                                            }}
+                                                            style={{ display: "none" }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                <p className="file-name fw-5">Or drop images here to upload</p>
+                                                </div>
+                                            )}
+                                        />
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         {/* Image Previews */}
                                     <div className="image-preview-container image-gallery">
-                                    {iconPreview && (
+                                    {iconPreview.length > 0 && iconPreview && (
                                             <div className="preview-item">
                                             <img
                                                 src={iconPreview}
@@ -839,7 +810,7 @@ export default function CreateAgency() {
                                                 {neighborhoodList && neighborhoodList.length > 0 ? (
                                                     neighborhoodList.map((neighborhoods) => (
                                                         <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                            {neighborhoods.neighborhood_name}
+                                                            {neighborhoods.name}
                                                         </option>
                                                     ))
                                                 ) : (
@@ -859,6 +830,13 @@ export default function CreateAgency() {
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                            setFieldValue('address', newAddress);
+                                            setFieldValue('latitude', newLocation.lat);
+                                            setFieldValue('longitude', newLocation.lng);
+                                            //handleAddressSelect(newAddress, newLocation);
+                                        }
+                                    }
                                     />
                                 </div>
                             </div>
@@ -893,6 +871,12 @@ export default function CreateAgency() {
                                 errors={errors}
                                 validationSchema={validationSchema}
                                 onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
+                        {sucessMessage && (
+                            <SuccessPopup
+                                message={sucessMessage}
+                                onClose={() => setSucessMessage(false)}
                             />
                         )}
                     </Form>

@@ -98,7 +98,7 @@ export default function ProjectAmenitiesListing() {
               <div className="widget-box-2 wd-listing">
               <div class="top d-flex justify-content-between align-items-center">
                 <h6 className="title">Districts Listing</h6>
-                <Link className="remove-file tf-btn primary" href="/create-district">Create Districts</Link>
+                <Link className="remove-file tf-btn primary" href="/create-district">Add Districts</Link>
               </div>
                 {districts.length > 0 ? (
                   <>

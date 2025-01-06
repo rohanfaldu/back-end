@@ -85,8 +85,8 @@ export default function ProjectListing() {
     }
   };
 
-  const handleView = (id) => {
-    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/property/${id}`;
+  const handleView = (slug) => {
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/project/${slug}`;
       window.open(URL, '_blank')
   };
 
@@ -129,7 +129,7 @@ export default function ProjectListing() {
                               <td>
                                 <div className="listing-box">
                                   <div className="images">
-                                    <img src={property.picture || '/images/avatar/user-image.png'} alt="images" />
+                                    <img src={property.picture[0] || '/images/avatar/user-image.png'} alt="images" />
                                   </div>
                                 </div>
                               </td>
@@ -145,8 +145,8 @@ export default function ProjectListing() {
                               </td>
                               <td>
                                 <ul className="list-action">
-                                  <li className="edit">
-                                    <Link href={`/edit-project/${property.id}`} className="item">
+                                  {/* <li className="edit">
+                                    <Link href={`/edit-project/${property.slug}`} className="item">
                                       <Image
                                         src={EditIcon} // Imported image object or static path
                                         alt="Edit icon"
@@ -154,7 +154,7 @@ export default function ProjectListing() {
                                         height={25}
                                       />
                                     </Link>
-                                  </li>
+                                  </li> */}
                                   <li className="delete">
                                     <a className="remove-file item" onClick={() => handleDelete(property.id)}>
                                       <Image
@@ -165,10 +165,10 @@ export default function ProjectListing() {
                                         />
                                     </a>
                                   </li>
-                                  {/* <li className="delete">
+                                  <li className="delete">
                                     <a
                                       className="remove-file item"
-                                      onClick={() => handleView(property.id)}
+                                      onClick={() => handleView(property.slug)}
                                       style={{ border: 'none', background: 'transparent', padding: 0 }}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -180,7 +180,7 @@ export default function ProjectListing() {
                                         height={25}
                                       />
                                     </a>
-                                  </li> */}
+                                  </li>
                                 </ul>
                               </td>
                             </tr>

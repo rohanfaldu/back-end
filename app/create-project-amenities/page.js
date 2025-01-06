@@ -188,7 +188,7 @@ export default function CreateProjectAmenities() {
                                                 }}
                                             >
                                             <option value="">Select Type</option>
-                                            <option value="number">Number</option>
+                                            {/* <option value="number">Number</option> */}
                                             <option value="boolean">Boolean</option>
                                         </Field>
                                         {/* <ErrorMessage name="type" component="div" className="error" /> */}

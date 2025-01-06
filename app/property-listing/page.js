@@ -138,8 +138,7 @@ export default function PropertyListing() {
                                 </td>
                                 <td>{property.title}</td>
                                 <td>
-                                  {property.currency ?? "$"}
-                                  {property.price}
+                                  {property.price} {property.currency ?? "USD"}
                                   <br />
                                   {property.user_name}
                                 </td>
@@ -163,6 +162,16 @@ export default function PropertyListing() {
                                       />
                                     </Link>
                                   </li> */}
+                                   {/* <li className="edit">
+                                        <Link href={`/edit-property/${property.slug}`} className="item">
+                                          <Image 
+                                            src={EditIcon} // Imported image object or static path
+                                            alt="Edit icon" 
+                                            width={25} 
+                                            height={25} 
+                                          />
+                                        </Link>
+                                    </li> */}
                                     <li className="delete">
                                       <a
                                         className="remove-file item"
@@ -179,7 +188,7 @@ export default function PropertyListing() {
                                     <li className="delete">
                                       <a
                                         className="remove-file item"
-                                        onClick={() => handleView(property.id)}
+                                        onClick={() => handleView(property.slug)}
                                         style={{ border: 'none', background: 'transparent', padding: 0 }}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -193,16 +202,7 @@ export default function PropertyListing() {
                                       </a>
                                     </li>
 
-                                    <li className="edit">
-                                        <Link href={`/edit-property/${property.id}`} className="item">
-                                          <Image 
-                                            src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
-                                          />
-                                        </Link>
-                                    </li>
+                                   
                                   </ul>
                                 </td>
                               </tr>

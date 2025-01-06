@@ -64,7 +64,7 @@ export default function CreateAgency() {
         setShowErrorPopup(false); // Reset error popup
         try {
             console.log(values);
-            return;
+           
             // Check if user exists
             const checkData = { email_address: values.email, phone_number: parseInt(values.phone, 10) };
             const getUserInfo = await insertData('auth/check/user', checkData, false);
