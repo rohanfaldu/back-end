@@ -17,7 +17,7 @@ import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
-export default function CreateAgency() {
+export default function CreateProject() {
     const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -65,7 +65,7 @@ export default function CreateAgency() {
         districts_id: Yup.string().required("District is required"),
         neighborhood_id: Yup.string().required("Neighborhood is required"),
         user_id: Yup.string().required("Developer is required"),
-        
+        icon: Yup.string().required("Icon is required"),
     });
 
     useEffect(() => {
@@ -213,26 +213,22 @@ export default function CreateAgency() {
         const selectedAmenities = projectOfBooleanListing
             .filter((project) => checkedItems[project.key])
             .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
-
+    
         console.log("Selected Amenities:", selectedAmenities);
-
+    
         try {
             setErrors({ serverError: "Processing ........." });
             setShowErrorPopup(true);
             //setLoading(true); // Start loader
-            /********* Upload Image ***********/
-            // const uploadImageObj = [values.picture_img, values.video];
-            // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-            // Ensure picture_img, video, and icon are arrays
+    
+            // Upload Image and Handle File Uploads (remains unchanged)
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
             const videoObj = values.video ? [values.video] : [];
             const iconObj = values.icon ? [values.icon] : [];
             
-            // Combine all files (images, video, icons) for upload
             const allUploadFiles = [...uploadImageObj, ...videoObj];
             const allUploadFilesICon = [...iconObj];
             
-            // Upload files
             const uploadImageUrl = await insertMultipleUploadImage("image", allUploadFiles);
             const uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
             
@@ -241,37 +237,35 @@ export default function CreateAgency() {
             if (uploadImageUrl.files.length > 0) {
                 const imageUrls = [];
                 let videoUrl = null;
-                let iconUrl = null; // Initialize as null for a single URL
-            
-                // Process uploaded files to separate URLs
+                let iconUrl = null;
+    
                 uploadImageUrl.files.forEach((file) => {
                     if (file.mimeType.startsWith("image")) {
-                        imageUrls.push(file.url); // Collect image URLs
+                        imageUrls.push(file.url);
                     } else if (file.mimeType.startsWith("video")) {
-                        videoUrl = file.url; // Assign video URL
+                        videoUrl = file.url;
                     }
                 });
-            
-                // Assign the first icon file's URL to iconUrl
+    
                 if (uploadImageIconUrl?.files?.length > 0) {
-                    iconUrl = uploadImageIconUrl.files[0].url; // Use the first file's URL
+                    iconUrl = uploadImageIconUrl.files[0].url;
                 }
-            
+    
                 console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
-            
-                // Default video URL if not uploaded
-                if (!videoUrl) {
-                    const isValid = validateYouTubeURL(values.video_link);
-                    if (!isValid) {
-                        setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
-                        setShowErrorPopup(true);
-                        return false;
-                    }
-                    videoUrl = values.video_link ?? null; // Use values.video_link as fallback
+    
+                // Validate YouTube URL if a link is provided
+                if (values.video_link && !validateYouTubeURL(values.video_link)) {
+                    setErrors({ serverError: "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                    setShowErrorPopup(true);
+                    return false;
                 }
+    
+                // Use the provided video link if no video was uploaded
+                videoUrl = videoUrl || values.video_link;
+    
                 console.log('values');
                 console.log(values);
-
+    
                 /********* Create Project ***********/
                 const projectData = {
                     title_en: values.title_en,
@@ -286,38 +280,38 @@ export default function CreateAgency() {
                     user_id: values.user_id,
                     state_id: values.state_id,
                     city_id: values.city_id,
-                    district_id: values.districts_id, // Fixed
-                    neighborhoods_id: values.neighborhood_id, // Fixed
+                    district_id: values.districts_id,
+                    neighborhoods_id: values.neighborhood_id,
                     latitude: isNaN(parseFloat(values.latitude)) ? 20.2323 : parseFloat(values.latitude),
                     longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
                     currency_id: values.currency_id,
                     meta_details: selectedAmenities,
                     address: values.address,
                 };
-
-                console.log("Project Data:", projectData); 
+    
+                console.log("Project Data:", projectData);
                 const createUserInfo = await insertData("api/projects/create", projectData, true);
-
+    
                 if (createUserInfo.status) {
                     //setSucessMessage(true);
                     setSucessMessage(createUserInfo.message || "Project created successfully.");
                     resetForm();
                     router.push("/project-listing");
                 } else {
-                    //setLoading(false); 
+                    //setLoading(false);
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
                 }
             } else {
-                //setLoading(false); 
+                //setLoading(false);
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
-            //setLoading(false); 
+            //setLoading(false);
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
-        }finally {
+        } finally {
             setLoading(false); // Stop loader
         }
     };

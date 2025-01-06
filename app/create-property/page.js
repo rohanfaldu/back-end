@@ -334,57 +334,54 @@ export default function CreateProperty() {
         console.log(values);
         console.log(propertyOfMetaNumberValue);
         try {
-            // Validation for video
+            // Validation for video upload
             if (isVideoUpload && !values.video) {
                 setErrors({ serverError: "Please upload a video file." });
                 setShowErrorPopup(true);
                 return;
             }
-
-            if (!isVideoUpload && !values.video_link) {
-                setErrors({ serverError: "Please enter a YouTube video link." });
+    
+            // Validate YouTube link only if it's not empty
+            if (!isVideoUpload && values.video_link && !validateYouTubeURL(values.video_link)) {
+                setErrors({ serverError: "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
                 setShowErrorPopup(true);
                 return;
             }
+    
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
                 .map((project) => ({ property_type_id: project.id, value: "true" }));
-                
-
-                if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
-                    // Iterate over the keys in the JSON object
-                    Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
-                        // Check if the key matches any property_type_id in the array
-                        const index = selectedAmenities.findIndex(item => item.property_type_id === key);
-                        if (index !== -1) {
-                            // Update the value if a match is found
-                            selectedAmenities[index].value = value;
-                        } else {
-                            // Add a new object if no match is found
-                            selectedAmenities.push({ property_type_id: key, value });
-                        }
-                    });
-                }
-
-            console.log("Selected Amenities:", selectedAmenities); 
-          //  setLoading(true);
-            const uploadImageObj = Array.isArray(values.picture_img) 
-            ? values.picture_img.filter(item => item !== null) 
-            : [values.picture_img].filter(item => item !== null);
-            
+    
+            if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
+                // Update selected amenities based on propertyOfMetaNumberValue
+                Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
+                    const index = selectedAmenities.findIndex(item => item.property_type_id === key);
+                    if (index !== -1) {
+                        selectedAmenities[index].value = value;
+                    } else {
+                        selectedAmenities.push({ property_type_id: key, value });
+                    }
+                });
+            }
+    
+            console.log("Selected Amenities:", selectedAmenities);
+            // Process image uploads
+            const uploadImageObj = Array.isArray(values.picture_img)
+                ? values.picture_img.filter(item => item !== null)
+                : [values.picture_img].filter(item => item !== null);
+    
             if (values.video != null) {
                 uploadImageObj.push(values.video);
             }
     
-            //setLoading(true);
             setErrors({ serverError: "Processing ........." });
             setShowErrorPopup(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-
+    
             if (uploadImageUrl.files.length > 0) {
                 const imageUrls = [];
                 let videoUrl = null;
-
+    
                 uploadImageUrl.files.forEach((file) => {
                     if (file.mimeType.startsWith("image")) {
                         imageUrls.push(file.url);
@@ -392,21 +389,14 @@ export default function CreateProperty() {
                         videoUrl = file.url;
                     }
                 });
-
+    
                 const pictureUrl = imageUrls.join(", ");
                 console.log("Image URLs:", pictureUrl);
                 console.log("Video URL:", videoUrl);
-
-                if (!videoUrl) {
-                    const isValid = validateYouTubeURL(values.video_link);
-                    if (!isValid) {
-                        setErrors({ serverError: "Please upload a Valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
-                        setShowErrorPopup(true);
-                        return false;
-                    }
-                    videoUrl = values.video_link ?? null; // Use values.video_link as fallback
-                }
-
+    
+                // Use video URL from upload or fallback to video link
+                videoUrl = videoUrl || (values.video_link ? values.video_link : null);
+    
                 const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
@@ -432,38 +422,32 @@ export default function CreateProperty() {
                     project_id: values.project_id ?? null,
                     address: values.address,
                 };
-
-                console.log("Property Data:", propertyData); 
+    
+                console.log("Property Data:", propertyData);
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
                 console.log('response');
                 console.log(createPropertyInfo.status);
-                console.log('status');
+    
                 if (createPropertyInfo.status) {
-                    //setLoading(false);
                     setSucessMessage(createPropertyInfo.message || "Property created successfully.");
-                    //setErrors({ serverError: "Property created successfully." });
-                    //setShowErrorPopup(true);
                     resetForm();
                     router.push("/property-listing");
                 } else {
-                    //setLoading(false);
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
                 }
             } else {
-               // setLoading(false);
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
             }
         } catch (error) {
-            //setLoading(false);
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
-        }
-        finally {
+        } finally {
             setLoading(false); // Stop loader
         }
     };
+    
 
 
     const handleCheckboxChange = (key) => {
