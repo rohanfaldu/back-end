@@ -109,18 +109,6 @@ export default function EditProject({params}) {
                 }
                
             }
-           
-    
-            // if (getProjectInfo.data.length === 0 && getProjectInfo.data.city) {
-            //     handleCityChange(getProjectInfo.data.city);
-            // }
-    
-            // if (getProjectInfo.data.length === 0 && getProjectInfo.data.district) {
-            //     handleDistrictChange(getProjectInfo.data.district);
-            // }
-
-                
-
 
         
                 if(projectOfNumberListing.length === 0 && projectOfBooleanListing.length === 0){
@@ -152,7 +140,6 @@ export default function EditProject({params}) {
 		fetchData(); // Fetch data on component mount
 	}, []);
     
-   console.log(projectDetail);
    console.log(projectDetail);
 
     const validationSchema = Yup.object({
@@ -267,7 +254,6 @@ export default function EditProject({params}) {
             console.error('Neighborhood not found');
         }
     };
-    console.log(projectDetail);
     const handleSubmit = async (values, {resetForm, setErrors }) => {
        console.log(values);
               
@@ -442,30 +428,25 @@ export default function EditProject({params}) {
                                     <div className="widget-box-2">
                                         <h6 className="title">Project Information</h6>
                                         <div className="box grid-2 gap-30">
-                                            {/* <Field type="hidden" id="project_id" name="project_id" className="form-control style-1" /> */}
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">Title English:<span>*</span></label>
                                                 <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                                {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">Title French:<span>*</span></label>
                                                 <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                                {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                         <div className="grid-1 box gap-30">
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="description">Description English:<span>*</span></label>
                                                 <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                                {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                         <div className="grid-1 box gap-30">
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="description">Description French:<span>*</span></label>
                                                 <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                                {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
                                     </div>
@@ -481,20 +462,8 @@ export default function EditProject({params}) {
                                                 <label htmlFor="desc">VR Link:</label>
                                                 <Field type="text" name="vr_link" className="box-fieldset"  />
                                             </fieldset>
-                                            {/* <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Link UUID:<span>*</span></label>
-                                                <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                            </fieldset> */}
                                         </div>
                                         <div className="box grid-3 gap-30">
-                                            {/* <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">License number:</label>
-                                                <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                            </fieldset>
-                                            <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Credit:</label>
-                                                <Field type="text" name="credit" className="box-fieldset"  />
-                                            </fieldset> */}
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">User Listing:</label>
                                                 <Field as="select" name="user_id" className="nice-select country-code"
@@ -513,50 +482,15 @@ export default function EditProject({params}) {
                                                         <></>
                                                     )}
                                                 </Field>
-                                                {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                             </fieldset>
-                                                {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
-                                                    projectOfNumberListing.map((project) => (
-                                                        <fieldset className="box box-fieldset">
-                                                            <label htmlFor="desc">{project.name}:</label>
-                                                                <Field type="number" name={project.id} className="box-fieldset" />
-                                                        </fieldset>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )} */}
                                         </div>
                                         <div className="grid-2 box gap-30">
-                                        <fieldset className="box-fieldset">
+                                            <fieldset className="box-fieldset">
                                             <label htmlFor="picture_img">Picture Images:</label>
                                             <Field
                                                 name="picture_img"
                                                 component={({ field, form }) => ( 
                                                 <div className="box-floor-img uploadfile">
-                                                    {/* Existing Image Previews */}
-                                                    {/* <div className="image-previews">
-                                                    {field.value?.map((img, index) => (
-                                                        <div key={index} className="image-preview">
-                                                        <img
-                                                            src={typeof img === 'string' ? img : URL.createObjectURL(img)}
-                                                            alt={`Preview ${index}`}
-                                                            className="preview-img"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="remove-btn"
-                                                            onClick={() => {
-                                                            const updatedImages = [...field.value];
-                                                            updatedImages.splice(index, 1); // Remove the image from the array
-                                                            form.setFieldValue(field.name, updatedImages);
-                                                            }}
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                        </div>
-                                                    ))}
-                                                    </div> */}
-
                                                     {/* Upload Button */}
                                                     <div className="btn-upload">
                                                     <label className="tf-btn primary">
@@ -615,9 +549,6 @@ export default function EditProject({params}) {
                                                 )}
                                             />
                                             </fieldset>
-
-
-                   
                                             <fieldset className="box-fieldset">
                                                 {/* Image Previews */}
                                                 <div className="image-preview-container image-gallery">
