@@ -5,14 +5,14 @@ import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from 'axios';
-import { userType } from "../../components/common/functions";
+import { userType } from "../../../components/common/functions";
 import { useState } from "react"
 import { useRouter } from 'next/navigation';
-import passwordShow from "../../public/images/favicon/password-show.png";
-import passwordHide from "../../public/images/favicon/password-hide.png";
-import { insertData } from "../../components/api/Axios/Helper";
-import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
+import passwordShow from "../../../public/images/favicon/password-show.png";
+import passwordHide from "../../../public/images/favicon/password-hide.png";
+import { insertData } from "../../../components/api/Axios/Helper";
+import { insertMultipleUploadImage } from "../../../components/common/imageUpload";
+import ErrorPopup from "../../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
 
 export default function EditPropertyType() {

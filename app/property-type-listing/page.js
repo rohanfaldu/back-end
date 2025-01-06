@@ -125,7 +125,7 @@ export default function PropertyAmenitiesListing() {
                               </td>
                               <td>
                                 <ul className="list-action">
-                                  {/* <li className="edit">
+                                  <li className="edit">
                                     <Link href={`/edit-property-type/${property.id}`} className="item">
                                       <Image
                                         src={EditIcon} // Imported image object or static path
@@ -134,7 +134,7 @@ export default function PropertyAmenitiesListing() {
                                         height={25}
                                       />
                                     </Link>
-                                  </li> */}
+                                  </li>
                                   <li className="delete">
                                     <a className="remove-file item" onClick={() => handleDelete(property.id)}>
                                       <Image
