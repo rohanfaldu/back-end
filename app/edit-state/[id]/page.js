@@ -59,7 +59,7 @@ export default function EditState({ params }) {
 
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         try {
-            const response = await updateData("api/state/update", { ...values, state_id: id });
+            const response = await updateData("api/state/update", { ...values, state_id: id }, true);
 
             if (response.status) {
                 setSucessMessage(response.message || "State created successfully");

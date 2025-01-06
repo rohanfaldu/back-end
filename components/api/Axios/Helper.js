@@ -70,43 +70,41 @@ export const createUser = async (userData) => {
 export const updateData = async (endpoint, data, flag) => {
   try {
     let header;
-
-    if (flag) {
       // Retrieve the token from localStorage
       const token = localStorage.getItem('token');
       if (!token) {
-        // Redirect to login if token is missing
+        console.warn("Token is missing, redirecting to login...");
+        localStorage.clear();
         window.location.href = '/';
         return false;
       }
       header = {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`, // Add token to Authorization header
         },
       };
-    } else {
-      // No token required
-      header = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-    }
-
+    
     // Send the PUT request with the appropriate headers
     const response = await axios.put(`${API_URL}/${endpoint}`, data, header);
     return response.data; // Return the updated data
   } catch (error) {
-    if (error.response && error.response.status === 401) {
-      // Handle unauthorized access
-      localStorage.clear();
-      window.location.href = '/';
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Handle unauthorized access
+        console.warn("Unauthorized access. Clearing token and redirecting...");
+        localStorage.clear();
+        window.location.href = '/';
+      } else {
+        console.error(`API Error: ${error.response.status} - ${error.response.data.message}`);
+      }
+    } else {
+      console.error('Network error:', error.message);
     }
-    console.error('Error updating data:', error);
     throw error; // Re-throw for further error handling
   }
 };
+
 
 
 // Function to handle DELETE requests
