@@ -80,7 +80,7 @@ export default function EditCity({ params }) {
 
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         try {
-            const response = await updateData("api/city/update", { ...values });
+            const response = await updateData("api/city/update", { ...values }, true);
 
             if (response.status) {
                 setSucessMessage(response.message || "State created successfully");

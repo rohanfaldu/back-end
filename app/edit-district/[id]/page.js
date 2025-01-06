@@ -80,7 +80,7 @@ export default function EditDistrict({ params }) {
 
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         try {
-            const response = await updateData("api/district/update", { ...values });
+            const response = await updateData("api/district/update", { ...values }, true);
 
             if (response.status) {
                 setSucessMessage(response.message || "State created successfully");
@@ -128,7 +128,7 @@ export default function EditDistrict({ params }) {
     {({setFieldValue, errors, touched }) => (
         <Form>
             <div className="widget-box-2">
-                <h6 className="title">City Information</h6>
+                <h6 className="title">District Information</h6>
                 <div className="box grid-2 gap-30">
                     <fieldset className="box box-fieldset">
                         <label htmlFor="en_name">Title English:<span>*</span></label>
@@ -171,7 +171,7 @@ export default function EditDistrict({ params }) {
                     </fieldset>
                 </div>
             </div>
-            <button type="submit" className="tf-btn primary">Update City</button>
+            <button type="submit" className="tf-btn primary">Update District</button>
             {showErrorPopup && Object.keys(errors).length > 0 && (
                 <ErrorPopup
                     errors={errors}
