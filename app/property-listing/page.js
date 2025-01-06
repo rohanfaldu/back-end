@@ -162,7 +162,7 @@ export default function PropertyListing() {
                                       />
                                     </Link>
                                   </li> */}
-                                   <li className="edit">
+                                   {/* <li className="edit">
                                         <Link href={`/edit-property/${property.slug}`} className="item">
                                           <Image 
                                             src={EditIcon} // Imported image object or static path
@@ -171,7 +171,7 @@ export default function PropertyListing() {
                                             height={25} 
                                           />
                                         </Link>
-                                    </li>
+                                    </li> */}
                                     <li className="delete">
                                       <a
                                         className="remove-file item"
