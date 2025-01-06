@@ -80,7 +80,7 @@ export default function EditDistrict({ params }) {
 
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         try {
-            const response = await updateData(`api/neighborhood/${id}`, { ...values });
+            const response = await updateData(`api/neighborhood/${id}`, { ...values }, true);
 
             if (response.status) {
                 setSucessMessage(response.message || "Neighborhood created successfully");
