@@ -115,23 +115,30 @@ export default function CreateProject() {
     });
     const handleStateChange = async (stateId) => {
         console.log('State ID:', stateId);
-
+        
+        // Clear the dependent lists whenever the state changes
+        setCityList([]); // Clear the city list first
+        setDistrictList([]); // Clear the district list
+        setNeighborhoodList([]); // Clear the neighborhood list
+    
         const selectedState = stateList.find((state) => state.id === stateId);
-        const { latitude, longitude } = selectedState;
-        setPropertyMapCoords({
-            latitude: latitude,
-            longitude: longitude,
-            zoom: 10
-        });
-        if(cityList.length === 0){
+        if (selectedState) {
+            const { latitude, longitude } = selectedState;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 10
+            });
+    
             const cityObj = { state_id: stateId, lang: "en" };
-            const getCityInfo = await insertData('api/city', cityObj, true);
+            const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
             if (getCityInfo.status) {
                 console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
     };
+    
 
     
     const handleCityChange = async (cityId) => {
@@ -150,9 +157,9 @@ export default function CreateProject() {
         }
         try {
             const districtObj = { city_id: cityId, lang: "en" };
-            const getDistrictInfo = await insertData('api/district', districtObj, true);
+            const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
-                setDistrictList(getDistrictInfo.data.districts);
+                setDistrictList(getDistrictInfo.data);
             } else {
                 setDistrictList([]);
             }
@@ -202,6 +209,7 @@ export default function CreateProject() {
                 longitude: longitude,
                 zoom: 14
             });
+            console.log(selecteNeighborhood,"selecteNeighborhood");
         } else {
             console.error('Neighborhood not found');
         }
@@ -217,8 +225,8 @@ export default function CreateProject() {
         console.log("Selected Amenities:", selectedAmenities);
     
         try {
-            setErrors({ serverError: "Processing ........." });
-            setShowErrorPopup(true);
+            console.log(parseFloat(propertyMapCoords.latitude),parseFloat(propertyMapCoords.latitude))
+            setSucessMessage("Processing .........");
             //setLoading(true); // Start loader
     
             // Upload Image and Handle File Uploads (remains unchanged)
@@ -264,8 +272,8 @@ export default function CreateProject() {
                 videoUrl = videoUrl || values.video_link;
     
                 console.log('values');
-                console.log(values);
-    
+                console.log(propertyMapCoords.latitude);
+                
                 /********* Create Project ***********/
                 const projectData = {
                     title_en: values.title_en,
@@ -282,8 +290,8 @@ export default function CreateProject() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhoods_id: values.neighborhood_id,
-                    latitude: isNaN(parseFloat(values.latitude)) ? 20.2323 : parseFloat(values.latitude),
-                    longitude: isNaN(parseFloat(values.longitude)) ? 20.2323 : parseFloat(values.longitude),
+                    latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
                     currency_id: values.currency_id,
                     meta_details: selectedAmenities,
                     address: values.address,
@@ -361,7 +369,7 @@ export default function CreateProject() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
                          
@@ -554,6 +562,7 @@ export default function CreateProject() {
                                                         type="button"
                                                         onClick={() => {
                                                             const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+                                                            console.log(values,"valuesvaluesvalues")
                                                             const newImageList = values.picture_img.filter((_, i) => i !== index);
                                                             setFilePreviews(newFilePreviews);
                                                             setFieldValue("picture_img", newImageList);
@@ -764,7 +773,7 @@ export default function CreateProject() {
                                                 {cityList && cityList.length > 0 ? (
                                                     cityList.map((cities) => (
                                                         <option key={cities.id} value={cities.id}>
-                                                            {cities.city_name}
+                                                            {cities.name}
                                                         </option>
                                                     ))
                                                 ) : (
@@ -784,7 +793,7 @@ export default function CreateProject() {
                                                 {districtList && districtList.length > 0 ? (
                                                     districtList.map((districts) => (
                                                         <option key={districts.id} value={districts.id}>
-                                                            {districts.district_name}
+                                                            {districts.name}
                                                         </option>
                                                     ))
                                                 ) : (

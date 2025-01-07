@@ -120,7 +120,7 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 				onLoad={onLoad}
 				onUnmount={onUnmount}
 			>
-				{/* <Marker position={currentLocation} /> */}
+				<Marker position={currentLocation} />
 			</GoogleMap>
         </>
       ) : (
