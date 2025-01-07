@@ -22,12 +22,14 @@ export default function MyProperty() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
         const type = { type: "agency" };
-        const getUserInfo = await insertData('auth/getall', type, false);
-        setProperties(getUserInfo.data.user_data); // Save all properties
-        setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
-        setLoading(false); // Stop loading
-        setError(null); // Clear errors
+                const getUserInfo = await insertData('auth/getall', type, false);
+                console.log(getUserInfo);
+                setProperties(getUserInfo.data.user_data); // Save all properties
+                setFilteredProperties(getUserInfo.data.user_data); // Initially display all properties
+                setLoading(false); // Stop loading
+                setError(null); // Clear errors
       } catch (err) {
         setError(err.response?.data?.message || 'An error occurred'); // Handle error
         setLoading(false); // Stop loading
@@ -37,48 +39,46 @@ export default function MyProperty() {
     fetchData(); // Fetch data on component mount
   }, []);
 
-  useEffect(() => {
-    filterAndPaginateData(); // Apply filter and pagination whenever inputs change
-  }, [searchTerm, statusFilter, currentPage, properties]);
-
-  // Filter and paginate properties
-  const filterAndPaginateData = () => {
-    let filtered = properties;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(property =>
-        property.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (statusFilter) {
-      filtered = filtered.filter(property => property.status === statusFilter);
-    }
-
-    // Paginate results
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
-
-    setFilteredProperties(paginated);
-  };
-
-  // Handle search input
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
-  };
+    // console.log(filteredProperties.length);
+    useEffect(() => {
+      filterAndPaginateData(); // Apply filter and pagination whenever inputs change
+    }, [searchTerm, statusFilter, currentPage, properties]);
+  
+    // Filter and paginate properties
+    const filterAndPaginateData = () => {
+      let filtered = properties;
+  
+      // Filter by search term
+      if (searchTerm) {
+        filtered = filtered.filter(property =>
+          property.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+  
+      // Filter by status
+      if (statusFilter) {
+        filtered = filtered.filter(property => property.status === statusFilter);
+      }
+  
+      // Paginate results
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
+  
+      setFilteredProperties(paginated);
+    };
+  
+    // Handle search input
+    const handleSearchChange = (e) => {
+      setSearchTerm(e.target.value);
+      setCurrentPage(1); // Reset to first page on search
+    };
 
   const handleDelete = async (id) => {
-    console.log(id);
     try {
       const deleteData = { id: id, type: "agency" };
-      console.log(deleteData);
       const deleteUserInfo = await insertData('auth/delete/user', deleteData);
       if(deleteUserInfo.status){
         const filteredData = filteredProperties.filter((item) => item.id !== id);
-        console.log(filteredData);
         setProperties(filteredData); // Save all properties
         setFilteredProperties(filteredData); // Initially display all properties
         setLoading(false); // Stop loading
@@ -108,7 +108,10 @@ export default function MyProperty() {
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency">Add Agnecy</Link>
+                </div>
                   {(filteredProperties.length > 0)?
                     <>
                       <div className="wrap-table">
@@ -147,26 +150,26 @@ export default function MyProperty() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
-                                      {/* <li className="edit">
-                                        <Link href={`/edit-agency/${user.id}`} className="item">
-                                          <Image 
+                                      <li className="edit">
+                                        {/* <Link href={`/edit-agency/${user.id}`} className="item"> */}
+                                          <Image
                                             src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
                                           />
-                                        </Link>
-                                      </li> */}
+                                        {/* </Link> */}
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(user.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>
@@ -212,7 +215,7 @@ export default function MyProperty() {
                       </div>
                     </>
                   }
-                
+
               </div>
             </div>
           </LayoutAdmin>

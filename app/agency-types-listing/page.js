@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
-
+import variablesList from "../../components/common/variable";
 export default function AgencyPackageListing() {
   const [properties, setProperties] = useState([]); // Store properties for the current page
   const [loading, setLoading] = useState(true); // Manage loading state
@@ -19,11 +19,11 @@ export default function AgencyPackageListing() {
   const [pagination, setPagination] = useState({
     totalCount: 0,
     totalPages: 0,
-    currentPage: 1,
-    itemsPerPage: 1,
+    currentPage: variablesList.currentPage,
+    itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
 
-  const fetchProperties = async (page = 1, term = '', status = '') => {
+  const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
       const requestData = {
@@ -94,7 +94,10 @@ export default function AgencyPackageListing() {
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Agency Packages Listing</h6>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Agency Packages Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-agency-type">Add Agency Package</Link>
+                </div>
                 {properties.length > 0 ? (
                   <>
                     <div className="wrap-table">
@@ -124,16 +127,26 @@ export default function AgencyPackageListing() {
                                   </td>
                                   <td>
                                     <ul className="list-action">
+                                    <li className="edit">
+                                        <Link href={`/edit-agency-package/${property.id}`} className="item">
+                                          <Image
+                                            src={EditIcon} // Imported image object or static path
+                                            alt="Edit icon"
+                                            width={25}
+                                            height={25}
+                                          />
+                                        </Link>
+                                      </li>
                                       <li className="delete">
                                         <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                          <Image 
+                                          <Image
                                               src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
+                                              alt="Delete icon"
+                                              width={25}
+                                              height={25}
                                             />
                                         </a>
-                                      </li>                                        
+                                      </li>
                                     </ul>
                                   </td>
                                 </tr>

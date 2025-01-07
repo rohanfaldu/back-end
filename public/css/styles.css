@@ -8753,7 +8753,7 @@ label {
   background-color: #00a8c1;
 }
 .layout-wrap .wrap-table .list-action li:not(:last-child) {
-  margin-bottom: 8px;
+  /*margin-bottom: 8px;*/
 }
 .layout-wrap .wrap-table .list-action .item {
   display: flex;
@@ -10205,7 +10205,7 @@ tr {
 @media only screen and (min-width: 1024px) {
   .show-password{
     padding-top: 50px;
-    right: 80px;
+    right: 20px;
   }
 }
 .error{
@@ -10328,4 +10328,35 @@ tr {
 .table-responsive .listing-box .images img{
   width: 100px;
   height: 100px;
+}
+.image-gallery .preview-item{
+  position: relative;
+  z-index: 1;
+}
+
+.image-gallery .preview-item .remove-image-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  right: -5px;
+  z-index: 2;
+}
+
+.password-field {
+  position: relative;
+}
+
+.video-upload{
+  margin-bottom: 10px;
+}
+.list-action{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media only screen and (max-width: 767px) {
+  .widget-box-2 .grid-4 {
+      grid-template-columns: 1fr;
+  }
 }

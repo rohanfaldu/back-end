@@ -1,18 +1,14 @@
 
 'use client'
-import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
-import { use, useState, useEffect } from "react"
+import {useState, useEffect } from "react"
 import CountetNumber from "@/components/elements/CountetNumber"
 import DashboardChart from "@/components/elements/DashboardChart"
 import DeleteFile from "@/components/elements/DeleteFile"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
-import Link from "next/link";
-import { insertData, deletedData } from "../../components/api/Axios/Helper";
+import { insertData} from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
 export default function Dashboard() {
-	const [startDate, setStartDate] = useState(new Date())
-	const [endDate, setEndDate] = useState(new Date())
 	const [loading, setLoading] = useState(true);
 	const [dashboardData, setDashboardData] = useState([]);
 
@@ -50,7 +46,6 @@ export default function Dashboard() {
 											<div className="title-count">Total Users</div>
 											<div className="d-flex align-items-end">
 												<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.total_users} ><CountetNumber count={dashboardData?.data?.total_users} /></h6>
-												{/* <span className="fw-7 text-variant-2">{dashboardData?.data?.normal_user_count}</span> */}
 											</div>
 										</div>
 									</div>
@@ -76,17 +71,6 @@ export default function Dashboard() {
 											</div>
 										</div>
 									</div>
-									{/* <div className="counter-box">
-										<div className="box-icon w-68 round">
-											<span className="icon icon-review" />
-										</div>
-										<div className="content-box">
-											<div className="title-count">Reviews</div>
-											<div className="d-flex align-items-end">
-												<h6 className="number" data-speed={2000} data-to={17}><CountetNumber count={17} /></h6>
-											</div>
-										</div>
-									</div> */}
 								</div>
 								<div className="wrapper-content row">
 									<div className="col-xl-12">

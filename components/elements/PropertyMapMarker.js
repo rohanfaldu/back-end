@@ -3,8 +3,9 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import Preloader from './Preloader';
 
-export default function PropertyMapMarker({ isGeolocation, latitude, longitude, zoom, onPlaceSelected }) {
+export default function PropertyMapMarker({ isGeolocation, latitude, longitude, zoom, onPlaceSelected, address }) {
   const [currentLocation, setCurrentLocation] = useState({ lat: latitude || 0, lng: longitude || 0 });
+  const [zoomlevel, setZoomlevel] = useState(8);
   const [map, setMap] = useState(null);
   const autocompleteRef = useRef(null);
 
@@ -15,13 +16,14 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw', // Replace with your API key
+    googleMapsApiKey: 'AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag', // Replace with your API key
     libraries: ['places'], // Required for Autocomplete
   });
 
-  const zoomLevel = zoom || 8;
+
 
   useEffect(() => {
+      setZoomlevel(zoom);
     if (isGeolocation) {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -45,17 +47,36 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
 
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current.getPlace();
-	console.log('place');
-	console.log(place);
+    console.log('Selected place:', place);
+    // Ensure the place contains geometry (location)
     if (place.geometry) {
       const { lat, lng } = place.geometry.location;
       setCurrentLocation({ lat: lat(), lng: lng() });
-	 
-	  if (onPlaceSelected) {
-		const newAddress = place.formatted_address;
-        onPlaceSelected(newAddress, { lat: lat(), lng: lng() }); // Notify parent component
+      setZoomlevel(14);
+      // Retrieve the address from place details
+      const formattedAddress = place.formatted_address || 'No address found';
+      const addressComponents = place.address_components;
+      const addressName = place.name;
+
+      // Optionally, handle address components for more detailed info
+      let fullAddress = formattedAddress;
+      if (addressComponents) {
+        fullAddress = addressComponents.map((component) => component.long_name).join(', ');
       }
-      map.panTo(place.geometry.location);
+
+      console.log('Full Address:', `${addressName},${fullAddress}`); // Log the full address
+
+      if (onPlaceSelected) {
+        // Pass the selected address and coordinates to the parent component
+        onPlaceSelected(fullAddress, { lat: lat(), lng: lng() });
+      }
+
+      // Optionally, pan the map to the selected place
+      if (map && place.geometry) {
+        map.panTo(place.geometry.location);
+      }
+    } else {
+      alert("Place details are not available.");
     }
   };
 
@@ -72,33 +93,34 @@ export default function PropertyMapMarker({ isGeolocation, latitude, longitude, 
       {isLoaded ? (
         <>
           {/* Search Input */}
-			<div >
-				<Autocomplete
-				onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-				onPlaceChanged={handlePlaceSelect}
-				>
-					 <fieldset className="fieldset-input">
-						<input
-							type="text"
-							label="Search for a place"
-							className="ip-file"
-							placeholder="Search for a place"
-							
-						/>
-					 </fieldset>
-				
-				</Autocomplete>
-			</div>
+          <div >
+            <Autocomplete
+            onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+            onPlaceChanged={handlePlaceSelect}
+            >
+              <fieldset className="fieldset-input">
+                <input
+                  type="text"
+                  label="Search for a place"
+                  className="ip-file"
+                  value={address}
+                  placeholder="Search for a place"
+                  
+                />
+              </fieldset>
+            
+            </Autocomplete>
+          </div>
 
 			{/* Google Map */}
 			<GoogleMap
 				mapContainerStyle={containerStyle}
 				center={currentLocation}
-				zoom={zoomLevel}
+				zoom={zoomlevel}
 				onLoad={onLoad}
 				onUnmount={onUnmount}
 			>
-				<Marker position={currentLocation} />
+				{/* <Marker position={currentLocation} /> */}
 			</GoogleMap>
         </>
       ) : (

@@ -9,92 +9,80 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
+import variablesList from "../../components/common/variable";
+
 export default function PropertyAmenitiesListing() {
-  const [properties, setProperties] = useState([]); // Store all fetched properties
-  const [filteredPropertysofamenities, setfilteredPropertysofamenities] = useState([]); // Store filtered properties
+  const [properties, setProperties] = useState([]); // Store properties for the current page
   const [loading, setLoading] = useState(true); // Manage loading state
   const [error, setError] = useState(null); // Manage error state
   const [searchTerm, setSearchTerm] = useState(''); // Store search input
   const [statusFilter, setStatusFilter] = useState(''); // Store selected status filter
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const itemsPerPage = 5; // Number of items per page
+  const [pagination, setPagination] = useState({
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: variablesList.currentPage,
+      itemsPerPage: variablesList.itemsPerPage,
+  }); // Track pagination info
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const type = { page: 1, limit: 100 };
-        const getUserInfo = await insertData('api/property-type', type, true);
-        console.log(getUserInfo);
-        setProperties(getUserInfo.data.list); // Save all properties
-        setfilteredPropertysofamenities(getUserInfo.data.list); // Initially display all properties
-        setLoading(false); // Stop loading
-        setError(null); // Clear errors
-      } catch (err) {
-        setError(err.response?.data?.message || 'An error occurred'); // Handle error
-        setLoading(false); // Stop loading
+  const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
+    setLoading(true);
+    try {
+      const requestData = {
+        page,
+        limit: pagination.itemsPerPage,
+        lang: "en",
+        searchTerm: term,
+        status,
+      };
+
+      const response = await insertData("api/property-type", requestData, true);
+      if (response.status) {
+        const { list, totalCount, totalPages, currentPage } = response.data;
+        setProperties(list);
+        setPagination({
+          ...pagination,
+          totalCount,
+          totalPages,
+          currentPage,
+        });
+        setError(null);
       }
-    };
-
-    fetchData(); // Fetch data on component mount
-  }, []);
-
-  useEffect(() => {
-    filterAndPaginateData(); // Apply filter and pagination whenever inputs change
-  }, [searchTerm, statusFilter, currentPage, properties]);
-
-  // Filter and paginate properties
-  const filterAndPaginateData = () => {
-    let filtered = properties;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(property =>
-        property.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred");
+    } finally {
+      setLoading(false);
     }
-
-    // Filter by status
-    if (statusFilter) {
-      filtered = filtered.filter(property => property.status === statusFilter);
-    }
-
-    // Paginate results
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
-
-    setfilteredPropertysofamenities(paginated);
   };
 
-  // Handle search input
+  useEffect(() => {
+    fetchProperties(pagination.currentPage, searchTerm, statusFilter);
+  }, [pagination.currentPage, searchTerm, statusFilter]);
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
+    setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on search
+  };
+
+  const handleStatusChange = (e) => {
+    setStatusFilter(e.target.value);
+    setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on filter
   };
 
   const handleDelete = async (id) => {
-    console.log(id);
     try {
-      const data = { id: id };
-      const deleteUserInfo = await deletedData(`api/property-type/${id}`, data);
-      if(deleteUserInfo.status){
-        const filteredData = filteredPropertysofamenities.filter((item) => item.id !== id);
-        setProperties(filteredData); // Save all properties
-        setfilteredPropertysofamenities(filteredData); // Initially display all properties
-        setLoading(false); // Stop loading
-        setError(null); // Clear errors
-      }else{
-        alert(deleteUserInfo.message);
+      const response = await deletedData(`api/property-type/${id}`, { propertyId: id });
+      if (response.status) {
+        fetchProperties(pagination.currentPage, searchTerm, statusFilter);
+      } else {
+        alert(response.message);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred'); // Handle error
-      setLoading(false); // Stop loading
+      setError(err.response?.data?.message || "An error occurred");
     }
   };
 
-  // Handle status filter change
-  const handleStatusChange = (e) => {
-    setStatusFilter(e.target.value);
-    setCurrentPage(1); // Reset to first page on filter
+  const handlePageChange = (page) => {
+    setPagination({ ...pagination, currentPage: page });
   };
 
   return (
@@ -106,125 +94,82 @@ export default function PropertyAmenitiesListing() {
           <DeleteFile />
           <LayoutAdmin>
             <div className="wrap-dashboard-content">
-              {/* <div className="row">
-                <div className="col-md-3">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="status">Post Status:<span>*</span></label>
-                    <select className="nice-select" onChange={handleStatusChange}>
-                      <option value="">Select</option>
-                      <option value="Published">Publish</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Hidden">Hidden</option>
-                      <option value="Sold">Sold</option>
-                    </select>
-                  </fieldset>
-                </div>
-                <div className="col-md-9">
-                  <fieldset className="box-fieldset">
-                    <label htmlFor="search">Search by Title:<span>*</span></label>
-                    <input
-                      type="text"
-                      className="form-control style-1"
-                      placeholder="Search by title"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                  </fieldset>
-                </div>
-              </div> */}
-
               <div className="widget-box-2 wd-listing">
-                <h6 className="title">Property Types Listing</h6>
-                  {(filteredPropertysofamenities.length > 0)?
-                    <>
-                      <div className="wrap-table">
-                        <div className="table-responsive">
-                          <table>
-                            <thead>
-                              <tr>
+                <div class="top d-flex justify-content-between align-items-center">
+                  <h6 className="title">Property Types Listing</h6>
+                  <Link className="remove-file tf-btn primary" href="/create-property-type">Add Property Type</Link>
+                </div>
+                {properties.length > 0 ? (
+                  <>
+                    <div className="wrap-table">
+                      <div className="table-responsive">
+                        <table>
+                          <thead>
+                            <tr>
                                 <th>Title</th>
                                 <th>Date Published</th>
                                 <th>Status</th>
                                 <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {filteredPropertysofamenities.map(property => (
-                                <tr key={property.id} className="file-delete">
-                                  
-                                  <td>{property.title}</td>
-                                  <td>{new Date(property.createdAt).toLocaleDateString()}</td>
-                                  <td>
-                                    <div className="status-wrap">
-                                      <Link href="#" className="btn-status">{property.status? 'Active':'Inactive'}</Link>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <ul className="list-action">
-                                      {/* <li className="edit">
-                                        <Link href={`/edit-agency/${property.id}`} className="item">
-                                          <Image 
-                                            src={EditIcon} // Imported image object or static path
-                                            alt="Edit icon" 
-                                            width={25} 
-                                            height={25} 
-                                          />
-                                        </Link>
-                                      </li> */}
-                                      <li className="delete">
-                                        <a className="remove-file item" onClick={() => handleDelete(property.id)}>
-                                          <Image 
-                                              src={DeleteIcon} // Imported image object or static path
-                                              alt="Delete icon" 
-                                              width={25} 
-                                              height={25} 
-                                            />
-                                        </a>
-                                      </li>                                        
-                                    </ul>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        <ul className="wd-navigation">
-                          {[...Array(Math.ceil(properties.length / itemsPerPage))].map((_, index) => (
-                            <li key={index}>
-                              <Link
-                                href="#"
-                                className={`nav-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                onClick={() => setCurrentPage(index + 1)}
-                              >
-                                {index + 1}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {properties.map((property) => (
+                              <tr key={property.id} className="file-delete">
+
+                              <td>{property.title}</td>
+                              <td>{new Date(property.createdAt).toLocaleDateString()}</td>
+                              <td>
+                                <div className="status-wrap">
+                                  <Link href="#" className="btn-status">{property.status? 'Active':'Inactive'}</Link>
+                                </div>
+                              </td>
+                              <td>
+                                <ul className="list-action">
+                                  <li className="edit">
+                                    <Link href={`/edit-property-type/${property.id}`} className="item">
+                                      <Image
+                                        src={EditIcon} // Imported image object or static path
+                                        alt="Edit icon"
+                                        width={25}
+                                        height={25}
+                                      />
+                                    </Link>
+                                  </li>
+                                  <li className="delete">
+                                    <a className="remove-file item" onClick={() => handleDelete(property.id)}>
+                                      <Image
+                                          src={DeleteIcon} // Imported image object or static path
+                                          alt="Delete icon"
+                                          width={25}
+                                          height={25}
+                                        />
+                                    </a>
+                                  </li>
+                                </ul>
+                              </td>
+                            </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    </>:<>
-                      <div className="wrap-table">
-                        <div className="table-responsive">
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>Title</th>
-                                <th>Date Published</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td>No Record Found</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </>
-                  }
-                
+                      <ul className="wd-navigation">
+                        {Array.from({ length: pagination.totalPages }, (_, index) => (
+                          <li key={index}>
+                            <Link
+                              href="#"
+                              className={`nav-item ${pagination.currentPage === index + 1 ? 'active' : ''}`}
+                              onClick={() => handlePageChange(index + 1)}
+                            >
+                              {index + 1}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <div>No records found</div>
+                )}
               </div>
             </div>
           </LayoutAdmin>

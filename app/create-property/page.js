@@ -1,27 +1,23 @@
 'use client'
-import PropertyMap from "@/components/elements/PropertyMap"
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker"
 import LayoutAdmin from "@/components/layout/LayoutAdmin"
-import Link from "next/link"
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { use, useState, useEffect } from "react"
+import {useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import { capitalizeFirstChar } from "../../components/common/functions";
-// import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-// Adjust the path based on your project structure
-//import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
-
+import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
+import Preloader from "@/components/elements/Preloader";
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 import  "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 
 export default function CreateProperty() {
+    const [loading, setLoading] = useState(false); // Loader state
 	const [errorMessage, setErrorMessage] = useState('');
 	const [sucessMessage, setSucessMessage] = useState(false);
 	const [propertyMeta, setPropertyMeta] = useState(false);
-    const [filePictureImg, setFilePictureImg] = useState(null);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
     const [userList, setUserList] = useState([]);
@@ -35,8 +31,6 @@ export default function CreateProperty() {
     const [propertyOfMetaNumberValue, setPropertyOfMetaNumberValue] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null); // State for video preview
     const [isVideoUpload, setIsVideoUpload] = useState(true);
-    const [video, setVideo] = useState(null);
-    const [videoLink, setVideoLink] = useState("");
     const [filePreviews, setFilePreviews] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [currencyList, setCurrencyList] = useState([]);
@@ -47,7 +41,6 @@ export default function CreateProperty() {
         zoom: 6
     });
     const [address, setAddress] = useState('');
-
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -61,8 +54,7 @@ export default function CreateProperty() {
         description_fr: Yup.string().required("Description is required"),
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
-        picture_img: Yup.array().min(1, "At least one image is required").required("Image is required"),
-        credit: Yup.string().required("Credit is required"),
+        picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
@@ -78,81 +70,90 @@ export default function CreateProperty() {
 
     useEffect(() => {
         const fetchData = async () => {
-            // console.log('propertyofTypes');
             try {
-                if(stateList.length === 0){
-                    const stateObj = {};
-                    const getStateInfo = await insertData('api/state', stateObj, true);
-                    console.log(getStateInfo);
-                    if(getStateInfo) {
-                        setStateList(getStateInfo.data.states);
-                    }
-                }
-                // console.log('cityList');
-                // console.log(cityList.length);
-                // if(cityList.length === 0){
-                //     const stateObj = {};
-                //     const getCityInfo = await insertData('api/city', stateObj, true);
-                //     console.log(getCityInfo);
-                //     if(getCityInfo) {
-                //         setCityList(getCityInfo.data);
-                //     }
-                // }
+                // Collect API calls in an array for concurrent execution
+                const apiCalls = [];
 
-                if(userList.length === 0){
-                    const getUsersDeveloperInfo = await insertData('auth/get/developer', {}, false);
-                    const developerList = getUsersDeveloperInfo.data.user_data;
-                    const getUsersAgencyInfo = await insertData('auth/get/agency', {}, false);
-                    const agencyList = getUsersAgencyInfo.data.user_data;
-                    const getalluserInfo = developerList.concat(agencyList);
-                    setUserList(getalluserInfo);
+                if (stateList.length === 0) {
+                    apiCalls.push(
+                        insertData('api/state', {}, true).then((res) => {
+                            if (res) setStateList(res.data.states);
+                        })
+                    );
                 }
 
-                if(propertyofTypesListing.length === 0){
-                    const getPropertyTypeInfo = await insertData('api/property-type/', {page: 1, limit: 100}, true);
-                    if(getPropertyTypeInfo.status) {
-                        console.log(getPropertyTypeInfo.data.list);
-                        setpropertyofTypesListing(getPropertyTypeInfo.data.list);
-                    }
+                if (userList.length === 0) {
+                    apiCalls.push(
+                        Promise.all([
+                            insertData('auth/get/developer', {}, false),
+                            insertData('auth/get/agency', {}, false),
+                        ]).then(([devRes, agencyRes]) => {
+                            const allUsers = [
+                                ...devRes.data.user_data,
+                                ...agencyRes.data.user_data,
+                            ];
+                            setUserList(allUsers);
+                        })
+                    );
                 }
 
-                if(projectOfListing.length === 0){
-                    const getProjectListInfo = await insertData('api/projects/', {}, true);
-                    if(getProjectListInfo.status) {
-                        setProjectOfListing(getProjectListInfo.data);
-                    }
+                if (propertyofTypesListing.length === 0) {
+                    apiCalls.push(
+                        insertData('api/property-type/', { page: 1, limit: 100 }, true).then((res) => {
+                            if (res.status) setpropertyofTypesListing(res.data.list);
+                        })
+                    );
                 }
 
-                if(!propertyMeta){
-                    const projectMetaObj = { page: 1, limit: 100 };
-                    const getPropertyInfo = await insertData('api/property-type-listings', projectMetaObj, true);
-                    if(getPropertyInfo) {
-                        const projectOfNumberType = getPropertyInfo.data.list.filter(item => item.type === "number");
-                        const projectOfBlooeanType = getPropertyInfo.data.list.filter(item => item.type === "boolean");
-                        setProjectOfNumberListing(projectOfNumberType);
-                        setProjectOfBooleanListing(projectOfBlooeanType);
-                    }
-                    setPropertyMeta(true);
-                }
-                if(currencyList.length === 0){
-                    // console.log(1);
-                    const currencyObj = {};
-                    const getCurrencyInfo = await insertData('api/currency/get', currencyObj, true);
-
-                    if(getCurrencyInfo.status) {
-                        setCurrencyList(getCurrencyInfo.data);
-                    }
+                if (projectOfListing.length === 0) {
+                    apiCalls.push(
+                        insertData('api/projects/', { page: 1, limit: 1000 }, true).then((res) => {
+                            if (res.status) setProjectOfListing(res.data.projects);
+                        })
+                    );
                 }
 
-                //console.log(propertyofTypes)
+                if (!propertyMeta) {
+                    apiCalls.push(
+                        insertData('api/property-type-listings', { page: 1, limit: 100 }, true).then((res) => {
+                            if (res) {
+                                setProjectOfNumberListing(
+                                    res.data.list.filter((item) => item.type === "number")
+                                );
+                                setProjectOfBooleanListing(
+                                    res.data.list.filter((item) => item.type === "boolean")
+                                );
+                            }
+                            setPropertyMeta(true);
+                        })
+                    );
+                }
+
+                if (currencyList.length === 0) {
+                    apiCalls.push(
+                        insertData('api/currency/get', {}, true).then((res) => {
+                            if (res.status) setCurrencyList(res.data);
+                        })
+                    );
+                }
+
+                // Execute all API calls concurrently
+                await Promise.all(apiCalls);
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching data:", error);
             }
         };
-        fetchData();
-        console.log(stateList);
-    });
 
+        fetchData();
+    }, [
+        stateList.length,
+        userList.length,
+        propertyofTypesListing.length,
+        projectOfListing.length,
+        propertyMeta,
+        currencyList.length,
+    ]); 
+  
     const handleStateChange = async (stateId) => {
         const selectedState = stateList.find((state) => state.id === stateId);
         const { latitude, longitude } = selectedState;
@@ -165,15 +166,12 @@ export default function CreateProperty() {
             const cityObj = { state_id: stateId, lang: "en" };
             const getCityInfo = await insertData('api/city', cityObj, true);
             if (getCityInfo.status) {
-                console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
             }
         }
     };
     const handleDistrictChange = async (DistrictId) => {
-        console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
         setPropertyMapCoords({
             latitude: latitude,
@@ -189,7 +187,7 @@ export default function CreateProperty() {
             const districtObj = { district_id: DistrictId , lang:"en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
-                setNeighborhoodList(getNeighborhoodObjInfo.data);
+                setNeighborhoodList(getNeighborhoodObjInfo.data.neighborhoods);
             } else {
                 setNeighborhoodList([]);
             }
@@ -218,13 +216,12 @@ export default function CreateProperty() {
 
 
     const handleCityChange = async (cityId) => {
-        console.log('City ID:', cityId);
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
         setPropertyMapCoords({
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            zoom: 12
         });
 
         if (!cityId) {
@@ -247,110 +244,61 @@ export default function CreateProperty() {
 
 
     const handleNumberChange = (id, value) => {
-        setPropertyOfMetaNumberValue((prev) => {
-          const propertyOfMetaNumberValue = [...prev];
-          const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
-          if (index > -1) {
-            propertyOfMetaNumberValue[index].value = value;
-          } else {
-            const propertyOfMetaNumberObj = {property_type_id: id, value: value};
-            propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
-          }
-          return propertyOfMetaNumberValue;
-        });
+        setPropertyOfMetaNumberValue((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
     };
-
-
-
-
-
-    const handleFileChangeVideo = (event, setFieldValue) => {
-        console.log( 'video' );
-        console.log( event );
-        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
-        const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
-        //const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
-        console.log(videoFile);
-        // If video file is selected, set it in the "video" field
-        if (videoFile) {
-            setFieldValue("video", videoFile);
-            setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
-        }
-
-        // If image files are selected, set them in the "picture_img" field
-        // if (imageFiles.length > 0) {
-        //     console.log(imageFiles);
-        //     setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
-        //     setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
-        // }
-    };
-
-    const handleFileChange = (event, setFieldValue) => {
-        console.log( 'image' );
-        console.log( event );
-        const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
-        //const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
-        const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
-        console.log(imageFiles);
-        // If video file is selected, set it in the "video" field
-        // if (videoFile) {
-        //     setFieldValue("video", videoFile);
-        //     setVideoPreview(URL.createObjectURL(videoFile));  // Optional: Display video preview
-        // }
-
-        // If image files are selected, set them in the "picture_img" field
-        if (imageFiles.length > 0) {
-            console.log(imageFiles);
-            setFieldValue("picture_img", imageFiles);  // Multiple image files in Formik field
-            setFilePreviews(imageFiles.map(file => URL.createObjectURL(file)));  // Preview images
-        }
-    };
-
-    const handlePlaceSelect = (place) => {
-        // You can access selected place details here
-        console.log("place");
-        console.log(place);
-        // Update address state with the selected place's formatted address
-        setAddress(place.description);
-    };
-
     const handleAddressSelect = (newAddress, newLocation) => {
-        
-      };
 
+    };
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
-    
+        console.log(propertyOfMetaNumberValue);
         try {
-            // Validation for video
+            // Validation for video upload
             if (isVideoUpload && !values.video) {
                 setErrors({ serverError: "Please upload a video file." });
                 setShowErrorPopup(true);
                 return;
             }
     
-            if (!isVideoUpload && !values.video_link) {
-                setErrors({ serverError: "Please enter a YouTube video link." });
+            // Validate YouTube link only if it's not empty
+            if (!isVideoUpload && values.video_link && !validateYouTubeURL(values.video_link)) {
+                setErrors({ serverError: "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
                 setShowErrorPopup(true);
                 return;
             }
     
-            // Prepare amenities
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
                 .map((project) => ({ property_type_id: project.id, value: "true" }));
     
-            if (propertyOfMetaNumberValue.length > 0) {
-                selectedAmenities.push(...propertyOfMetaNumberValue);
+            if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
+                // Update selected amenities based on propertyOfMetaNumberValue
+                Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
+                    const index = selectedAmenities.findIndex(item => item.property_type_id === key);
+                    if (index !== -1) {
+                        selectedAmenities[index].value = value;
+                    } else {
+                        selectedAmenities.push({ property_type_id: key, value });
+                    }
+                });
             }
     
             console.log("Selected Amenities:", selectedAmenities);
+            // Process image uploads
+            const uploadImageObj = Array.isArray(values.picture_img)
+                ? values.picture_img.filter(item => item !== null)
+                : [values.picture_img].filter(item => item !== null);
     
-            // Prepare images and videos for upload
-            const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-            uploadImageObj.push(values.video);
+            if (values.video != null) {
+                uploadImageObj.push(values.video);
+            }
     
+            setErrors({ serverError: "Processing ........." });
+            setShowErrorPopup(true);
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
     
             if (uploadImageUrl.files.length > 0) {
@@ -369,11 +317,9 @@ export default function CreateProperty() {
                 console.log("Image URLs:", pictureUrl);
                 console.log("Video URL:", videoUrl);
     
-                if (!videoUrl) {
-                    videoUrl = values.video_link;
-                }
+                // Use video URL from upload or fallback to video link
+                videoUrl = videoUrl || (values.video_link ? values.video_link : null);
     
-                // Prepare data for property creation
                 const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
@@ -389,8 +335,8 @@ export default function CreateProperty() {
                     city_id: values.city_id,
                     district_id: values.districts_id,
                     neighborhood_id: values.neighborhood_id,
-                    latitude: values.latitude ? String(values.latitude) : "33.985047",
-                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
+                    latitude: isNaN(parseFloat(values.latitude)) ? "20.2323" : String(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? "20.2323" : String(values.longitude),
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
@@ -401,13 +347,12 @@ export default function CreateProperty() {
                 };
     
                 console.log("Property Data:", propertyData);
-    
-                // Create property
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
+                console.log('response');
+                console.log(createPropertyInfo.status);
     
                 if (createPropertyInfo.status) {
-                    setErrors({ serverError: "Property created successfully." });
-                    setShowErrorPopup(true);
+                    setSucessMessage(createPropertyInfo.message || "Property created successfully.");
                     resetForm();
                     router.push("/property-listing");
                 } else {
@@ -421,9 +366,12 @@ export default function CreateProperty() {
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+        } finally {
+            setLoading(false); // Stop loader
         }
     };
     
+
 
     const handleCheckboxChange = (key) => {
         setCheckedItems((prevState) => ({
@@ -434,10 +382,6 @@ export default function CreateProperty() {
 
 	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
-	// const handleRadioChange = (event) => {
-	// 	const selectedRadioId = event.target.id
-	// 	setSelectedRadio(selectedRadioId)
-	// }
 
     const handleRadioChange = (event, setFieldValue) => {
         const isUpload = event.target.value === "upload";
@@ -460,13 +404,14 @@ export default function CreateProperty() {
         setFieldValue("video_link", event.target.value); // Update Formik state
 
     };
-    console.log(checkedItems);
+    // console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
+        <>
+        {loading ? (
+            <Preloader />
+        ) : (
 		<>
-
-			{/* <DeleteFile /> */}
-
 			<LayoutAdmin>
             {errorMessage && <div className={messageClass}>{errorMessage}</div>}
             <Formik
@@ -476,11 +421,9 @@ export default function CreateProperty() {
                     description_en: "",
                     description_fr: "",
                     price: "",
-//                    vr_link: "",
-                    picture_img: [], // Set this to an empty array for multiple files
-                    video: null, // Use `null` for file inputs
-                    video_link: "", // Add this for YouTube video link
-                    credit: "",
+                    picture_img: [],
+                    video: null,
+                    video_link: "",
                     state_id: "",
                     city_id: "",
                     districts_id: "",
@@ -493,60 +436,31 @@ export default function CreateProperty() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
                 >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                     <Form>
                         <div>
-                            {/* <div className="widget-box-2">
-                                <h6 className="title">Upload Agency User Image</h6>
-                                <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                    <span className="icon icon-img-2" />
-                                    <div className="btn-upload">
-                                        <span className="tf-btn primary">Choose Image</span>
-                                        <input
-                                            type="file"
-                                            className="ip-file"
-                                            onChange={(event) => {
-                                                const file = event.currentTarget.files[0];
-                                                setFieldValue("image", file);
-                                                setFilePreview(URL.createObjectURL(file));
-                                            }}
-                                        />
-                                    </div>
-                                    {filePreview && ( <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} /> )}
-                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                    </label>
-                                    {errors.image && touched.image && (
-                                    <div className="error">{errors.image}</div>
-                                    )}
-                                </div>
-                            </div> */}
                             <div className="widget-box-2">
                                 <h6 className="title">Property Information</h6>
                                 <div className="box grid-2 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title English:<span>*</span></label>
                                         <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Title French:<span>*</span></label>
                                         <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description English:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="grid-1 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Description French:<span>*</span></label>
                                         <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                             </div>
@@ -557,22 +471,21 @@ export default function CreateProperty() {
                                         <label htmlFor="title">Transaction Type:<span>*</span></label>
                                         <Field as="select" name="transaction_type" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("transaction_type", selectedState);
+                                                    const selectedTransactionType = e.target.value;
+                                                    setFieldValue("transaction_type", selectedTransactionType);
                                                 }}
                                             >
                                             <option value="">Select Transaction Type</option>
                                             <option value="sale">Fore Sale</option>
                                             <option value="rental">For Rental</option>
                                         </Field>
-                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Property Type:<span>*</span></label>
                                         <Field as="select" name="property_type" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("property_type", selectedState);
+                                                    const selectedPropertyType = e.target.value;
+                                                    setFieldValue("property_type", selectedPropertyType);
                                                 }}
                                             >
                                             <option value="">Select Property Type</option>
@@ -584,14 +497,13 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Project Listing:<span>*</span></label>
                                         <Field as="select" name="project_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("project_id", selectedState);
+                                                    const selectedProjectId = e.target.value;
+                                                    setFieldValue("project_id", selectedProjectId);
                                                 }}
                                             >
                                             <option value="">Select Project Listing</option>
@@ -603,14 +515,13 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">User Listing:</label>
                                         <Field as="select" name="user_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("user_id", selectedState);
+                                                    const selectedUserId = e.target.value;
+                                                    setFieldValue("user_id", selectedUserId);
                                                 }}
                                             >
                                             <option value="">Select User Listing</option>
@@ -622,7 +533,6 @@ export default function CreateProperty() {
                                                 <></>
                                             )}
                                         </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -633,16 +543,15 @@ export default function CreateProperty() {
                                                     id="country-code"
                                                     value={currencyCode}
                                                     onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setCurrencyCode(selectedState);
-                                                        setFieldValue("currency_id", selectedState);
-                                                        //handleCityChange(selectedState);
+                                                        const selectedCurrencyCode = e.target.value;
+                                                        setCurrencyCode(selectedCurrencyCode);
+                                                        setFieldValue("currency_id", selectedCurrencyCode);
                                                     }}
                                                 >
                                                     <option value="">Select Currency</option>
                                                     {currencyList && currencyList.length > 0 ? (
                                                         currencyList.map((currency, index) =>(
-                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            <option key={index} value={currency.id}>{currency.name}
                                                             </option>
                                                         ))
                                                     ) : (
@@ -651,35 +560,20 @@ export default function CreateProperty() {
                                                 </Field>
                                                 <Field type="text" id="price" name="price" className="form-control style-1" />
                                             </div>
-                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">VR Link:</label>
-                                        <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        // <ErrorMessage name="vr_link" component="div" className="error" />
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Link UUID:</label>
-                                        <Field type="text"  name="link_uuid" className="box-fieldset" />
-                                        // <ErrorMessage name="link_uuid" component="div" className="error" />
-                                    </fieldset> */}
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                        {/* <ErrorMessage name="license_number" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                        {/* <ErrorMessage name="credit" component="div" className="error" /> */}
+                                        <label htmlFor="title">Direction:<span>*</span></label>
+                                        <Field as="select" name="direction" className="nice-select country-code">
+                                            <option value="">Select Direction</option>
+                                            <option value="north">North</option>
+                                            <option value="south">South</option>
+                                            <option value="east">East</option>
+                                            <option value="west">West</option>
+                                        </Field>
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
-                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" />
-                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
+                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
@@ -690,10 +584,10 @@ export default function CreateProperty() {
                                                         <Field
                                                             type="number"
                                                             name={project.id}
+                                                            min="0"
                                                             className="box-fieldset"
                                                             onChange={(e) => handleNumberChange(project.id, e.target.value)}
                                                         />
-                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -721,50 +615,42 @@ export default function CreateProperty() {
                                                         const validPreviews = [];
                                                         files.forEach((file) => {
                                                             // Check file size (less than 150KB)
-                                                            if (file.size < 150000) {
-                                                            alert(`Please upload files less than 150KB`);
-                                                            } else {
                                                             // Create an Image object to check its dimensions
-                                                            const img = new Image();
-                                                            const reader = new FileReader();
-                                                            reader.onload = (e) => {
-                                                                img.src = e.target.result; // Set image src to the file's data URL
+                                                                const img = new Image();
+                                                                const reader = new FileReader();
+                                                                reader.onload = (e) => {
+                                                                    img.src = e.target.result; // Set image src to the file's data URL
 
-                                                                // Once the image is loaded, check its dimensions
-                                                                img.onload = () => {
-                                                                const imageHeight = img.height;  // Get image height
-                                                                const imageWidth = img.width;    // Get image width
+                                                                    // Once the image is loaded, check its dimensions
+                                                                    img.onload = () => {
+                                                                    const imageHeight = img.height;  // Get image height
+                                                                    const imageWidth = img.width;    // Get image width
 
-                                                                // You can add your dimension validation here
-                                                                if (imageHeight <= 800 || imageWidth <= 1100) {
-                                                                    alert('Image dimensions are too large. Please upload an image with smaller dimensions (max 500px).');
-                                                                } else {
-                                                                    // Add the file as a valid image and generate the preview
-                                                                    validPreviews.push(URL.createObjectURL(file));
-                                                                    imageList.push(file); // Add valid file to the list
-                                                                }
+                                                                    // You can add your dimension validation here
+                                                                    if (imageHeight <= 80|| imageWidth <= 100) {
+                                                                        alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
+                                                                    } else {
+                                                                        // Add the file as a valid image and generate the preview
+                                                                        validPreviews.push(URL.createObjectURL(file));
+                                                                        imageList.push(file); // Add valid file to the list
+                                                                    }
 
-                                                                // Update state and Formik with valid files
-                                                                setFilePreviews(validPreviews); // Set previews for valid files
-                                                                form.setFieldValue(field.name, imageList);
+                                                                    // Update state and Formik with valid files
+                                                                    setFilePreviews(validPreviews); // Set previews for valid files
+                                                                    form.setFieldValue(field.name, imageList);
+                                                                    };
                                                                 };
-                                                            };
 
-                                                            // Read the file as a Data URL to create a preview
-                                                            reader.readAsDataURL(file);
-                                                            }
+                                                                // Read the file as a Data URL to create a preview
+                                                                reader.readAsDataURL(file);
+                                                            //}
                                                         });
                                                         }}
                                                         style={{ display: "none" }}
                                                     />
                                                     </label>
                                                 </div>
-
-                                                
                                                 <p className="file-name fw-5">Or drop images here to upload</p>
-
-                                                {/* Error Message */}
-                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
                                                 </div>
                                             )}
                                             />
@@ -781,19 +667,19 @@ export default function CreateProperty() {
                                                         alt={`Preview ${index + 1}`}
                                                         className="uploadFileImage"
                                                     />
-                                                    <button 
+                                                    <button
                                                         type="button"
                                                         onClick={() => {
-                                                            // Remove the image from preview and Formik
                                                             const newFilePreviews = filePreviews.filter((_, i) => i !== index);
-                                                            const newImageList = form.values.picture_img.filter((_, i) => i !== index);
-                                                            setFilePreviews(newFilePreviews); // Update preview state
-                                                            form.setFieldValue(field.name, newImageList); // Update Formik field
-                                                        }}
+                                                            const newImageList = values.picture_img.filter((_, i) => i !== index);
+                                                            setFilePreviews(newFilePreviews);
+                                                            setFieldValue("picture_img", newImageList);
+                                                          }}
                                                         className="remove-image-btn"
                                                     >
-                                                    &times;
+                                                        &times;
                                                     </button>
+
                                                 </div>
                                             ))}
                                         </div>
@@ -805,7 +691,7 @@ export default function CreateProperty() {
                                         {/* Video Option Radio Buttons */}
                                         <div>
                                             <fieldset className="fieldset-radio">
-                                                <input type="radio" className="tf-radio"  value="upload" name="videoOption" onChange={() => {
+                                                <input type="radio" className="tf-radio video-upload"  value="upload" name="videoOption" onChange={() => {
                                                         setIsVideoUpload(true); // Update the state for conditional rendering
                                                         setFieldValue("video", null); // Reset the file field in Formik state
                                                     }} defaultChecked />
@@ -813,7 +699,7 @@ export default function CreateProperty() {
 
                                                 <input
                                                     type="radio"
-                                                    className="tf-radio"
+                                                    className="tf-radio video-upload"
                                                     name="videoOption"
                                                     value="link"
                                                     onChange={() => {
@@ -854,7 +740,6 @@ export default function CreateProperty() {
                                                     </video>
                                                 )}
                                                 <p className="file-name fw-5">Or drop video here to upload</p>
-                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
                                             </div>
                                         ) : (
                                             // YouTube Link Input Field
@@ -864,9 +749,8 @@ export default function CreateProperty() {
                                                     type="text"
                                                     name="video_link"
                                                     className="form-control"
-                                                    placeholder="Enter YouTube video link"
+                                                    placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
                                                 />
-                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                             </div>
                                         )}
                                     </fieldset>
@@ -893,15 +777,14 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                         </Field>
-                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Cities:</label>
                                             <Field as="select" name="city_id" className="nice-select country-code"
                                                 onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("city_id", selectedState);
-                                                    handleCityChange(selectedState);
+                                                    const selectedCity = e.target.value;
+                                                    setFieldValue("city_id", selectedCity);
+                                                    handleCityChange(selectedCity);
                                                 }}
                                             >
                                                 <option value="">Select Cities</option>
@@ -915,7 +798,6 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">District:</label>
@@ -935,7 +817,6 @@ export default function CreateProperty() {
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Neighborhood:</label>
@@ -948,38 +829,22 @@ export default function CreateProperty() {
                                                 {neighborhoodList && neighborhoodList.length > 0 ? (
                                                     neighborhoodList.map((neighborhoods) => (
                                                         <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                            {neighborhoods.name}
+                                                            {neighborhoods.neighborhood_name}
                                                         </option>
                                                     ))
                                                 ) : (
                                                     <></>
                                                 )}
                                             </Field>
-                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
                                 <div className="box box-fieldset">
-                                    {/* <label htmlFor="location">Address:<span>*</span></label> */}
-                                    {/* <div className="box-ip"> */}
-                                     
-                                        {/* <GooglePlacesAutocomplete /> */}
-
-
-                                     {/* <ReactGooglePlacesAutocomplete
-                                        apiKey="AIzaSyDdhV2ojxz4IEp98Gvn5sz9rKWf89Ke5gw"
-                                        selectProps={{
-                                            value: address,
-                                            onChange: (selected) => handlePlaceSelect(selected),
-                                        }}
-                                    /> <br/> */}
-                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
-                                    </div><br/><br/><br/> */}
                                     <PropertyMapMarker
                                         latitude={propertyMapCoords.latitude}
                                         longitude={propertyMapCoords.longitude}
                                         zoom={propertyMapCoords.zoom}
                                         onPlaceSelected={(newAddress, newLocation) => {
-                                                setFieldValue('address', newAddress); 
+                                                setFieldValue('address', newAddress);
                                                 setFieldValue('latitude', newLocation.lat);
                                                 setFieldValue('longitude', newLocation.lng);
                                                 handleAddressSelect(newAddress, newLocation);
@@ -1002,7 +867,6 @@ export default function CreateProperty() {
                                                         onChange={() => handleCheckboxChange(project.key)}
                                                     />
                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
@@ -1014,20 +878,26 @@ export default function CreateProperty() {
                             <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
                         </div >
                           {/* Error Popup */}
-                          {showErrorPopup && Object.keys(errors).length > 0 && (
-                            <ErrorPopup
-                                errors={errors}
-                                validationSchema={validationSchema}
-                                onClose={() => setShowErrorPopup(false)}
-                            />
-                        )}
+                            {showErrorPopup && Object.keys(errors).length > 0 && (
+                                <ErrorPopup
+                                    errors={errors}
+                                    validationSchema={validationSchema}
+                                    onClose={() => setShowErrorPopup(false)}
+                                />
+                            )}
+                            {sucessMessage && (
+                                <SuccessPopup
+                                    message={sucessMessage}
+                                    onClose={() => setSucessMessage(false)}
+                                />
+                            )}
                     </Form>
 
                 )}
-                </Formik>
-
-
+            </Formik>
 			</LayoutAdmin >
 		</>
-	)
+            )}
+        </>
+  );
 }
