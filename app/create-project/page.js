@@ -42,6 +42,7 @@ export default function CreateProject() {
     const [loading, setLoading] = useState(false); // Loader state
     const [currencyCode, setCurrencyCode] = useState([]);
     const [currencyList, setCurrencyList] = useState([]);
+    const [propertyOfMetaNumberValue, setPropertyOfMetaNumberValue] = useState([]);
 
     const router = useRouter();
     const [propertyMapCoords, setPropertyMapCoords] = useState({
@@ -215,14 +216,33 @@ export default function CreateProject() {
         }
     };
 
+    const handleNumberChange = (id, value) => {
+        setPropertyOfMetaNumberValue((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+    
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
         console.log(values);
         const selectedAmenities = projectOfBooleanListing
-            .filter((project) => checkedItems[project.key])
-            .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
+                .filter((project) => checkedItems[project.key])
+                .map((project) => ({ project_type_listing_id: project.id, value: "true" }));
+
+            if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
+                // Update selected amenities based on propertyOfMetaNumberValue
+                Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
+                    const index = selectedAmenities.findIndex(item => item.property_type_id === key);
+                    if (index !== -1) {
+                        selectedAmenities[index].value = value;
+                    } else {
+                        selectedAmenities.push({ project_type_listing_id: key, value });
+                    }
+                });
+            }
     
-        console.log("Selected Amenities:", selectedAmenities);
+
     
         try {
             console.log(parseFloat(propertyMapCoords.latitude),parseFloat(propertyMapCoords.latitude))
@@ -458,24 +478,23 @@ export default function CreateProject() {
                                    
                                 </div>
                                 <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                    </fieldset> */}
-                                         {/* {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                        {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                             projectOfNumberListing.map((project) => (
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="project">{project.name}:</label>
-                                                        <Field type="number" name={project.id} className="box-fieldset" />
+                                                    <label htmlFor="desc">{project.name}:</label>
+                                                        <Field
+                                                            type="number"
+                                                            name={project.id}
+                                                            min="0"
+                                                            className="box-fieldset"
+                                                            onChange={(e) => handleNumberChange(project.id, e.target.value)}
+                                                        />
+                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
                                                 </fieldset>
                                             ))
                                         ) : (
                                             <></>
-                                        )} */}
+                                        )}
                                 </div>
                                 <div className="grid-2 box gap-30">
                                     <fieldset className="box-fieldset">

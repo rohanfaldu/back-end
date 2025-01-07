@@ -267,23 +267,6 @@ export default function CreateProperty() {
             ...prev,
             [id]: value,
         }));
-    
-        //setPropertyOfMetaNumberValue((prev) => {
-            
-        //   const propertyOfMetaNumberValue = [...prev];
-        //   const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
-        //   console.log('index');
-        //   console.log(index);
-        //   console.log('propertyOfMetaNumberValue');
-        //   console.log(propertyOfMetaNumberValue);
-        //   if (index > -1) {
-        //     propertyOfMetaNumberValue[index].value = value;
-        //   } else {
-        //     const propertyOfMetaNumberObj = {property_type_id: id, value: value};
-        //     propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
-        //   }
-        //   return propertyOfMetaNumberValue;
-        //});
     };
 
 
