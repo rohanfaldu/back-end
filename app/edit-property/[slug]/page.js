@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { useFormik } from 'formik';
 import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
-import { insertData, insertImageData } from "@/components/api/Axios/Helper";
+import { insertData, insertImageData, updateData } from "@/components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "@/components/common/imageUpload";
 import { capitalizeFirstChar } from "@/components/common/functions";
 import Preloader from "@/components/elements/Preloader";
@@ -62,7 +62,7 @@ export default function EditProperty({params}) {
         price: Yup.string().required("Price is required"),
         // vr_link: Yup.string().url("Invalid URL").nullable(),
         picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
-        credit: Yup.string().required("Credit is required"),
+        // credit: Yup.string().required("Credit is required"),
         state_id: Yup.string().required("State is required"),
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
@@ -88,6 +88,25 @@ export default function EditProperty({params}) {
     
                     if (getpropertyInfo.data) {
                         setPropertyDetail(getpropertyInfo.data);
+
+                        const cityObj = { state_id: getpropertyInfo.data.state, lang: "en" };
+                        const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
+                        if (getCityInfo.status) {
+                            console.log(getCityInfo.data.cities,"statecity");
+                            setCityList(getCityInfo.data.cities);
+                        }
+    
+                        const districtObj = { city_id: getpropertyInfo.data.city, lang: "en" };
+                        const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
+                        if (getDistrictInfo.status) {
+                            setDistrictList(getDistrictInfo.data);
+                        } 
+    
+                        const neighbourhoodObj = { district_id: getpropertyInfo.data.district, lang: "en" };
+                        const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
+                        if (getNeighborhoodObjInfo.status) {
+                            setNeighborhoodList(getNeighborhoodObjInfo.data);
+                        }
                     } else {
                         setErrorMessage("Property not found.");
                     }
@@ -104,8 +123,8 @@ export default function EditProperty({params}) {
                     setCheckedItems(initialCheckedItems);
                     const initialNumberItems = getpropertyInfo.data.meta_details.reduce((acc, meta) => {
     
-                        if (meta.value === "number") {
-                            acc[meta.key] = true; // Set the checkbox for this key as checked
+                        if (meta.type === "number") {
+                            acc[meta.id] = meta.value; // Set the checkbox for this key as checked
                         }
                         return acc;
                     }, {});
@@ -205,16 +224,21 @@ export default function EditProperty({params}) {
     console.log(propertyOfNumberListing);
 
     const handleStateChange = async (stateId) => {
+        setCityList([]);
+        setDistrictList([]);
+        setNeighborhoodList([]);
+
         const selectedState = stateList.find((state) => state.id === stateId);
-        const { latitude, longitude } = selectedState;
-        setPropertyMapCoords({
-            latitude: latitude,
-            longitude: longitude,
-            zoom: 10
-        });
-        if(cityList.length === 0){
+        if (selectedState) {
+            const { latitude, longitude } = selectedState;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 10
+            });
+
             const cityObj = { state_id: stateId, lang: "en" };
-            const getCityInfo = await insertData('api/city', cityObj, true);
+            const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
             if (getCityInfo.status) {
                 console.log(getCityInfo.data.cities);
                 setCityList(getCityInfo.data.cities);
@@ -226,6 +250,8 @@ export default function EditProperty({params}) {
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
         console.log('selectedState ID:', selectedDistricts.latitude);
         const { latitude, longitude } = selectedDistricts;
+        setNeighborhoodList([]);
+
         setPropertyMapCoords({
             latitude: latitude,
             longitude: longitude,
@@ -238,7 +264,7 @@ export default function EditProperty({params}) {
         }
         try {
             const districtObj = { district_id: DistrictId , lang:"en" };
-            const getNeighborhoodObjInfo = await insertData('api/neighborhood', districtObj, true);
+            const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
                 setNeighborhoodList(getNeighborhoodObjInfo.data);
             } else {
@@ -273,6 +299,8 @@ export default function EditProperty({params}) {
         const selectedCites = cityList.find((cities) => cities.id === cityId);
         console.log('selectedState ID:', selectedCites.latitude);
         const { latitude, longitude } = selectedCites;
+        setNeighborhoodList([]);
+
         setPropertyMapCoords({
             latitude: latitude,
             longitude: longitude,
@@ -285,9 +313,9 @@ export default function EditProperty({params}) {
         }
         try {
             const districtObj = { city_id: cityId, lang: "en" };
-            const getDistrictInfo = await insertData('api/district', districtObj, true);
+            const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
-                setDistrictList(getDistrictInfo.data.districts);
+                setDistrictList(getDistrictInfo.data);
             } else {
                 setDistrictList([]);
             }
@@ -299,17 +327,21 @@ export default function EditProperty({params}) {
 
 
     const handleNumberChange = (id, value) => {
-        setPropertyOfMetaNumberValue((prev) => {
-          const propertyOfMetaNumberValue = [...prev];
-          const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
-          if (index > -1) {
-            propertyOfMetaNumberValue[index].value = value;
-          } else {
-            const propertyOfMetaNumberObj = {property_type_id: id, value: value};
-            propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
-          }
-          return propertyOfMetaNumberValue;
-        });
+        // setPropertyOfMetaNumberValue((prev) => {
+        //   const propertyOfMetaNumberValue = [...prev];
+        //   const index = propertyOfMetaNumberValue.findIndex((item) => item.id === id);
+        //   if (index > -1) {
+        //     propertyOfMetaNumberValue[index].value = value;
+        //   } else {
+        //     const propertyOfMetaNumberObj = {property_type_id: id, value: value};
+        //     propertyOfMetaNumberValue.push(propertyOfMetaNumberObj);
+        //   }
+        //   return propertyOfMetaNumberValue;
+        // });
+        setPropertyOfMetaNumberValue((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
     };
 
 
@@ -352,12 +384,6 @@ export default function EditProperty({params}) {
         console.log(values);
 
         try {
-            // Validation for video
-            if (isVideoUpload && !values.video) {
-                setErrors({ serverError: "Please upload a video file." });
-                setShowErrorPopup(true);
-                return;
-            }
 
             if (!isVideoUpload && !values.video_link) {
                 setErrors({ serverError: "Please enter a YouTube video link." });
@@ -365,7 +391,6 @@ export default function EditProperty({params}) {
                 return;
             }
 
-            setLoading(true); // Start loader
 
 
             // Prepare amenities
@@ -373,49 +398,77 @@ export default function EditProperty({params}) {
                 .filter((property) => checkedItems[property.key])
                 .map((property) => ({ property_type_id: property.id, value: "true" }));
 
-            if (propertyOfMetaNumberValue.length > 0) {
-                selectedAmenities.push(...propertyOfMetaNumberValue);
-            }
+                console.log("Selected Amenities:", selectedAmenities);
 
-            console.log("Selected Amenities:", selectedAmenities);
-                    setLoading(true); // Start loader
+                const updatedValues = Object.entries(propertyOfMetaNumberValue).map(([property_type_id, value]) => ({
+                    property_type_id,
+                    value
+                }));
+
+                console.log(updatedValues,"updatedValues")
+
+                const metaDetailsPass = [
+                    ...selectedAmenities,
+                    ...updatedValues
+                ];
+
+                console.log(metaDetailsPass,"metaDetailsPass")
+
+
+
 
 
             // Prepare images and videos for upload
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
-            uploadImageObj.push(values.video);
+            const videoObj = values.video ? [values.video] : [];
+            // console.log('uploadImageObj',uploadImageObj)
+            // uploadImageObj.push(values.video);
 
-            const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
+            const allUploadFiles = [...uploadImageObj, ...videoObj];
+            const hasFile = allUploadFiles.some((item) => item instanceof File);
+            let uploadImageUrl = values.picture_img;
+            if (hasFile) {
+                const uploadImageUrlFIles = await insertMultipleUploadImage("image", allUploadFiles);
+                uploadImageUrl = uploadImageUrlFIles.files;
+            }
+            console.log(uploadImageUrl,"lllll")
 
-            if (uploadImageUrl.files.length > 0) {
+
+            if (uploadImageUrl.length > 0) {
                 const imageUrls = [];
-                let videoUrl = null;
-
-                uploadImageUrl.files.forEach((file) => {
-                    if (file.mimeType.startsWith("image")) {
-                        imageUrls.push(file.url);
-                    } else if (file.mimeType.startsWith("video")) {
-                        videoUrl = file.url;
+                let videoUrl = values.video;
+            
+                uploadImageUrl.forEach((file) => {
+                    if (file && file.mimeType) {
+                        if (file.mimeType.startsWith("image")) {
+                            imageUrls.push(file.url);
+                        } else if (file.mimeType.startsWith("video")) {
+                            videoUrl = file.url;
+                        }
+                    } else {
+                        console.error("Invalid file object:", file);
                     }
                 });
-
+                
+            
                 const pictureUrl = imageUrls.join(", ");
                 console.log("Image URLs:", pictureUrl);
                 console.log("Video URL:", videoUrl);
-
+            
                 if (!videoUrl) {
                     videoUrl = values.video_link;
                 }
-
+            
                 // Prepare data for property creation
                 const propertyData = {
+                    propertyId : propertyDetail.id,
                     title_en: values.title_en,
                     title_fr: values.title_fr,
                     description_en: values.description_en ?? null,
                     description_fr: values.description_fr ?? null,
                     price: parseInt(values.price) ?? 0,
                     vr_link: values.vr_link ?? null,
-                    picture: imageUrls,
+                    picture: imageUrls.length > 0 ? imageUrls : values.picture_img,
                     video: videoUrl,
                     user_id: values.user_id,
                     link_uuid: values.link_uuid ?? null,
@@ -428,17 +481,17 @@ export default function EditProperty({params}) {
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
-                    meta_details: selectedAmenities,
+                    meta_details: metaDetailsPass,
                     currency_id: values.currency_id,
                     project_id: values.project_id ?? null,
                     address: values.address,
                 };
-
+            
                 console.log("Property Data:", propertyData);
-
+            
                 // Create property
-                const createPropertyInfo = await insertData("api/property/create", propertyData, true);
-
+                const createPropertyInfo = await updateData(`api/property/${propertyDetail.id}`, propertyData, true);
+            
                 if (createPropertyInfo.status) {
                     setErrors({ serverError: "Property created successfully." });
                     setShowErrorPopup(true);
@@ -452,6 +505,7 @@ export default function EditProperty({params}) {
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
             }
+            
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
@@ -516,17 +570,16 @@ export default function EditProperty({params}) {
                     video: propertyDetail?.video || null,
                     video_link: propertyDetail?.video || null,
                     currency_id: propertyDetail?.currency || "",
-                    credit: propertyDetail?.credit || "",
-                    state_id: propertyDetail?.state_id || "",
-                    city_id: propertyDetail?.city_id || "",
-                    districts_id: propertyDetail?.districts_id || "",
-                    neighborhood_id: propertyDetail?.neighborhood_id || "",
+                    state_id: propertyDetail?.state || "",
+                    city_id: propertyDetail?.city || "",
+                    districts_id: propertyDetail?.district || "",
+                    neighborhood_id: propertyDetail?.neighborhood || "",
                     transaction_type: propertyDetail?.transaction_type || "",
                     property_type: propertyDetail?.type_details?.id || "",
                     project_id: propertyDetail?.project_id || "",
                     user_id: propertyDetail?.user || "",
                     size_sqft: propertyDetail?.size || "",
-                    
+                    ...propertyOfMetaNumberValue
                 }}
 
                  
@@ -663,14 +716,14 @@ export default function EditProperty({params}) {
                                     </fieldset>
                                 </div>
                                 <div className="box grid-3 gap-30">
-                                    <fieldset className="box box-fieldset">
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
+                                    </fieldset> */}
+                                    {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Credit:</label>
                                         <Field type="text" name="credit" className="box-fieldset"  />
-                                    </fieldset>
+                                    </fieldset> */}
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
@@ -878,7 +931,7 @@ export default function EditProperty({params}) {
                                                 as="select"
                                                 name="state_id"
                                                 className="nice-select country-code"
-                                                value={ propertyDetail.state|| values.state_id}
+                                                value={values.state_id}
                                                 onChange={(e) => {
                                                     const selectedStateId = e.target.value;
                                                     setFieldValue("state_id", selectedStateId);
@@ -898,7 +951,7 @@ export default function EditProperty({params}) {
                                             }
                                         </Field>
                                         </fieldset>
-                                        <fieldset className="box box-fieldset">
+                                         <fieldset className="box box-fieldset">
                                             <label htmlFor="desc">Cities:</label>
                                             <Field
                                                 as="select"
@@ -909,22 +962,17 @@ export default function EditProperty({params}) {
                                                     setFieldValue("city_id", selectedCity);
                                                     handleCityChange(selectedCity);
                                                 }}
-                                                value={propertyDetail.city || values.city_id }
+                                                value={values.city_id }
                                             >
                                                 <option value="">Select Cities</option>
                                                 {cityList && cityList.length > 0 ? (
                                                     cityList.map((cities) => (
                                                         <option key={cities.id} value={cities.id}>
-                                                            {cities.city_name}
+                                                            {cities.name}
                                                         </option>
                                                     ))
                                                 ) : (
-                                                    // Show the propertyDetail city name when cityList is empty
-                                                    propertyDetail?.city?.id && (
-                                                        <option value={propertyDetail.city.id}>
-                                                            {propertyDetail.city.name}
-                                                        </option>
-                                                    )
+                                                    <></>
                                                 )}
                                             </Field>
                                         </fieldset>
@@ -940,22 +988,18 @@ export default function EditProperty({params}) {
                                                     setFieldValue("districts_id", selectedDistrict);
                                                     handleDistrictChange(selectedDistrict);
                                                 }}
-                                                value={propertyDetail.district || values.districts_id || ""}
+                                                value={values.districts_id}
                                             >
                                                 <option value="">Select District</option>
                                                 
                                                 {districtList && districtList.length > 0 ? (
                                                     districtList.map((districts) => (
                                                         <option key={districts.id} value={districts.id}>
-                                                            {districts.district_name}
+                                                            {districts.name}
                                                         </option>
                                                     ))
                                                 ) : (
-                                                    propertyDetail?.district && (
-                                                        <option value={propertyDetail.district.id}>
-                                                            {propertyDetail.district.name}
-                                                        </option>
-                                                    )
+                                                    <></>
                                                 )}
                                             </Field>
                                         </fieldset>
@@ -971,21 +1015,17 @@ export default function EditProperty({params}) {
                                                         setFieldValue("neighborhood_id", selectedNeighborhood);
                                                         handleNeighborhoodChange(selectedNeighborhood);
                                                     }}
-                                                    value={propertyDetail.neighborhood || values.neighborhood_id || ""}
+                                                    value={values.neighborhood_id}
                                                 >
                                                 <option value="">Select Neighborhood</option>
                                                 {neighborhoodList && neighborhoodList.length > 0 ? (
                                                     neighborhoodList.map((neighborhoods) => (
                                                         <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                            {neighborhoods.neighborhood_name}
+                                                            {neighborhoods.name}
                                                         </option>
                                                     ))
                                                 ) : (
-                                                    propertyDetail?.neighborhood && (
-                                                        <option value={propertyDetail.neighborhood}>
-                                                            {propertyDetail.neighborhood}
-                                                        </option>
-                                                    )
+                                                   <></>
                                                 )}
                                             </Field>
                                         </fieldset>
@@ -1001,17 +1041,38 @@ export default function EditProperty({params}) {
                                                 setFieldValue('address', newAddress);
                                                 setFieldValue('latitude', newLocation.lat);
                                                 setFieldValue('longitude', newLocation.lng);
-                                                //handleAddressSelect(newAddress, newLocation);
                                             }
                                         }
                                         />
                                     </div>
                                 </div>
-                            
+                            <div className="widget-box-2">
+                                 <h6 className="title">Amenities </h6>
+                                 <div className="box-amenities-property">
+                                     <div className="box-amenities">
+                                         {propertyOfBooleanListing && propertyOfBooleanListing.length > 0 ? (
+                                             propertyOfBooleanListing.map((project) => (
+                                                 <fieldset className="amenities-item">
+                                                     <Field
+                                                         type="checkbox" name={project.id}
+                                                         className="tf-checkbox style-1 primary"
+                                                         checked={!!checkedItems[project.key]} // Set checked status
+                                                         onChange={() => handleCheckboxChange(project.key)}
+                                                     />
+                                                     <label for="cb1" className="text-cb-amenities">{project.name}</label>
+                                                     {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
+                                                 </fieldset>
+                                             ))
+                                         ) : (
+                                             <></>
+                                         )}
+                                     </div>
+                                 </div>
+                             </div>
                               
                             </div>
                           
-                            <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
+                            <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Update Property</button>
                         </div >
                           {/* Error Popup */}
                           {showErrorPopup && Object.keys(errors).length > 0 && (
