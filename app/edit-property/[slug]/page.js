@@ -499,7 +499,7 @@ export default function EditProperty({params}) {
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
-                    neighborhood_id: values.neighborhood_id,
+                    neighborhoods_id: values.neighborhood_id,
                     latitude: values.latitude ? String(values.latitude) : "33.985047",
                     longitude: values.longitude ? String(values.longitude) : "-118.469483",
                     transaction: values.transaction_type,
