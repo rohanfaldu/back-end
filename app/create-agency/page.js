@@ -40,7 +40,9 @@ export default function CreateAgency() {
         youtube_link: Yup.string().url("Invalid URL").nullable(),
         pinterest_link: Yup.string().url("Invalid URL").nullable(),
         linkedin_link: Yup.string().url("Invalid URL").nullable(),
-        instagram_link: Yup.string().url("Invalid URL").nullable()
+        instagram_link: Yup.string().url("Invalid URL").nullable(),
+        agency_packages: Yup.string().required("Agency packages are required"),
+        
     });
 
     useEffect (() => {
@@ -85,6 +87,7 @@ export default function CreateAgency() {
                             user_login_type: userType("NONE"),
                             phone_number: values.phone.toString(),
                             password: values.password ?? null,
+                            country_code: values.country_code,
                             user_id: null,
                             device_type: "web",
                             social_id: null
@@ -192,6 +195,7 @@ export default function CreateAgency() {
                     instagram_link: "",
                     country_code: "+33",
                     whatsup_country_code: "+33",
+                    agency_packages: ""
                  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -385,7 +389,7 @@ export default function CreateAgency() {
                                         {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
-                                <div className="grid-2 box gap-30">
+                                {/* <div className="grid-2 box gap-30">
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="bedrooms">Picture Image:</label>
                                         <div className="box-floor-img uploadfile">
@@ -424,7 +428,7 @@ export default function CreateAgency() {
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
                                         </div>
                                     </fieldset>
-                                </div>
+                                </div> */}
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Other Information</h6>

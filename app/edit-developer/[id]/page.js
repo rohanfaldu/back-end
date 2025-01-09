@@ -87,6 +87,13 @@ export default function EditDeveloper({params}) {
         //     .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
         //     .required("Phone Number is required"),
         // image: Yup.mixed().required("Image is required"),
+        username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
+        fullname: Yup.string().min(5, "Full name must be at least 5 characters") .required("Full name is required"),
+        email: Yup.string() .email("Invalid email format") .required("Email is required"),
+        phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
+        country_code: Yup.string().required("Country code is required"),
+        agency_packages: Yup.string().required("Agency packages are required"),
+        
     });
 
 
@@ -148,6 +155,7 @@ export default function EditDeveloper({params}) {
                 console.log(updateDeveloperInfo,"hbdshjbdhsbvhdbvhj")
                 if(updateDeveloperInfo.status){
                     setSucessMessage(updateDeveloperInfo.message);
+                    router.push('/developer-listing');
                 }else{
                     setErrors({ serverError: response.message || "Failed to create state." });
                     setShowErrorPopup(true);
@@ -292,7 +300,7 @@ export default function EditDeveloper({params}) {
                                                 <label htmlFor="desc">Email:<span>*</span></label>
                                                 <Field type="email" id="email" name="email" />
                                             </fieldset>
-                                            <fieldset className="box-fieldset">
+                                            {/* <fieldset className="box-fieldset">
                                                 <label htmlFor="pass">Password<span>*</span>:</label>
                                                 <Field
                                                     type={showPassword ? "text" : "password"}
@@ -308,7 +316,7 @@ export default function EditDeveloper({params}) {
                                                     >
                                                     {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
                                                 </span>
-                                            </fieldset>
+                                            </fieldset> */}
                                         </div>
                                     </div>
 
