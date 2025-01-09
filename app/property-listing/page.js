@@ -172,6 +172,7 @@ export default function PropertyListing() {
                                           />
                                         </Link>
                                     </li>
+                                    
                                     <li className="delete">
                                       <a
                                         className="remove-file item"
