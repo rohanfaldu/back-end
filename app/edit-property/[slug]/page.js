@@ -10,11 +10,11 @@ import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData, updateData } from "@/components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "@/components/common/imageUpload";
-import { capitalizeFirstChar } from "@/components/common/functions";
+import { capitalizeFirstChar, validateYouTubeURL } from "@/components/common/functions";
 import Preloader from "@/components/elements/Preloader";
 import  "@/components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
-
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 export default function EditProperty({params}) {
     const { slug } = params;
     const [loading, setLoading] = useState(false); // Loader state
@@ -88,6 +88,14 @@ export default function EditProperty({params}) {
     
                     if (getpropertyInfo.data) {
                         setPropertyDetail(getpropertyInfo.data);
+
+
+                        setPropertyMapCoords({
+                            latitude: parseFloat(getpropertyInfo.data.latitude),
+                            longitude: parseFloat(getpropertyInfo.data.longitude),
+                            zoom: 14
+                        });
+
 
                         const cityObj = { state_id: getpropertyInfo.data.state, lang: "en" };
                         const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
@@ -232,8 +240,8 @@ export default function EditProperty({params}) {
         if (selectedState) {
             const { latitude, longitude } = selectedState;
             setPropertyMapCoords({
-                latitude: latitude,
-                longitude: longitude,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
                 zoom: 10
             });
 
@@ -253,8 +261,8 @@ export default function EditProperty({params}) {
         setNeighborhoodList([]);
 
         setPropertyMapCoords({
-            latitude: latitude,
-            longitude: longitude,
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
             zoom: 12
         });
 
@@ -282,8 +290,8 @@ export default function EditProperty({params}) {
             console.log('selectedNeighborhood ID:', selecteNeighborhood.latitude);
             const { latitude, longitude } = selecteNeighborhood;
             setPropertyMapCoords({
-                latitude: latitude,
-                longitude: longitude,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
                 zoom: 14
             });
         } else {
@@ -385,10 +393,26 @@ export default function EditProperty({params}) {
 
         try {
 
-            if (!isVideoUpload && !values.video_link) {
-                setErrors({ serverError: "Please enter a YouTube video link." });
-                setShowErrorPopup(true);
-                return;
+            setSucessMessage("Processing .........");
+            let videoUrl = values.video;
+            // if (isVideoUpload && !values.video_link) {
+            //     setErrors({ serverError: "Please enter a YouTube video link." });
+            //     setShowErrorPopup(true);
+            //     return;
+            // }
+
+            if (values.video_link) {
+                const isValid = validateYouTubeURL(values.video_link);
+                if (!isValid) {
+                    setErrors({
+                        serverError:
+                            "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID.",
+                    });
+                    setShowErrorPopup(true);
+                    return false;
+                }
+                videoUrl = values.video_link;
+                console.log(videoUrl,"videoUrl")
             }
 
 
@@ -436,7 +460,7 @@ export default function EditProperty({params}) {
 
             if (uploadImageUrl.length > 0) {
                 const imageUrls = [];
-                let videoUrl = values.video;
+                let videoUrl = values.video_link;
             
                 uploadImageUrl.forEach((file) => {
                     if (file && file.mimeType) {
@@ -548,6 +572,7 @@ export default function EditProperty({params}) {
         setFieldValue("video_link", event.target.value); // Update Formik state
 
     };
+
     console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
@@ -703,7 +728,7 @@ export default function EditProperty({params}) {
                                                     <option value="">Select Currency</option>
                                                     {currencyList && currencyList.length > 0 ? (
                                                         currencyList.map((currency, index) =>(
-                                                            <option key={index} value={currency.id}>{currency.symbol}
+                                                            <option key={index} value={currency.id}>{currency.name}
                                                             </option>
                                                         ))
                                                     ) : (
@@ -714,21 +739,24 @@ export default function EditProperty({params}) {
                                             </div>
                                            
                                     </fieldset>
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">License number:</label>
-                                        <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                    </fieldset> */}
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Credit:</label>
-                                        <Field type="text" name="credit" className="box-fieldset"  />
-                                    </fieldset> */}
+
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="title">Direction:<span>*</span></label>
+                                        <Field as="select" name="direction" className="nice-select country-code">
+                                            <option value="">Select Direction</option>
+                                            <option value="north">North</option>
+                                            <option value="south">South</option>
+                                            <option value="east">East</option>
+                                            <option value="west">West</option>
+                                        </Field>
+                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
+                                    </fieldset>
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="description">Size of SqMeter:<span>*</span></label>
                                         <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
                                     </fieldset>
                                 </div>
+                                
                                 <div className="box grid-3 gap-30">
                                         {propertyOfNumberListing && propertyOfNumberListing.length > 0 ? (
                                             propertyOfNumberListing.map((property) => (
@@ -1080,6 +1108,12 @@ export default function EditProperty({params}) {
                                 errors={errors}
                                 validationSchema={validationSchema}
                                 onClose={() => setShowErrorPopup(false)}
+                            />
+                        )}
+                        {sucessMessage && (
+                            <SuccessPopup
+                            message={sucessMessage}
+                            onClose={() => setSucessMessage(false)}
                             />
                         )}
                     </Form>
