@@ -17,7 +17,7 @@ import { capitalizeFirstChar, validateYouTubeURL } from "../../../components/com
 import { insertMultipleUploadImage } from "../../../components/common/imageUpload";
 import "../../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../../components/errorPopup/ErrorPopup.js";
-
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 const resolveIdByName = (stateName, statesList) => {
     const state = statesList.find((state) => state.name === stateName);
     return state ? state.id : ""; // Return the state id or empty string if not found
@@ -337,10 +337,28 @@ export default function EditProject({ params }) {
 
 
         try {
-
+            setSucessMessage("Processing .........");
             // const uploadImageObj = [values.picture_img, values.video];
             // const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
             // Ensure picture_img, video, and icon are arrays
+            // console.log(values.video_link,"values.video_link");
+            // console.log(values.video,"values.video");
+            // let videoUrl = values.video;
+            // if (values.video_link) {
+            //     const isValid = validateYouTubeURL(values.video_link);
+            //     if (!isValid) {
+            //         setErrors({
+            //             serverError:
+            //                 "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID.",
+            //         });
+            //         setShowErrorPopup(true);
+            //         return false;
+            //     }
+            //     videoUrl = values.video_link;
+                
+            // }
+            
+
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
             const videoObj = values.video ? [values.video] : [];
             const iconObj = values.icon ? [values.icon] : [];
@@ -363,13 +381,13 @@ export default function EditProject({ params }) {
                 uploadImageIconUrl = await insertMultipleUploadImage("image", allUploadFilesICon);
 
             }
-
+           
 
             if (uploadImageUrl.length > 0) {
 
 
                 const imageUrls = [];
-                let videoUrl = values.video;
+                let videoUrl = values.video_link;
                 let iconUrl = values.icon; // Initialize as null for a single URL
 
                 // Process uploaded files to separate URLs
@@ -397,21 +415,21 @@ export default function EditProject({ params }) {
                 }
 
 
+                if (values.video_link && !validateYouTubeURL(values.video_link) && !values.video_link.toLowerCase().endsWith('.mp4')) {
+                    setErrors({ serverError: "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
+                    setShowErrorPopup(true);
+                    return false;
+                }
+    
+                // Use the provided video link if no video was uploaded
+                videoUrl = videoUrl || values.video_link;
+
                 console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
 
                 // Default video URL if not uploaded
-                if (values.video_link) {
-                    const isValid = validateYouTubeURL(values.video_link);
-                    if (!isValid) {
-                        setErrors({
-                            serverError:
-                                "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID.",
-                        });
-                        setShowErrorPopup(true);
-                        return false;
-                    }
-                    videoUrl = values.video_link;
-                }
+                
+
+
                 console.log('values');
                 console.log(values);
 
@@ -578,8 +596,6 @@ export default function EditProject({ params }) {
                                                 <label htmlFor="desc">VR Link:</label>
                                                 <Field type="text" name="vr_link" className="box-fieldset" />
                                             </fieldset>
-                                        </div>
-                                        <div className="box grid-3 gap-30">
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="title">User Listing:</label>
                                                 <Field as="select" name="user_id" className="nice-select country-code"
@@ -600,6 +616,27 @@ export default function EditProject({ params }) {
                                                 </Field>
                                             </fieldset>
                                         </div>
+                                        {/* <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Listing:</label>
+                                                <Field as="select" name="user_id" className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedUSer = e.target.value;
+                                                        setFieldValue("user_id", selectedUSer);
+                                                    }}
+                                                    value={values.user_id || projectDetail.user || ""}
+                                                >
+                                                    <option value="">Select User Listing</option>
+                                                    {developerList && developerList.length > 0 ? (
+                                                        developerList.map((user) => (
+                                                            (user.full_name !== null) ? <option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option> : <></>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                            </fieldset>
+                                        </div> */}
                                         <div className="box grid-3 gap-30">
                                             {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
                                                 projectOfNumberListing.map((project) => (
@@ -1043,6 +1080,12 @@ export default function EditProject({ params }) {
                                         validationSchema={validationSchema}
                                         onClose={() => setShowErrorPopup(false)}
                                     />
+                                )}
+                                {sucessMessage && (
+                                <SuccessPopup
+                                    message={sucessMessage}
+                                    onClose={() => setSucessMessage(false)}
+                                />
                                 )}
                             </Form>
                         )}
