@@ -403,7 +403,7 @@ export default function EditProperty({params}) {
                 const updatedValues = Object.entries(propertyOfMetaNumberValue).map(([property_type_id, value]) => ({
                     property_type_id,
                     value
-                }));
+                })); 
 
                 console.log(updatedValues,"updatedValues")
 
