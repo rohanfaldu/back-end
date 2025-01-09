@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import passwordShow from "../../../public/images/favicon/password-show.png";
 import passwordHide from "../../../public/images/favicon/password-hide.png";
-import { insertData } from "../../../components/api/Axios/Helper";
+import { insertData, updateData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
 import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
@@ -24,6 +24,8 @@ export default function EditDeveloper({params}) {
 	const [loading, setLoading] = useState(true);
     const [filePreview, setFilePreview] = useState(null);
     const [userDetail, setUserDetail] = useState(null);
+    const [developerDetail, setDeveloperDetail] = useState(null);
+
     const [selectedCode, setSelectedCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [agencyPackageList, setAgencyPackageList] = useState([]);
@@ -34,25 +36,45 @@ export default function EditDeveloper({params}) {
 
 
     useEffect(() => {
-        console.log(id);
-        const fetchData = async () => {
-		try {
-            const type = { type: "developer" };
-            const getUserInfo = await insertData('auth/getall', type, false);
-            const allUsersList = getUserInfo.data.user_data;
-			const specifcUserDetail = allUsersList.find(item => item.id === id);
-			setUserDetail(specifcUserDetail);
-			setFilePreview(specifcUserDetail.image);
-			setLoading(false); // Stop loading
-			setError(null); // Clear errors
-		} catch (err) {
-			setLoading(false); // Stop loading
-		}
-		};
-		fetchData(); // Fetch data on component mount
-	}, []);
+            console.log(id);
+            const fetchData = async () => {
+            try {
+                setLoading(true);
+                const type = { user_id: id };
+                const getDeveloperInfo = await insertData('api/developer/getbyuserid', type, true);
+    
+                if (getDeveloperInfo.status) {
+                    setUserDetail(getDeveloperInfo.data.user);
+                    setDeveloperDetail(getDeveloperInfo.data.developer);
+                    setFilePreview(getDeveloperInfo.data.user.image);
+                    setErrorMessage('');
+                } else {
+                    setShowErrorPopup(true);
+                }
+            } catch (err) {
+                setShowErrorPopup(true); 
+            } finally{
+                setLoading(false);
+            }
+        };
+            fetchData();
+        }, []);
 
-    console.log(userDetail);
+        useEffect (() => {
+                const fetchData = async () => {
+                    try{
+                        if(agencyPackageList.length === 0){
+                            const getAgencyPackageListInfo = await insertData('api/agency-packages/', {page: 1, limit: 100}, true);
+                            if(getAgencyPackageListInfo) {
+                                setAgencyPackageList(getAgencyPackageListInfo.data.list);
+                            }
+                        }
+                    }catch (error) {
+                        console.error('Error inserting data:', error);
+                    }
+                }
+                fetchData();
+            });
 
     const validationSchema = Yup.object({
         // username: Yup.string()
@@ -65,93 +87,90 @@ export default function EditDeveloper({params}) {
         //     .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
         //     .required("Phone Number is required"),
         // image: Yup.mixed().required("Image is required"),
+        username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
+        fullname: Yup.string().min(5, "Full name must be at least 5 characters") .required("Full name is required"),
+        email: Yup.string() .email("Invalid email format") .required("Email is required"),
+        phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
+        country_code: Yup.string().required("Country code is required"),
+        agency_packages: Yup.string().required("Agency packages are required"),
+        
     });
-    const router = useRouter();
-    // Handle form submission
 
-    const handleDelete = async (id) => {
-        const deleteData = { user_id: id, is_deleted: true };
-        try {
-            const deleteUserInfo = await insertData('auth/update/user', deleteData, false);
-            if(deleteUserInfo.status === true) {
-                setSucessMessage(true);
-                setErrorMessage(createUserInfo.message);
-                router.push('/developer-listing');
-            }else{
-                setErrorMessage(createUserInfo.message);
-            }
-            console.log(response);
-            router.push('/developer-listing');
-        } catch (error) {
-            console.error('Error deleting user:', error);
-        }
-    };
-    const handleSubmit = async (values, {resetForm}) => {
+
+
+    const router = useRouter();
+    const handleSubmit = async (values, { resetForm }) => {
         console.log(id);
-        // console.log(values);
         setErrorMessage('');
+    
+        // Create FormData for image upload
         const formData = new FormData();
         formData.append('image', values.image);
-
+    
         try {
             let imageUrl = filePreview;
             if (values.image instanceof File) {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                imageUrl = response.data.data.files.map(file => file.url);// New uploaded image URL
+                imageUrl = response.data.data.files.map(file => file.url)[0];
             }
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formData, {
-                headers: {
-                'Content-Type': 'multipart/form-data',
-                },
-            });
+    
+            const userData = {
+                user_name: values.username,
+                full_name: values.fullname,
+                email_address: values.email,
+                phone_number: values.phone,
+                country_code: values.country_code,
+                image_url: imageUrl,
+                user_id: id
+            };
+    
+            console.log(userData);
 
+            const updateUserInfo = await insertData("auth/update/allRole", userData, true);
 
-                const userData = {
+            if (updateUserInfo.status) {
+                const developerData = {
                     credit: values.credit,
-                    description_en:  values.description_en,
-                    description_en:  values.description_fr,
-                    facebook_link: values.facebook_link,
-                    twitter_link:values.twitter_link,
-                    youtube_link: values.youtube_link,
-                    pinterest_link: values.pinterest_link,
-                    linkedin_link: values.linkedin_link,
-                    instagram_link: values.instagram_link,
-                    whatsup_number: values.whatsup_number,
+                    description_en: values.description_en,
+                    description_fr: values.description_fr,
+                    whatsup_number: values.developer_phone,
                     service_area_en: values.service_area_en,
                     service_area_fr: values.service_area_fr,
                     tax_number: values.tax_number,
                     license_number: values.license_number,
-                    picture: "new-urltopicture.jpg",
-                    cover: "new-urltocoverimage.jpg"
+                    country_code: values.developer_country_code,
+                    agency_packages: values.agency_packages,
+                    facebook_link: values.facebook_link,
+                    twitter_link: values.twitter_link,
+                    youtube_link: values.youtube_link,
+                    pinterest_link: values.pinterest_link,
+                    linkedin_link: values.linkedin_link,
+                    instagram_link: values.instagram_link,
+                };
+
+                console.log(developerData);
+                const updateDeveloperInfo = await updateData(`api/developer/${developerDetail.id}`, developerData, true);
+                console.log(updateDeveloperInfo,"hbdshjbdhsbvhdbvhj")
+                if(updateDeveloperInfo.status){
+                    setSucessMessage(updateDeveloperInfo.message);
+                    router.push('/developer-listing');
+                }else{
+                    setErrors({ serverError: response.message || "Failed to create state." });
+                    setShowErrorPopup(true);
                 }
-                console.log(userData);
-
-
-                const updateUserInfo = await updateData(`api/developer/${id}`, userData, true);
-                if(updateUserInfo.status === true) {
-                        setSucessMessage(true);
-                        setErrorMessage(updateUserInfo.message);
-                        router.push('/agency-listing');
-                    }else{
-                        setErrorMessage(updateUserInfo.message);
-                    }
-
-
+            } else {
+                setErrorMessage(updateUserInfo.data.message);
+            }
+    
         } catch (error) {
-          console.error('Error uploading file:', error);
+            console.error('Error updating user information:', error);
+            setErrorMessage('Failed to update user information. Please try again.');
         }
-
-
     };
 
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
 
-	const handleRadioChange = (event) => {
-		const selectedRadioId = event.target.id
-		setSelectedRadio(selectedRadioId)
-	}
     const messageClass = (sucessMessage) ? "message success" : "message error";
 
 	return (
@@ -164,18 +183,33 @@ export default function EditDeveloper({params}) {
                     <Formik
                          initialValues={{
                           
-                            description_en: userDetail.description_en,
-                            description_fr: userDetail.description_fr,
-                            service_area_fr: userDetail.service_area_fr,
-                            service_area_en: userDetail.service_area_en,
-                            facebook_link: userDetail.facebook_link,
-                            twitter_link: userDetail.youtube_link,
-                            youtube_link: userDetail.youtube_link,
-                            pinterest_link: userDetail.pinterest_link,
-                            linkedin_link: userDetail.linkedin_link,
-                            instagram_link: userDetail.instagram_link,
-                            country_code: userDetail.country_code,
-                            whatsup_country_code: userDetail.country_code,
+                            image: userDetail?.image || "",
+                            username: userDetail?.user_name || "",
+                            fullname: userDetail?.full_name || "",
+                            email: userDetail?.user_email_adress || "",
+                            phone: userDetail?.mobile_number || "",
+                            password: userDetail?.password || "",
+                            country_code: userDetail?.country_code || "",
+
+
+                            description_en: developerDetail.description_en || '',
+                            description_fr: developerDetail.description_fr || '',
+                            developer_country_code: developerDetail.country_code || '',
+                            developer_phone: developerDetail.whatsup_number || '',
+                            service_area_en: developerDetail.service_area_en || '',
+                            service_area_fr: developerDetail.service_area_fr || '',
+                            tax_number: developerDetail.tax_number || '',
+                            license_number: developerDetail.license_number || '',
+                            credit: developerDetail.credit || '',
+                            agency_packages: developerDetail.agency_packages || '',
+
+                            facebook_link: developerDetail?.facebook_link || "",
+                            twitter_link: developerDetail?.twitter_link || "",
+                            youtube_link: developerDetail?.youtube_link || "",
+                            pinterest_link: developerDetail?.pinterest_link || "",
+                            linkedin_link: developerDetail?.linkedin_link || "",
+                            instagram_link: developerDetail?.instagram_link || "",
+
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -184,7 +218,111 @@ export default function EditDeveloper({params}) {
                             <Form>
                                 <div>
                                     
-                                    
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Upload Developer User Image</h6>
+                                        <div className="box-uploadfile text-center">
+                                        <label className="uploadfile">
+                                                <span className="icon icon-img-2" />
+                                                <div className="btn-upload">
+                                                    <span className="tf-btn primary">Choose Image</span>
+                                                    <input
+                                                        type="file"
+                                                        className="ip-file"
+                                                        onChange={(event) => {
+                                                            console.log(event)
+                                                            const file = event.currentTarget.files[0];
+                                                            console.log("Uploaded File: ", file); 
+                                                            if (file) {
+                                                                setFieldValue("image", file);
+                                                                setFilePreview(URL.createObjectURL(file)); 
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                                {filePreview && (
+                                                    <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} />
+                                                )}
+                                                <p className="file-name fw-5"> Or drop image here to upload </p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="widget-box-2">
+                                        <h6 className="title">User Information</h6>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Name:<span>*</span></label>
+                                                <Field type="text" id="username" name="username" className="form-control style-1" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">Full Name:<span>*</span></label>
+                                                <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                <div className="phone-and-country-code">
+                                                    <Field
+                                                        as="select"
+                                                        name="country_code"
+                                                        className="nice-select country-code"
+                                                        id="country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("country_code", selectedState);
+                                                            console.log('Selected Country Code:', selectedState); // Debugging output
+                                                        }}
+                                                    >
+                                                        <option value="">Select Country Code</option>
+                                                        {allCountries && allCountries.length > 0 ? (
+                                                            allCountries
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode))
+                                                                .map((country, index) => (
+                                                                    <option key={index} value={`+${country.dialCode}`}>
+                                                                        {country.name} (+{country.dialCode})
+                                                                    </option>
+                                                                ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    <Field
+                                                        type="text"
+                                                        id="phone"
+                                                        name="phone"
+                                                        className="form-control style-1"
+                                                    />
+                                                </div>
+                                            </fieldset>
+    
+    
+                                        </div>
+                                        <div className="box grid-2 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Email:<span>*</span></label>
+                                                <Field type="email" id="email" name="email" />
+                                            </fieldset>
+                                            {/* <fieldset className="box-fieldset">
+                                                <label htmlFor="pass">Password<span>*</span>:</label>
+                                                <Field
+                                                    type={showPassword ? "text" : "password"}
+                                                    id="password"
+                                                    name="password"
+                                                    onChange={handleChange}
+                                                    onBlur={handleBlur}
+                                                    style={{ width: "100%", paddingRight: "2.5rem" }}
+                                                />
+                                                <span
+                                                    onClick={() => setShowPassword((prev) => !prev)}
+                                                    className="show-password"
+                                                    >
+                                                    {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
+                                                </span>
+                                            </fieldset> */}
+                                        </div>
+                                    </div>
+
+
+
+
                                     <div className="widget-box-2">
                                         <h6 className="title">Developer Information</h6>
                                         <div className="grid-1 box gap-30">
@@ -198,35 +336,40 @@ export default function EditDeveloper({params}) {
                                             </fieldset>
                                         </div>
                                         <div className="box grid-3 gap-30">
-                                            <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Whatsup number:</label>
-                                                    <div className="phone-and-country-code">
-                                                        <Field as="select" name="whatsup_country_code" className="nice-select country-code"
-                                                            id="country-code"
-                                                            value={selectedCode}
-                                                            onChange={(e) => {
-                                                                const selectedState = e.target.value;
-                                                                setSelectedWhatsupCode(selectedState);
-                                                                setFieldValue("whatsup_country_code", selectedState);
-                                                                //handleCityChange(selectedState);
-                                                            }}
-                                                        >
-                                                            <option value="">Select Country Code</option>
-                                                            {allCountries && allCountries.length > 0 ? (
-                                                                allCountries
-                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
-                                                                .map((country, index) =>(
-                                                                    <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                <div className="phone-and-country-code">
+                                                    <Field
+                                                        as="select"
+                                                        name="developer_country_code"
+                                                        className="nice-select country-code"
+                                                        id="country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("developer_country_code", selectedState);
+                                                            console.log('Selected Country Code:', selectedState); // Debugging output
+                                                        }}
+                                                    >
+                                                        <option value="">Select Country Code</option>
+                                                        {allCountries && allCountries.length > 0 ? (
+                                                            allCountries
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode))
+                                                                .map((country, index) => (
+                                                                    <option key={index} value={`+${country.dialCode}`}>
+                                                                        {country.name} (+{country.dialCode})
                                                                     </option>
                                                                 ))
-                                                            ) : (
-                                                                <></>
-                                                            )}
-                                                        </Field>
-                                                        <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
-                                                    </div>
-                                                {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
-                                                {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    <Field
+                                                        type="text"
+                                                        id="phone"
+                                                        name="developer_phone"
+                                                        className="form-control style-1"
+                                                    />
+                                                </div>
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="service_area_en">Service Area English:</label>
@@ -276,46 +419,7 @@ export default function EditDeveloper({params}) {
                                                 {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
-                                        <div className="grid-2 box gap-30">
-                                            <fieldset className="box-fieldset">
-                                                <label htmlFor="bedrooms">Picture Image:</label>
-                                                <div className="box-floor-img uploadfile">
-                                                    <div className="btn-upload">
-                                                        <Link href="#" className="tf-btn primary">Choose File</Link>
-                                                        <input
-                                                            type="file"
-                                                            className="ip-file"
-                                                            onChange={(event) => {
-                                                                const file = event.currentTarget.files[0];
-                                                                setFieldValue("picture_img", file);
-                                                                setFilePictureImg(URL.createObjectURL(file));
-                                                            }}
-                                                        />
-                                                        {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
-                                                    </div>
-                                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                                </div>
-                                            </fieldset>
-                                            <fieldset className="box-fieldset">
-                                                <label htmlFor="bedrooms">Cover Image:</label>
-                                                <div className="box-floor-img uploadfile">
-                                                    <div className="btn-upload">
-                                                        <Link href="#" className="tf-btn primary">Choose File</Link>
-                                                        <input
-                                                            type="file"
-                                                            className="ip-file"
-                                                            onChange={(event) => {
-                                                                const file = event.currentTarget.files[0];
-                                                                setFieldValue("cover_img", file);
-                                                                setFileCoverImg(URL.createObjectURL(file));
-                                                            }}
-                                                        />
-                                                        {fileCoverImg && ( <img src={fileCoverImg} alt="Preview" className="uploadFileImage" /> )}
-                                                    </div>
-                                                    <p className="file-name fw-5"> Or drop image here to upload </p>
-                                                </div>
-                                            </fieldset>
-                                        </div>
+                                        
                                     </div>
                                     <div className="widget-box-2">
                                         <h6 className="title">Other Information</h6>
