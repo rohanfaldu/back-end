@@ -9,6 +9,8 @@ import Preloader from "@/components/elements/Preloader";
 import React, { useEffect, useState } from 'react';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
+import ViewIcon from "../../public/images/favicon/view.png";
+
 export default function MyProperty() {
   const [properties, setProperties] = useState([]); // Store all fetched properties
   const [filteredProperties, setFilteredProperties] = useState([]); // Store filtered properties
@@ -198,6 +200,22 @@ export default function MyProperty() {
                                               width={25}
                                               height={25}
                                             />
+                                        </a>
+                                      </li>
+                                      <li className="delete">
+                                        <a
+                                          className="remove-file item"
+                                          onClick={() => handleView(user.slug)}
+                                          style={{ border: 'none', background: 'transparent', padding: 0 }}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <Image
+                                            src={ViewIcon} // Imported image object or static path
+                                            alt="View icon"
+                                            width={25}
+                                            height={25}
+                                          />
                                         </a>
                                       </li>
                                     </ul>

@@ -121,6 +121,7 @@ export default function CreateAgency() {
                                 tax_number: values.tax_number ?? null,
                                 license_number: values.license_number ?? null,
                                 agency_packages: values.agency_packages ?? null,
+                                country_code: values.whatsup_country_code,
                                 picture: null,
                                 cover: null
                             };
@@ -246,7 +247,7 @@ export default function CreateAgency() {
                                             <div className="phone-and-country-code">
                                                 <Field as="select" name="country_code" className="nice-select country-code"
                                                     id="country-code"
-                                                    value={selectedCode}
+                                                   
                                                     onChange={(e) => {
                                                         const selectedState = e.target.value;
                                                         setSelectedCode(selectedState);
@@ -315,8 +316,8 @@ export default function CreateAgency() {
                                         <label htmlFor="desc">Whatsup number:</label>
                                             <div className="phone-and-country-code">
                                                 <Field as="select" name="whatsup_country_code" className="nice-select country-code"
-                                                    id="country-code"
-                                                    value={selectedCode}
+                                                    id="whatsup-country-code"
+                                                    
                                                     onChange={(e) => {
                                                         const selectedState = e.target.value;
                                                         setSelectedWhatsupCode(selectedState);
