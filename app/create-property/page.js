@@ -422,16 +422,20 @@ export default function CreateProperty() {
                 } else {
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
+                    setSucessMessage("");
                 }
             } else {
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
+                setSucessMessage("");
             }
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+            setSucessMessage("");
         } finally {
             setLoading(false); // Stop loader
+            setSucessMessage("");
         }
     };
     
@@ -613,7 +617,7 @@ export default function CreateProperty() {
                                         {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">User Listing:</label>
+                                        <label htmlFor="title">User Listing:<span>*</span></label>
                                         <Field as="select" name="user_id" className="nice-select country-code"
                                                 onChange={(e) => {
                                                     const selectedState = e.target.value;

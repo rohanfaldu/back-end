@@ -42,6 +42,11 @@ export default function MyProperty() {
     fetchData(); // Fetch data on component mount
   }, []);
 
+  const handleView = (id) => {
+    const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/agency/${id}`;
+      window.open(URL, '_blank')
+  };
+
     // console.log(filteredProperties.length);
     useEffect(() => {
       filterAndPaginateData(); // Apply filter and pagination whenever inputs change
@@ -179,7 +184,7 @@ export default function MyProperty() {
                                       <li className="delete">
                                         <a
                                           className="remove-file item"
-                                          onClick={() => handleView(user.slug)}
+                                          onClick={() => handleView(user.id)}
                                           style={{ border: 'none', background: 'transparent', padding: 0 }}
                                           target="_blank"
                                           rel="noopener noreferrer"
