@@ -214,6 +214,7 @@ export default function EditProject({ params }) {
         districts_id: Yup.string().required("District is required"),
         neighborhood_id: Yup.string().required("Neighborhood is required"),
         user_id: Yup.string().required("Developer is required"),
+        icon: Yup.string().required("Icon is required"),
     });
     const router = useRouter();
     // Handle form submission

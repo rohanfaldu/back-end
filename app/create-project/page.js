@@ -659,28 +659,29 @@ export default function CreateProject() {
                                     </fieldset>
                                     <fieldset className="box-fieldset">
                                         {/* Image Previews */}
-                                    <div className="image-preview-container image-gallery">
-                                    {iconPreview.length > 0 && iconPreview && (
+                                        <div className="image-preview-container image-gallery">
+                                            {iconPreview && iconPreview.length > 0 && ( // Check if iconPreview is not null
                                             <div className="preview-item">
-                                            <img
+                                                <img
                                                 src={iconPreview}
                                                 alt="Icon Preview"
                                                 className="uploadFileImage"
-                                            />
-                                            <button
+                                                />
+                                                <button
                                                 type="button"
                                                 onClick={() => {
-                                                setIconPreview(null); // Clear the preview
-                                                setFieldValue("icon", null); // Clear the file in Formik state
+                                                    setIconPreview(null); // Clear the preview
+                                                    setFieldValue("icon", null); // Clear the file in Formik state
                                                 }}
                                                 className="remove-image-btn"
-                                            >
+                                                >
                                                 &times;
-                                            </button>
+                                                </button>
                                             </div>
-                                        )}
-                                    </div>
-                                    </fieldset>
+                                            )}
+                                        </div>
+                                        </fieldset>
+
 
                                 </div>
                                 <div className="box grid-1 box gap-50">

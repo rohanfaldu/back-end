@@ -150,16 +150,50 @@ export default function EditDeveloper({params}) {
                     instagram_link: values.instagram_link,
                 };
 
-                console.log(developerData);
-                const updateDeveloperInfo = await updateData(`api/developer/${developerDetail.id}`, developerData, true);
-                console.log(updateDeveloperInfo,"hbdshjbdhsbvhdbvhj")
-                if(updateDeveloperInfo.status){
-                    setSucessMessage(updateDeveloperInfo.message);
-                    router.push('/developer-listing');
+                const developerCreateData = {
+                    user_id: id,
+                    sub_user_id: null,
+                    credit: values.credit ?? null,
+                    description_en: values.description_en ?? null,
+                    description_fr: values.description_fr ?? null,
+                    facebook_link: values.facebook_link ?? null,
+                    twitter_link: values.twitter_link ?? null,
+                    youtube_link: values.youtube_link ?? null,
+                    pinterest_link: values.pinterest_link ?? null,
+                    linkedin_link: values.linkedin_link ?? null,
+                    instagram_link: values.instagram_link ?? null,
+                    whatsup_number: values.developer_phone ?? null,
+                    service_area_en: values.service_area_en ?? null,
+                    service_area_fr: values.service_area_fr ?? null,
+                    tax_number: values.tax_number ?? null,
+                    license_number: values.license_number ?? null,
+                    agency_packages: values.agency_packages ?? null,
+                    country_code: values.developer_country_code
+                };
+
+                console.log(developerDetail.id,"developerDetail")
+                if(developerDetail.id == undefined){
+                    const createDeveloperInfo = await insertData('api/developer/create', developerCreateData, true);
+                    if (createDeveloperInfo.status === true) {
+                        resetForm();
+                        router.push('/developer-listing');
+                    } else {
+                        setErrors({ serverError: createDeveloperInfo.message });
+                        setShowErrorPopup(true);
+                    }
                 }else{
-                    setErrors({ serverError: response.message || "Failed to create state." });
-                    setShowErrorPopup(true);
+                    const updateDeveloperInfo = await updateData(`api/developer/${developerDetail.id}`, developerData, true);
+                    console.log(updateDeveloperInfo,"hbdshjbdhsbvhdbvhj")
+                    if(updateDeveloperInfo.status){
+                        setSucessMessage(updateDeveloperInfo.message);
+                        router.push('/developer-listing');
+                    }else{
+                        setErrors({ serverError: response.message || "Failed to create state." });
+                        setShowErrorPopup(true);
+                    }
                 }
+
+                
             } else {
                 setErrorMessage(updateUserInfo.data.message);
             }
