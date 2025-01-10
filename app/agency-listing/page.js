@@ -60,7 +60,7 @@ export default function MyProperty() {
       // Filter by search term
       if (searchTerm) {
         filtered = filtered.filter(property =>
-          property.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+          property.full_name.toLowerCase().includes(searchTerm.toLowerCase()) 
         );
       }
     
