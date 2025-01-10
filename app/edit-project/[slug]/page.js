@@ -602,7 +602,7 @@ export default function EditProject({ params }) {
                                                 <Field type="text" name="vr_link" className="box-fieldset" />
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="title">User Listing:</label>
+                                                <label htmlFor="title">User Listing:<span>*</span></label>
                                                 <Field as="select" name="user_id" className="nice-select country-code"
                                                     onChange={(e) => {
                                                         const selectedUSer = e.target.value;

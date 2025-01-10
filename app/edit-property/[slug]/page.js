@@ -696,7 +696,7 @@ export default function EditProperty({params}) {
                                         </Field>
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">User Listing:</label>
+                                        <label htmlFor="title">User Listing:<span>*</span></label>
                                         <Field as="select" name="user_id" className="nice-select country-code"
                                                 onChange={(e) => {
                                                     const selectedUser = e.target.value;
