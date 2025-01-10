@@ -86,17 +86,27 @@ export default function MyProperty() {
     try {
       const deleteData = { id: id, type: "agency" };
       console.log(deleteData);
-      const deleteUserInfo = await insertData('auth/delete/user', deleteData);
-      if(deleteUserInfo.status){
-        const filteredData = filteredProperties.filter((item) => item.id !== id);
-        console.log(filteredData);
-        setProperties(filteredData); // Save all properties
-        setFilteredProperties(filteredData); // Initially display all properties
-        setLoading(false); // Stop loading
-        setError(null); // Clear errors
+
+      const agencyDeleteId = { user_id: id }
+      const deleteAgencyInfo = await deletedData(`api/agencies/${id}`, agencyDeleteId);
+      if(deleteAgencyInfo.status){
+        const deleteUserInfo = await insertData('auth/delete/user', deleteData);
+        if(deleteUserInfo.status){
+          const filteredData = filteredProperties.filter((item) => item.id !== id);
+          console.log(filteredData);
+          setProperties(filteredData); // Save all properties
+          setFilteredProperties(filteredData); // Initially display all properties
+          setLoading(false); // Stop loading
+          setError(null); // Clear errors
+        }else{
+          alert(deleteUserInfo.message);
+        }
       }else{
-        alert(deleteUserInfo.message);
+        alert(deleteAgencyInfo.message);
       }
+
+
+      
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred'); // Handle error
       setLoading(false); // Stop loading
