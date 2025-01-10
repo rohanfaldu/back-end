@@ -53,27 +53,28 @@ export default function MyProperty() {
     }, [searchTerm, statusFilter, currentPage, properties]);
   
     // Filter and paginate properties
-    const filterAndPaginateData = () => {
-      let filtered = properties;
-  
+    const filterAndPaginateData = (updatedProperties = properties) => {
+      let filtered = updatedProperties;
+    
       // Filter by search term
       if (searchTerm) {
         filtered = filtered.filter(property =>
           property.full_name.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-  
+    
       // Filter by status
       if (statusFilter) {
         filtered = filtered.filter(property => property.status === statusFilter);
       }
-  
+    
       // Paginate results
       const startIndex = (currentPage - 1) * itemsPerPage;
       const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
-  
+    
       setFilteredProperties(paginated);
     };
+    
   
     // Handle search input
     const handleSearchChange = (e) => {
@@ -81,37 +82,37 @@ export default function MyProperty() {
       setCurrentPage(1); // Reset to first page on search
     };
 
-  const handleDelete = async (id) => {
-    console.log(id);
-    try {
-      const deleteData = { id: id, type: "agency" };
-      console.log(deleteData);
-
-      const agencyDeleteId = { user_id: id }
-      const deleteAgencyInfo = await deletedData(`api/agencies/${id}`, agencyDeleteId);
-      if(deleteAgencyInfo.status){
-        const deleteUserInfo = await insertData('auth/delete/user', deleteData);
-        if(deleteUserInfo.status){
-          const filteredData = filteredProperties.filter((item) => item.id !== id);
-          console.log(filteredData);
-          setProperties(filteredData); // Save all properties
-          setFilteredProperties(filteredData); // Initially display all properties
-          setLoading(false); // Stop loading
-          setError(null); // Clear errors
-        }else{
-          alert(deleteUserInfo.message);
+    const handleDelete = async (id) => {
+      try {
+        const deleteData = { id: id, type: "agency" };
+        const agencyDeleteId = { user_id: id };
+        const deleteAgencyInfo = await deletedData(`api/agencies/${id}`, agencyDeleteId);
+    
+        if (deleteAgencyInfo.status) {
+          const deleteUserInfo = await insertData('auth/delete/user', deleteData);
+    
+          if (deleteUserInfo.status) {
+            // Update the properties array
+            const updatedProperties = properties.filter((item) => item.id !== id);
+            setProperties(updatedProperties);
+    
+            // Reapply filters and pagination
+            setSearchTerm(''); // Reset search input
+            setStatusFilter(''); // Reset status filter
+            setCurrentPage(1); // Reset pagination to the first page
+            filterAndPaginateData(updatedProperties); // Update filtered properties
+          } else {
+            alert(deleteUserInfo.message);
+          }
+        } else {
+          alert(deleteAgencyInfo.message);
         }
-      }else{
-        alert(deleteAgencyInfo.message);
+      } catch (err) {
+        setError(err.response?.data?.message || 'An error occurred'); // Handle error
+        setLoading(false); // Stop loading
       }
-
-
-      
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred'); // Handle error
-      setLoading(false); // Stop loading
-    }
-  };
+    };
+    
 
   // Handle status filter change
   const handleStatusChange = (e) => {
@@ -227,6 +228,7 @@ export default function MyProperty() {
                             </li>
                           ))}
                         </ul>
+
                       </div>
                     </>:<>
                       <div className="wrap-table">
