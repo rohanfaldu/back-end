@@ -524,18 +524,22 @@ export default function EditProperty({params}) {
                 } else {
                     setErrors({ serverError: createPropertyInfo.message || "Failed to create property." });
                     setShowErrorPopup(true);
+                    setSucessMessage("");
                 }
             } else {
                 setErrors({ serverError: "File upload failed. Please try again." });
                 setShowErrorPopup(true);
+                setSucessMessage("");
             }
             
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+            setSucessMessage("");
         }
         finally {
             setLoading(false); // Stop loader
+            setSucessMessage("");
         }
     };
 

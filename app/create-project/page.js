@@ -329,18 +329,22 @@ export default function CreateProject() {
                     //setLoading(false);
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
+                    setSucessMessage("");
                 }
             } else {
                 //setLoading(false);
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
+                setSucessMessage("");
             }
         } catch (error) {
             //setLoading(false);
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+            setSucessMessage("");
         } finally {
             setLoading(false); // Stop loader
+            setSucessMessage("");
         }
     };
 

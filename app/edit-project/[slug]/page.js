@@ -469,16 +469,20 @@ export default function EditProject({ params }) {
                 } else {
                     setErrors({ serverError: createUserInfo.message || "Failed to create project." });
                     setShowErrorPopup(true);
+                    setSucessMessage("");
                 }
             } else {
                 setErrors({ serverError: "File upload failed." });
                 setShowErrorPopup(true);
+                setSucessMessage("");
             }
         } catch (error) {
             setErrors({ serverError: error.message || "An unexpected error occurred." });
             setShowErrorPopup(true);
+            setSucessMessage("");
         } finally {
             // setLoading(false); // Stop loader
+            setSucessMessage("");
         }
 
 
