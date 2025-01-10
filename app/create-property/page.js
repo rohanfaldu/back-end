@@ -398,7 +398,7 @@ export default function CreateProperty() {
                     state_id: values.state_id,
                     city_id: values.city_id,
                     district_id: values.districts_id,
-                    neighborhood_id: values.neighborhood_id,
+                    neighborhoods_id: values.neighborhood_id,
                     latitude: isNaN(parseFloat(values.latitude)) ? String(propertyMapCoords.latitude) : String(values.latitude),
                     longitude: isNaN(parseFloat(values.longitude)) ? String(propertyMapCoords.longitude) : String(values.longitude),
                     transaction: values.transaction_type,
