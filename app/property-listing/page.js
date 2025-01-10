@@ -24,7 +24,8 @@ export default function PropertyListing() {
       currentPage: variablesList.currentPage,
       itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletePropertyid, setDeletePropertyid] = useState('');
   const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
@@ -71,10 +72,11 @@ export default function PropertyListing() {
     setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on filter
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      const response = await deletedData(`api/property/${id}`, { propertyId: id });
+      const response = await deletedData(`api/property/${deletePropertyid}`, { propertyId: deletePropertyid });
       if (response.status) {
+        setIsModalOpen(false);
         fetchProperties(pagination.currentPage, searchTerm, statusFilter);
       } else {
         alert(response.message);
@@ -91,6 +93,15 @@ export default function PropertyListing() {
 
   const handlePageChange = (page) => {
     setPagination({ ...pagination, currentPage: page });
+  };
+
+  const openModal = (id) => {
+    setIsModalOpen(true);
+    setDeletePropertyid(id);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -176,7 +187,7 @@ export default function PropertyListing() {
                                     <li className="delete">
                                       <a
                                         className="remove-file item"
-                                        onClick={() => handleDelete(property.id)}
+                                        onClick={() => openModal(property.id)}
                                       >
                                         <Image
                                           src={DeleteIcon}
@@ -231,6 +242,22 @@ export default function PropertyListing() {
                 )}
               </div>
             </div>
+            {isModalOpen && (
+              <div className="modal">
+              <div className="modal-content">
+                <>
+
+                  <h2>Delete Item</h2>
+                  <p>Are you sure you want to delete this item?</p>
+                  <div>
+                    <button className="tf-btn primary " onClick={handleDelete}>Yes, Delete</button>
+                    <button className="tf-btn primary" onClick={closeModal}>Cancel</button>
+                  </div>
+                </>
+                
+              </div>
+              </div>
+            )}
           </LayoutAdmin>
         </>
       )}

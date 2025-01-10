@@ -22,7 +22,8 @@ export default function AgencyPackageListing() {
     currentPage: variablesList.currentPage,
     itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletePropertyid, setDeletePropertyid] = useState('');
   const fetchProperties = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
@@ -67,10 +68,11 @@ export default function AgencyPackageListing() {
     setPagination({ ...pagination, currentPage: 1 }); // Reset to first page on filter
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      const response = await deletedData(`api/agency-packages/${id}`, { propertyId: id });
+      const response = await deletedData(`api/agency-packages/${deletePropertyid}`, { propertyId: deletePropertyid });
       if (response.status) {
+        setIsModalOpen(false);
         fetchProperties(pagination.currentPage, searchTerm, statusFilter);
       } else {
         alert(response.message);
@@ -84,6 +86,14 @@ export default function AgencyPackageListing() {
     setPagination({ ...pagination, currentPage: page });
   };
 
+  const openModal = (id) => {
+    setIsModalOpen(true);
+    setDeletePropertyid(id);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   return (
     <>
       {loading ? (
@@ -138,7 +148,7 @@ export default function AgencyPackageListing() {
                                         </Link>
                                       </li>
                                       <li className="delete">
-                                        <a className="remove-file item" onClick={() => handleDelete(property.id)}>
+                                        <a className="remove-file item" onClick={() => openModal(property.id)}>
                                           <Image
                                               src={DeleteIcon} // Imported image object or static path
                                               alt="Delete icon"
@@ -174,6 +184,22 @@ export default function AgencyPackageListing() {
                 )}
               </div>
             </div>
+            {isModalOpen && (
+              <div className="modal">
+              <div className="modal-content">
+                <>
+
+                  <h2>Delete Item</h2>
+                  <p>Are you sure you want to delete this item?</p>
+                  <div>
+                    <button className="tf-btn primary " onClick={handleDelete}>Yes, Delete</button>
+                    <button className="tf-btn primary" onClick={closeModal}>Cancel</button>
+                  </div>
+                </>
+                
+              </div>
+              </div>
+            )}
           </LayoutAdmin>
         </>
       )}

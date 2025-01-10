@@ -20,7 +20,8 @@ export default function MyProperty() {
   const [statusFilter, setStatusFilter] = useState(''); // Store selected status filter
   const [currentPage, setCurrentPage] = useState(1); // Track current page
   const itemsPerPage = 5; // Number of items per page
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletePropertyid, setDeletePropertyid] = useState('');
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,19 +81,20 @@ export default function MyProperty() {
     setCurrentPage(1); // Reset to first page on search
   };
 
-  const handleDelete = async (id) => {
-    console.log(id);
+  const handleDelete = async () => {
+    console.log();
     try {
-      const deleteData = { id: id, type: "developer" };
-      const agencyDeleteId = { user_id: id };
-      const deleteDeveloperInfo = await deletedData(`api/developer/${id}`, agencyDeleteId);
+      const deleteData = { id: deletePropertyid, type: "developer" };
+      const agencyDeleteId = { user_id: deletePropertyid };
+      const deleteDeveloperInfo = await deletedData(`api/developer/${deletePropertyid}`, agencyDeleteId);
   
       if (deleteDeveloperInfo.status) {
         const deleteUserInfo = await insertData('auth/delete/user', deleteData);
         if (deleteUserInfo.status) {
           // Filter out the deleted property
-          const filteredData = properties.filter((item) => item.id !== id);
+          const filteredData = properties.filter((item) => item.id !== deletePropertyid);
           console.log(filteredData);
+          setIsModalOpen(false);
           setProperties(filteredData); // Save all properties
           setSearchTerm(''); // Reset search input
           setStatusFilter(''); // Reset status filter
@@ -117,6 +119,15 @@ export default function MyProperty() {
   const handleStatusChange = (e) => {
     setStatusFilter(e.target.value);
     setCurrentPage(1); // Reset to first page on filter
+  };
+  
+  const openModal = (id) => {
+    setIsModalOpen(true);
+    setDeletePropertyid(id);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -210,7 +221,7 @@ export default function MyProperty() {
                                         </Link>
                                       </li>
                                       <li className="delete">
-                                        <a className="remove-file item" onClick={() => handleDelete(user.id)}>
+                                        <a className="remove-file item" onClick={() => openModal(user.id)} >
                                           <Image
                                               src={DeleteIcon} // Imported image object or static path
                                               alt="Delete icon"
@@ -283,6 +294,22 @@ export default function MyProperty() {
 
               </div>
             </div>
+            {isModalOpen && (
+              <div className="modal">
+              <div className="modal-content">
+                <>
+
+                  <h2>Delete Item</h2>
+                  <p>Are you sure you want to delete this item?</p>
+                  <div>
+                    <button className="tf-btn primary " onClick={handleDelete}>Yes, Delete</button>
+                    <button className="tf-btn primary" onClick={closeModal}>Cancel</button>
+                  </div>
+                </>
+                
+              </div>
+              </div>
+            )}
           </LayoutAdmin>
         </>
       )}
