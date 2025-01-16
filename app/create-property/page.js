@@ -394,6 +394,7 @@ export default function CreateProperty() {
                     picture: imageUrls,
                     video: videoUrl,
                     user_id: values.user_id,
+                    direction: values.direction,
                     link_uuid: values.link_uuid ?? null,
                     state_id: values.state_id,
                     city_id: values.city_id,
@@ -667,7 +668,7 @@ export default function CreateProperty() {
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Direction:<span>*</span></label>
-                                        <Field as="select" name="direction" className="nice-select country-code">
+                                        <Field as="select" name="direction" id="direction" className="nice-select country-code">
                                             <option value="">Select Direction</option>
                                             <option value="north">North</option>
                                             <option value="south">South</option>

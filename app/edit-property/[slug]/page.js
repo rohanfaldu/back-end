@@ -495,6 +495,7 @@ export default function EditProperty({params}) {
                     picture: imageUrls.length > 0 ? imageUrls : values.picture_img,
                     video: videoUrl,
                     user_id: values.user_id,
+                    direction: values.direction,
                     link_uuid: values.link_uuid ?? null,
                     state_id: values.state_id,
                     city_id: values.city_id,
@@ -608,6 +609,7 @@ export default function EditProperty({params}) {
                     project_id: propertyDetail?.project_id || "",
                     user_id: propertyDetail?.user || "",
                     size_sqft: propertyDetail?.size || "",
+                    direction: propertyDetail?.direction,
                     ...propertyOfMetaNumberValue
                 }}
 
@@ -746,7 +748,7 @@ export default function EditProperty({params}) {
 
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="title">Direction:<span>*</span></label>
-                                        <Field as="select" name="direction" className="nice-select country-code">
+                                        <Field as="select" name="direction" id="direction" className="nice-select country-code">
                                             <option value="">Select Direction</option>
                                             <option value="north">North</option>
                                             <option value="south">South</option>
