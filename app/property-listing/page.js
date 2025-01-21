@@ -86,6 +86,17 @@ export default function PropertyListing() {
     }
   };
 
+  const statusChange = async (id) => {
+    try {
+      const response = await insertData("api/property/statusUpdate", {id: id}, true);
+      if (response.status) {
+        fetchProperties(pagination.currentPage, searchTerm, statusFilter);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred");
+    }
+  };
+
   const handleView = (id) => {
     const URL = `${process.env.NEXT_PUBLIC_SITE_URL}/property/${id}`;
       window.open(URL, '_blank')
@@ -156,7 +167,7 @@ export default function PropertyListing() {
                                 <td>{new Date(property.created_at).toLocaleDateString()}</td>
                                 <td>
                                   <div className="status-wrap">
-                                    <Link href="#" className="btn-status">
+                                    <Link href="#" className="btn-status" onClick={() => statusChange(property.id)}>
                                       {property.status ? "Active" : "Inactive"}
                                     </Link>
                                   </div>
