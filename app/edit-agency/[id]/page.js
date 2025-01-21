@@ -31,6 +31,7 @@ export default function EditAgency({params}) {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [agencyPackageList, setAgencyPackageList] = useState([]);
+    const [fileCoverImg, setFileCoverImg] = useState(null);
 
 
 
@@ -49,6 +50,9 @@ export default function EditAgency({params}) {
                 setUserDetail(getAgencyInfo.data.user);
                 setAgencyDetail(getAgencyInfo.data.agency);
                 setFilePreview(getAgencyInfo.data.user.image);
+                setFileCoverImg(getAgencyInfo.data.agency.cover);
+                setSelectedCode(getAgencyInfo.data.user.country_code);
+                setSelectedWhatsupCode(getAgencyInfo.data.agency.country_code)
                 setErrorMessage('');
             } else {
                 setShowErrorPopup(true);
@@ -99,6 +103,9 @@ export default function EditAgency({params}) {
         const formData = new FormData();
         formData.append('image', values.image);
     
+        const formDataCover = new FormData();
+        formDataCover.append('image', values.cover_img);
+
         try {
             let imageUrl = filePreview;
             if (values.image instanceof File) {
@@ -108,6 +115,15 @@ export default function EditAgency({params}) {
                 imageUrl = response.data.data.files.map(file => file.url)[0];
             }
     
+            let imageUrlCover = fileCoverImg;
+            if (values.cover_img instanceof File) {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formDataCover, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                imageUrlCover = response.data.data.files.map(file => file.url)[0];
+                console.log(imageUrlCover,"imageUrlCover");
+            }
+
             const userData = {
                 user_name: values.username,
                 full_name: values.fullname,
@@ -140,6 +156,7 @@ export default function EditAgency({params}) {
                     pinterest_link: values.pinterest_link,
                     linkedin_link: values.linkedin_link,
                     instagram_link: values.instagram_link,
+                    cover: imageUrlCover
                 };
 
 
@@ -162,6 +179,7 @@ export default function EditAgency({params}) {
                     license_number: values.license_number ?? null,
                     agency_packages: values.agency_packages ?? null,
                     country_code: values.agency_country_code,
+                    cover: imageUrlCover
                 };
 
 
@@ -209,7 +227,7 @@ export default function EditAgency({params}) {
                     {errorMessage && <div className={messageClass}>{errorMessage}</div>}
                     <Formik
                         initialValues={{  
-                            image: userDetail?.image || "",
+                            // image: userDetail?.image || "",
                             // description_en: userDetail?.description_en || "",
                             // description_fr: userDetail?.description_fr || "",
                             // whatsup_country_code: userDetail?.whatsup_country_code || "+33",
@@ -233,6 +251,7 @@ export default function EditAgency({params}) {
                             country_code: userDetail?.country_code || "",
 
 
+                            cover_img: agencyDetails?.cover || "",
                             description_en: agencyDetails.description_en || '',
                             description_fr: agencyDetails.description_fr || '',
                             agency_country_code: agencyDetails.country_code || '',
@@ -251,6 +270,7 @@ export default function EditAgency({params}) {
                             linkedin_link: agencyDetails?.linkedin_link || "",
                             instagram_link: agencyDetails?.instagram_link || "",
                         }}
+
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
                         >
@@ -299,7 +319,7 @@ export default function EditAgency({params}) {
                                         </fieldset>
                                         <fieldset className="box-fieldset">
                                             <label htmlFor="name">Mobile Number<span>*</span>:</label>
-                                            <div className="phone-and-country-code">
+                                            {/* <div className="phone-and-country-code">
                                                 <Field
                                                     as="select"
                                                     name="country_code"
@@ -330,7 +350,41 @@ export default function EditAgency({params}) {
                                                     name="phone"
                                                     className="form-control style-1"
                                                 />
-                                            </div>
+                                            </div> */}
+
+
+
+                                            <div className="phone-and-country-code">
+                                                <select
+                                                    name="country_code"
+                                                    className="nice-select country-code"
+                                                    id="country-code"
+                                                    value={selectedCode || "+33"} // Default to +33
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setSelectedCode(selectedState);
+                                                        setFieldValue("country_code", selectedState);
+                                                    }}
+                                                >
+                                                    {/* Default selected option: Show only the country code */}
+                                                    <option value={selectedCode || "+33"}>
+                                                        {selectedCode || "+33"}
+                                                    </option>
+
+                                                    {/* Dropdown options: Show country name and code */}
+                                                    {allCountries &&
+                                                        allCountries.length > 0 &&
+                                                        allCountries
+                                                            .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                            .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                            .map((country, index) => (
+                                                                <option key={index} value={`+${country.dialCode}`}>
+                                                                    {country.name} (+{country.dialCode})
+                                                                </option>
+                                                            ))}
+                                                </select>
+                                            <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                        </div>
                                         </fieldset>
 
 
@@ -377,7 +431,7 @@ export default function EditAgency({params}) {
                                             <div className="box grid-4 gap-30">
                                                 <fieldset className="box-fieldset">
                                                     <label htmlFor="name">Mobile Number<span>*</span>:</label>
-                                                    <div className="phone-and-country-code">
+                                                    {/* <div className="phone-and-country-code">
                                                         <Field
                                                             as="select"
                                                             name="agency_country_code"
@@ -408,7 +462,42 @@ export default function EditAgency({params}) {
                                                             name="agency_phone"
                                                             className="form-control style-1"
                                                         />
+                                                    </div> */}
+
+
+                                                    <div className="phone-and-country-code">
+                                                            <select
+                                                                name="agency_country_code"
+                                                                className="nice-select country-code"
+                                                                id="agency-country-code"
+                                                                value={selectedWhatsupCode || "+33"} // Default to +33
+                                                                onChange={(e) => {
+                                                                    const selectedState = e.target.value;
+                                                                    setSelectedWhatsupCode(selectedState);
+                                                                    setFieldValue("agency_country_code", selectedState);
+                                                                }}
+                                                            >
+                                                                {/* Default selected option: Show only the country code */}
+                                                                <option value={selectedWhatsupCode || "+33"}>
+                                                                    {selectedWhatsupCode || "+33"}
+                                                                </option>
+
+                                                                {/* Dropdown options: Show country name and code */}
+                                                                {allCountries &&
+                                                                    allCountries.length > 0 &&
+                                                                    allCountries
+                                                                        .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                                        .map((country, index) => (
+                                                                            <option key={index} value={`+${country.dialCode}`}>
+                                                                                {country.name} (+{country.dialCode})
+                                                                            </option>
+                                                                        ))}
+                                                            </select>
+                                                        <Field type="text" id="phone" name="agency_phone" className="form-control style-1" />
                                                     </div>
+
+
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="service_area_en">Service Area English:</label>
@@ -453,6 +542,32 @@ export default function EditAgency({params}) {
                                                         </Field>
                                                 </fieldset>
                                             </div>
+                                            <div>
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="bedrooms">Cover Image:</label>
+                                                    <div className="box-floor-img uploadfile">
+                                                        <div className="btn-upload">
+                                                            <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                            <input
+                                                                type="file"
+                                                                className="ip-file"
+                                                                onChange={(event) => {
+                                                                    const file = event.currentTarget.files[0];
+                                                                    setFieldValue("cover_img", file);
+                                                                    setFileCoverImg(URL.createObjectURL(file));
+                                                                }}
+                                                            />
+                                                        
+                                                            {fileCoverImg && (
+                                                                <img src={fileCoverImg} alt="Preview"  className="uploadFileImage" />
+                                                            )}
+                                                        </div>
+                                                        <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            {console.log(fileCoverImg,"fileCoverImg")}
+
                                             
                                         </div>
 

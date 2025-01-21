@@ -100,7 +100,7 @@ export default function CreateAgency() {
                         if (createUserInfo.status === true) {
                             setSucessMessage(true);
                             setShowErrorPopup("Developer created successfully");
-
+                            const fileUrls = await insertUploadImage('cover_img', values.cover_img);
                             /********* Create Developer ***********/
                             const user_id = createUserInfo.data.userProfile.id;
                             const developerData = {
@@ -123,7 +123,7 @@ export default function CreateAgency() {
                                 agency_packages: values.agency_packages ?? null,
                                 country_code: values.whatsup_country_code,
                                 picture: null,
-                                cover: null
+                                cover: fileUrls
                             };
 
                             console.log(developerData);
@@ -196,7 +196,8 @@ export default function CreateAgency() {
                     instagram_link: "",
                     country_code: "+33",
                     whatsup_country_code: "+33",
-                    agency_packages: ""
+                    agency_packages: "",
+                    cover_img:""
                  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -390,8 +391,8 @@ export default function CreateAgency() {
                                         {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                     </fieldset>
                                 </div>
-                                {/* <div className="grid-2 box gap-30">
-                                    <fieldset className="box-fieldset">
+                                <div className="grid-2 box gap-30">
+                                   {/*  <fieldset className="box-fieldset">
                                         <label htmlFor="bedrooms">Picture Image:</label>
                                         <div className="box-floor-img uploadfile">
                                             <div className="btn-upload">
@@ -409,7 +410,7 @@ export default function CreateAgency() {
                                             </div>
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
                                         </div>
-                                    </fieldset>
+                                    </fieldset>*/}
                                     <fieldset className="box-fieldset">
                                         <label htmlFor="bedrooms">Cover Image:</label>
                                         <div className="box-floor-img uploadfile">
@@ -429,7 +430,7 @@ export default function CreateAgency() {
                                             <p className="file-name fw-5"> Or drop image here to upload </p>
                                         </div>
                                     </fieldset>
-                                </div> */}
+                                </div> 
                             </div>
                             <div className="widget-box-2">
                                 <h6 className="title">Other Information</h6>

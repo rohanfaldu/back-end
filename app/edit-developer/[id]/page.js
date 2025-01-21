@@ -47,6 +47,7 @@ export default function EditDeveloper({params}) {
                     setUserDetail(getDeveloperInfo.data.user);
                     setDeveloperDetail(getDeveloperInfo.data.developer);
                     setFilePreview(getDeveloperInfo.data.user.image);
+                    setFileCoverImg(getDeveloperInfo.data.developer.cover);
                     setErrorMessage('');
                 } else {
                     setShowErrorPopup(true);
@@ -107,6 +108,8 @@ export default function EditDeveloper({params}) {
         const formData = new FormData();
         formData.append('image', values.image);
     
+        const formDataCover = new FormData();
+        formDataCover.append('image', values.cover_img);
         try {
             let imageUrl = filePreview;
             if (values.image instanceof File) {
@@ -114,6 +117,15 @@ export default function EditDeveloper({params}) {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 imageUrl = response.data.data.files.map(file => file.url)[0];
+            }
+
+            let imageUrlCover = fileCoverImg;
+            if (values.cover_img instanceof File) {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formDataCover, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                imageUrlCover = response.data.data.files.map(file => file.url)[0];
+                console.log(imageUrlCover,"imageUrlCover");
             }
     
             const userData = {
@@ -148,6 +160,7 @@ export default function EditDeveloper({params}) {
                     pinterest_link: values.pinterest_link,
                     linkedin_link: values.linkedin_link,
                     instagram_link: values.instagram_link,
+                    cover: imageUrlCover
                 };
 
                 const developerCreateData = {
@@ -168,7 +181,8 @@ export default function EditDeveloper({params}) {
                     tax_number: values.tax_number ?? null,
                     license_number: values.license_number ?? null,
                     agency_packages: values.agency_packages ?? null,
-                    country_code: values.developer_country_code
+                    country_code: values.developer_country_code,
+                    cover: imageUrlCover
                 };
 
                 console.log(developerDetail.id,"developerDetail")
@@ -225,7 +239,7 @@ export default function EditDeveloper({params}) {
                             password: userDetail?.password || "",
                             country_code: userDetail?.country_code || "",
 
-
+                            cover_img: developerDetail?.cover || "",
                             description_en: developerDetail.description_en || '',
                             description_fr: developerDetail.description_fr || '',
                             developer_country_code: developerDetail.country_code || '',
@@ -453,6 +467,31 @@ export default function EditDeveloper({params}) {
                                                 {/* <ErrorMessage name="agency_packages" component="div" className="error" /> */}
                                             </fieldset>
                                         </div>
+
+                                        <div>
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="bedrooms">Cover Image:</label>
+                                                    <div className="box-floor-img uploadfile">
+                                                        <div className="btn-upload">
+                                                            <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                            <input
+                                                                type="file"
+                                                                className="ip-file"
+                                                                onChange={(event) => {
+                                                                    const file = event.currentTarget.files[0];
+                                                                    setFieldValue("cover_img", file);
+                                                                    setFileCoverImg(URL.createObjectURL(file));
+                                                                }}
+                                                            />
+                                                        
+                                                            {fileCoverImg && (
+                                                                <img src={fileCoverImg} alt="Preview"  className="uploadFileImage" />
+                                                            )}
+                                                        </div>
+                                                        <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
                                         
                                     </div>
                                     <div className="widget-box-2">
