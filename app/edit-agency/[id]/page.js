@@ -383,8 +383,8 @@ export default function EditAgency({params}) {
                                                                 </option>
                                                             ))}
                                                 </select>
-                                            <Field type="text" id="phone" name="phone" className="form-control style-1" />
-                                        </div>
+                                                <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                            </div>
                                         </fieldset>
 
 

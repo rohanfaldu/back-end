@@ -25,7 +25,7 @@ export default function EditDeveloper({params}) {
     const [filePreview, setFilePreview] = useState(null);
     const [userDetail, setUserDetail] = useState(null);
     const [developerDetail, setDeveloperDetail] = useState(null);
-
+    const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [selectedCode, setSelectedCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [agencyPackageList, setAgencyPackageList] = useState([]);
@@ -48,6 +48,8 @@ export default function EditDeveloper({params}) {
                     setDeveloperDetail(getDeveloperInfo.data.developer);
                     setFilePreview(getDeveloperInfo.data.user.image);
                     setFileCoverImg(getDeveloperInfo.data.developer.cover);
+                    setSelectedCode(getDeveloperInfo.data.user.country_code);
+                    setSelectedWhatsupCode(getDeveloperInfo.data.developer.country_code)
                     setErrorMessage('');
                 } else {
                     setShowErrorPopup(true);
@@ -308,36 +310,35 @@ export default function EditDeveloper({params}) {
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="name">Mobile Number<span>*</span>:</label>
                                                 <div className="phone-and-country-code">
-                                                    <Field
-                                                        as="select"
+                                                    <select
                                                         name="country_code"
                                                         className="nice-select country-code"
                                                         id="country-code"
+                                                        value={selectedCode || "+33"} // Default to +33
                                                         onChange={(e) => {
                                                             const selectedState = e.target.value;
+                                                            setSelectedCode(selectedState);
                                                             setFieldValue("country_code", selectedState);
-                                                            console.log('Selected Country Code:', selectedState); // Debugging output
                                                         }}
                                                     >
-                                                        <option value="">Select Country Code</option>
-                                                        {allCountries && allCountries.length > 0 ? (
+                                                       
+                                                        <option value={selectedCode || "+33"}>
+                                                            {selectedCode || "+33"}
+                                                        </option>
+    
+                                                        
+                                                        {allCountries &&
+                                                            allCountries.length > 0 &&
                                                             allCountries
-                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode))
+                                                                .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
                                                                 .map((country, index) => (
                                                                     <option key={index} value={`+${country.dialCode}`}>
                                                                         {country.name} (+{country.dialCode})
                                                                     </option>
-                                                                ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </Field>
-                                                    <Field
-                                                        type="text"
-                                                        id="phone"
-                                                        name="phone"
-                                                        className="form-control style-1"
-                                                    />
+                                                                ))}
+                                                    </select>
+                                                    <Field type="text" id="phone" name="phone" className="form-control style-1" />
                                                 </div>
                                             </fieldset>
     
@@ -387,36 +388,34 @@ export default function EditDeveloper({params}) {
                                             <fieldset className="box-fieldset">
                                                 <label htmlFor="name">Mobile Number<span>*</span>:</label>
                                                 <div className="phone-and-country-code">
-                                                    <Field
-                                                        as="select"
-                                                        name="developer_country_code"
-                                                        className="nice-select country-code"
-                                                        id="country-code"
-                                                        onChange={(e) => {
-                                                            const selectedState = e.target.value;
-                                                            setFieldValue("developer_country_code", selectedState);
-                                                            console.log('Selected Country Code:', selectedState); // Debugging output
-                                                        }}
-                                                    >
-                                                        <option value="">Select Country Code</option>
-                                                        {allCountries && allCountries.length > 0 ? (
-                                                            allCountries
-                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode))
-                                                                .map((country, index) => (
-                                                                    <option key={index} value={`+${country.dialCode}`}>
-                                                                        {country.name} (+{country.dialCode})
-                                                                    </option>
-                                                                ))
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </Field>
-                                                    <Field
-                                                        type="text"
-                                                        id="phone"
-                                                        name="developer_phone"
-                                                        className="form-control style-1"
-                                                    />
+                                                        <select
+                                                            name="developer_country_code"
+                                                            className="nice-select country-code"
+                                                            id="developer-country-code"
+                                                            value={selectedWhatsupCode || "+33"} // Default to +33
+                                                            onChange={(e) => {
+                                                                const selectedState = e.target.value;
+                                                                setSelectedWhatsupCode(selectedState);
+                                                                setFieldValue("developer_country_code", selectedState);
+                                                            }}
+                                                        >
+
+                                                            <option value={selectedWhatsupCode || "+33"}>
+                                                                {selectedWhatsupCode || "+33"}
+                                                            </option>
+                                                        
+                                                            {allCountries &&
+                                                                allCountries.length > 0 &&
+                                                                allCountries
+                                                                    .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                                    .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                                    .map((country, index) => (
+                                                                        <option key={index} value={`+${country.dialCode}`}>
+                                                                            {country.name} (+{country.dialCode})
+                                                                        </option>
+                                                                    ))}
+                                                        </select>
+                                                    <Field type="text" id="phone" name="developer_phone" className="form-control style-1" />
                                                 </div>
                                             </fieldset>
                                             <fieldset className="box box-fieldset">

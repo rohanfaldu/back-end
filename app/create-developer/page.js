@@ -245,31 +245,37 @@ export default function CreateAgency() {
                                     </fieldset>
                                     <fieldset className="box-fieldset ">
                                         <label htmlFor="name">Mobile Number<span>*</span>:</label>
-                                            <div className="phone-and-country-code">
-                                                <Field as="select" name="country_code" className="nice-select country-code"
-                                                    id="country-code"
-                                                   
-                                                    onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setSelectedCode(selectedState);
-                                                        setFieldValue("country_code", selectedState);
-                                                        //handleCityChange(selectedState);
-                                                    }}
-                                                >
-                                                    <option value="">Select Country Code</option>
-                                                    {allCountries && allCountries.length > 0 ? (
-                                                        allCountries
-                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
-                                                        .map((country, index) =>(
-                                                            <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
+                                        <div className="phone-and-country-code">
+                                            <select
+                                                name="country_code"
+                                                className="nice-select country-code"
+                                                id="country-code"
+                                                value={selectedCode || "+33"} // Default to +33
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setSelectedCode(selectedState);
+                                                    setFieldValue("country_code", selectedState);
+                                                }}
+                                            >
+                                                {/* Default selected option: Show only the country code */}
+                                                <option value={selectedCode || "+33"}>
+                                                    {selectedCode || "+33"}
+                                                </option>
+
+                                                {/* Dropdown options: Show country name and code */}
+                                                {allCountries &&
+                                                    allCountries.length > 0 &&
+                                                    allCountries
+                                                        .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                        .map((country, index) => (
+                                                            <option key={index} value={`+${country.dialCode}`}>
+                                                                {country.name} (+{country.dialCode})
                                                             </option>
-                                                        ))
-                                                    ) : (
-                                                        <></>
-                                                    )}
-                                                </Field>
-                                                <Field type="text" id="phone" name="phone" className="form-control style-1" />
-                                            </div>
+                                                        ))}
+                                            </select>
+                                            <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                        </div>
                                         {/* <ErrorMessage name="phone" component="div" className="error" /> */}
                                         {/* <ErrorMessage name="country_code" component="div" className="error" /> */}
                                     </fieldset>
@@ -315,30 +321,36 @@ export default function CreateAgency() {
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Whatsup number:</label>
-                                            <div className="phone-and-country-code">
-                                                <Field as="select" name="whatsup_country_code" className="nice-select country-code"
+                                        <div className="phone-and-country-code">
+                                                <select
+                                                    name="whatsup_country_code"
+                                                    className="nice-select country-code"
                                                     id="whatsup-country-code"
-                                                    
+                                                    value={selectedWhatsupCode || "+33"} // Default to +33
                                                     onChange={(e) => {
                                                         const selectedState = e.target.value;
                                                         setSelectedWhatsupCode(selectedState);
                                                         setFieldValue("whatsup_country_code", selectedState);
-                                                        //handleCityChange(selectedState);
                                                     }}
                                                 >
-                                                    <option value="">Select Country Code</option>
-                                                    {allCountries && allCountries.length > 0 ? (
+                                                    {/* Default selected option: Show only the country code */}
+                                                    <option value={selectedWhatsupCode || "+33"}>
+                                                        {selectedWhatsupCode || "+33"}
+                                                    </option>
+
+                                                    {/* Dropdown options: Show country name and code */}
+                                                    {allCountries &&
+                                                        allCountries.length > 0 &&
                                                         allCountries
-                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort alphabetically by country name
-                                                        .map((country, index) =>(
-                                                            <option key={index} value={`+${country.dialCode}`}>{country.name} (+{country.dialCode})
-                                                            </option>
-                                                        ))
-                                                    ) : (
-                                                        <></>
-                                                    )}
-                                                </Field>
-                                                <Field type="text" id="whatsup_number" name="whatsup_number" className="box-fieldset" />
+                                                            .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                            .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                            .map((country, index) => (
+                                                                <option key={index} value={`+${country.dialCode}`}>
+                                                                    {country.name} (+{country.dialCode})
+                                                                </option>
+                                                            ))}
+                                                </select>
+                                                <Field type="text" id="whatsup_number" name="whatsup_number" className="form-control style-1" />
                                             </div>
                                         {/* <ErrorMessage name="whatsup_country_code" component="div" className="error" /> */}
                                         {/* <ErrorMessage name="whatsup_number" component="div" className="error" /> */}
