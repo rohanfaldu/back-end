@@ -688,78 +688,22 @@ export default function CreateProject() {
 
 
                                 </div>
+                                
+
                                 <div className="box grid-1 box gap-50">
                                     <fieldset className="box-fieldset">
-                                        <label htmlFor="picture_img">Video Option:</label>
-                                        {/* Video Option Radio Buttons */}
+                                        <label htmlFor="video_link">YouTube Link:</label>
+                                        {/* YouTube Link Input Field */}
                                         <div>
-                                            <fieldset className="fieldset-radio">
-                                                <input type="radio" className="tf-radio video-upload"  value="upload" name="videoOption" onChange={() => {
-                                                        setIsVideoUpload(true); // Update the state for conditional rendering
-                                                        setFieldValue("video", null); // Reset the file field in Formik state
-                                                    }} defaultChecked />
-                                                <label htmlFor="upload" className="text-radio">Upload Video</label>
-
-                                                <input
-                                                    type="radio"
-                                                    className="tf-radio video-upload"
-                                                    name="videoOption"
-                                                    value="link"
-                                                    onChange={() => {
-                                                        setIsVideoUpload(false); // Update the state for conditional rendering
-                                                        setFieldValue("video_link", ""); // Reset the YouTube link field in Formik state
-                                                    }}
-                                                />
-                                                <label htmlFor="videoOption" className="text-radio"> YouTube Link</label>
-                                                </fieldset>
+                                            <Field
+                                                type="text"
+                                                name="video_link"
+                                                className="form-control"
+                                                placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
+                                            />
+                                            {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
                                         </div>
-
-                                        {/* Conditional Fields */}
-                                        {isVideoUpload ? (
-                                            // Video Upload Field
-                                            <div className="box-floor-img uploadfile">
-                                                <div className="btn-upload">
-                                                    <label className="tf-btn primary">
-                                                        Choose File
-                                                        <input
-                                                            type="file"
-                                                            accept="video/mp4"
-                                                            className="ip-file"
-                                                            onChange={(event) => {
-                                                                const file = event.target.files[0];
-                                                                if (file) {
-                                                                    setFieldValue("video", file); // Set the video file in Formik state
-                                                                    setVideoPreview(URL.createObjectURL(file)); // Generate a preview URL
-                                                                }
-                                                            }}
-                                                            style={{ display: "none" }}
-                                                        />
-                                                    </label>
-                                                </div>
-                                                {videoPreview && (
-                                                    <video controls className="uploadFileImage">
-                                                        <source src={videoPreview} type="video/mp4" />
-                                                        Your browser does not support the video tag.
-                                                    </video>
-                                                )}
-                                                <p className="file-name fw-5">Or drop video here to upload</p>
-                                                {/* <ErrorMessage name="video" component="div" className="error" /> */}
-                                            </div>
-                                        ) : (
-                                            // YouTube Link Input Field
-                                            <div>
-                                                <label htmlFor="video_link">YouTube Link:</label>
-                                                <Field
-                                                    type="text"
-                                                    name="video_link"
-                                                    className="form-control"
-                                                    placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
-                                                />
-                                                {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
-                                            </div>
-                                        )}
                                     </fieldset>
-
                                 </div>
                             </div>
                             <div className="widget-box-2">
