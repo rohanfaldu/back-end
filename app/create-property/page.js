@@ -84,7 +84,7 @@ export default function CreateProperty() {
 
                 if (stateList.length === 0) {
                     apiCalls.push(
-                        insertData('api/state', {}, true).then((res) => {
+                        insertData('api/state', {page:0,limit:10000}, true).then((res) => {
                             if (res) setStateList(res.data.states);
                         })
                     );

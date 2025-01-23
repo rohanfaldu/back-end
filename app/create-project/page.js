@@ -70,10 +70,13 @@ export default function CreateProject() {
     });
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchData = async (page=0,limit=100000) => {
             try {
                 if(stateList.length === 0){
-                    const stateObj = {};
+                    const stateObj = {
+                        page,
+                        limit
+                    };
                     const getStateInfo = await insertData('api/state', stateObj, true);
                     console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
