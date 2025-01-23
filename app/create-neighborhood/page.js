@@ -32,7 +32,7 @@ export default function CreatePropertyAmenities() {
             try {
                 const requestData = {
                     page: 1,
-                    limit: 100,
+                    limit: 10000,
                     lang: "en",
                     searchTerm: "",
                 };
@@ -51,7 +51,7 @@ export default function CreatePropertyAmenities() {
             try {
                 const requestData = {
                     page: 1,
-                    limit: 100,
+                    limit: 10000,
                     lang: "en",
                     searchTerm: "",
                 };

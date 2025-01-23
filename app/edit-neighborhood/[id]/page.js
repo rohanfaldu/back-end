@@ -53,7 +53,7 @@ export default function EditDistrict({ params }) {
             try {
                 const requestData = {
                     page: 1,
-                    limit: 100,
+                    limit: 10000,
                     lang: "en",
                     searchTerm: "",
                 };
@@ -72,7 +72,7 @@ export default function EditDistrict({ params }) {
             try {
               const requestData = {
                 page: 1,
-                limit: 100,
+                limit: 10000,
                 lang: "en",
                 searchTerm: "",
               };
