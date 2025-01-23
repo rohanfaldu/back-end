@@ -78,7 +78,6 @@ export default function CreatePropertyAmenities() {
         title_fr: Yup.string().required("Title is required"),
         latitude: Yup.string().required("Latitude is required"),
         longitude: Yup.mixed().required("Longitude is required"),
-        city: Yup.mixed().required("City is required"),
     });
 
     const handleSubmit = async (values, { resetForm, setErrors }) => {
