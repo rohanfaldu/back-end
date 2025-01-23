@@ -108,6 +108,7 @@ export default function ProjectAmenitiesListing() {
                           <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>City Name</th>
                                 <th>District Name</th>
                                 <th>Latitude</th>
                                 <th>Longitude</th>
@@ -119,6 +120,7 @@ export default function ProjectAmenitiesListing() {
                             {neighborhoods.map((property) => (
                              <tr key={property.id} className="file-delete">
                              <td>{property.neighborhood_name}</td>
+                             <td>{property.city_name}</td>
                              <td>{property.district_name}</td>
                              <td>
                                {property.latitude}

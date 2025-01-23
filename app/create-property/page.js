@@ -69,8 +69,6 @@ export default function CreateProperty() {
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
         currency_id: Yup.string().required("Currency is required"),
-        districts_id: Yup.string().required("District is required"),
-        neighborhood_id: Yup.string().required("Neighborhood is required"),
         transaction_type: Yup.string().required("Transaction type is required"),
         property_type: Yup.string().required("Property type is required"),
         user_id: Yup.string().required("User is required"),
@@ -252,6 +250,15 @@ export default function CreateProperty() {
             const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data);
+                if(getDistrictInfo.data.length == 0){
+                    const neighbourhoodObj = { city_id: cityId , lang:"en" };
+                    const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
+                    if (getNeighborhoodObjInfo.status) {
+                        setNeighborhoodList(getNeighborhoodObjInfo.data);
+                    } else {
+                        setNeighborhoodList([]);
+                    }
+                }
             } else {
                 setDistrictList([]);
             }

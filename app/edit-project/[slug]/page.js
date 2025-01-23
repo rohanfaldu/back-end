@@ -90,13 +90,28 @@ export default function EditProject({ params }) {
                     const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
                     if (getDistrictInfo.status) {
                         setDistrictList(getDistrictInfo.data);
+                        if(getDistrictInfo.data.length == 0){
+                            const neighbourhoodObj = { city_id: getProjectInfo.data.city.id , lang:"en" };
+                            const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
+                            if (getNeighborhoodObjInfo.status) {
+                                setNeighborhoodList(getNeighborhoodObjInfo.data);
+                            } else {
+                                setNeighborhoodList([]);
+                            }
+                        }else{
+                            const neighbourhoodObj = { district_id: getProjectInfo.data.district.id, lang: "en" };
+                            const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
+                            if (getNeighborhoodObjInfo.status) {
+                                setNeighborhoodList(getNeighborhoodObjInfo.data);
+                            }
+                        }
                     } 
 
-                    const neighbourhoodObj = { district_id: getProjectInfo.data.district.id, lang: "en" };
-                    const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
-                    if (getNeighborhoodObjInfo.status) {
-                        setNeighborhoodList(getNeighborhoodObjInfo.data);
-                    }
+                    // const neighbourhoodObj = { district_id: getProjectInfo.data.district.id, lang: "en" };
+                    // const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
+                    // if (getNeighborhoodObjInfo.status) {
+                    //     setNeighborhoodList(getNeighborhoodObjInfo.data);
+                    // }
 
 
                 } else {
@@ -211,8 +226,6 @@ export default function EditProject({ params }) {
         picture_img: Yup.array().min(3, "At least three image is required").required("Image is required"),
         state_id: Yup.string().required("State is required"),
         city_id: Yup.string().required("City is required"),
-        districts_id: Yup.string().required("District is required"),
-        neighborhood_id: Yup.string().required("Neighborhood is required"),
         user_id: Yup.string().required("Developer is required"),
         icon: Yup.string().required("Icon is required"),
     });
@@ -266,6 +279,15 @@ export default function EditProject({ params }) {
             const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data);
+                if(getDistrictInfo.data.length == 0){
+                    const neighbourhoodObj = { city_id: cityId , lang:"en" };
+                    const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
+                    if (getNeighborhoodObjInfo.status) {
+                        setNeighborhoodList(getNeighborhoodObjInfo.data);
+                    } else {
+                        setNeighborhoodList([]);
+                    }
+                }
             } else {
                 setDistrictList([]);
             }

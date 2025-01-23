@@ -21,6 +21,8 @@ export default function CreatePropertyAmenities() {
 	const [sucessMessage, setSucessMessage] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [districts, setDistricts] = useState([]);
+    const [cities, setCities] = useState([]);
+
 
     const router = useRouter();
 
@@ -44,8 +46,28 @@ export default function CreatePropertyAmenities() {
                 setShowErrorPopup(true);
             }
         };
+
+        const fetchCities = async () => {
+            try {
+                const requestData = {
+                    page: 1,
+                    limit: 100,
+                    lang: "en",
+                    searchTerm: "",
+                };
+    
+                const response = await insertData("api/city/", requestData, true);
+                if (response.status) {
+                    setCities(response.data.cities || []);
+                }
+            } catch (err) {
+                setErrors({ serverError: err.message || "An unexpected error occurred." });
+                setShowErrorPopup(true);
+            }
+        };
     
         fetchStates(); // Ensures `fetchStates` runs only once on mount
+        fetchCities();
     }, []); // Dependency array ensures `useEffect` runs only once
     
 
@@ -56,6 +78,7 @@ export default function CreatePropertyAmenities() {
         title_fr: Yup.string().required("Title is required"),
         latitude: Yup.string().required("Latitude is required"),
         longitude: Yup.mixed().required("Longitude is required"),
+        city: Yup.mixed().required("City is required"),
     });
 
     const handleSubmit = async (values, { resetForm, setErrors }) => {
@@ -68,6 +91,7 @@ export default function CreatePropertyAmenities() {
                 latitude: parseFloat(values.latitude), // Convert to float
                 longitude: parseFloat(values.longitude),
                 district_id: values.district,
+                city_id: values.city,
                 lang: "en"
             };
     
@@ -140,6 +164,22 @@ export default function CreatePropertyAmenities() {
                                     </fieldset>
                                 </div>
                                 <div className="box grid-2 gap-30">
+
+                                <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Cities:<span>*</span></label>
+                                            <Field as="select" name="city" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedCity = e.target.value;
+                                                    setFieldValue("city", selectedCity);
+                                                }}
+                                            >
+                                                <option value="">Select City</option>
+                                                {cities.map((city) => (
+                                                    <option key={city.id} value={city.id}>{city.city_name}</option>
+                                                ))}
+                                            </Field>
+                                </fieldset>
+
                                 <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Districts:</label>
                                             <Field as="select" name="district" className="nice-select country-code"
@@ -154,6 +194,8 @@ export default function CreatePropertyAmenities() {
                                                 ))}
                                             </Field>
                                     </fieldset>
+
+                                    
                                 </div>
                             </div>
 

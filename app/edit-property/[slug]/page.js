@@ -67,8 +67,6 @@ export default function EditProperty({params}) {
         videoLink: Yup.string().url("Enter a valid URL"),
         city_id: Yup.string().required("City is required"),
         currency_id: Yup.string().required("Currency is required"),
-        districts_id: Yup.string().required("District is required"),
-        neighborhood_id: Yup.string().required("Neighborhood is required"),
         transaction_type: Yup.string().required("Transaction type is required"),
         property_type: Yup.string().required("Property type is required"),
         user_id: Yup.string().required("User is required"),
@@ -108,13 +106,28 @@ export default function EditProperty({params}) {
                         const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
                         if (getDistrictInfo.status) {
                             setDistrictList(getDistrictInfo.data);
+                            if(getDistrictInfo.data.length == 0){
+                                const neighbourhoodObj = { city_id: getpropertyInfo.data.city , lang:"en" };
+                                const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
+                                if (getNeighborhoodObjInfo.status) {
+                                    setNeighborhoodList(getNeighborhoodObjInfo.data);
+                                } else {
+                                    setNeighborhoodList([]);
+                                }
+                            }else{
+                                const neighbourhoodObj = { district_id: getpropertyInfo.data.district, lang: "en" };
+                                const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
+                                if (getNeighborhoodObjInfo.status) {
+                                    setNeighborhoodList(getNeighborhoodObjInfo.data);
+                                } 
+                            }
                         } 
     
-                        const neighbourhoodObj = { district_id: getpropertyInfo.data.district, lang: "en" };
-                        const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
-                        if (getNeighborhoodObjInfo.status) {
-                            setNeighborhoodList(getNeighborhoodObjInfo.data);
-                        }
+                        // const neighbourhoodObj = { district_id: getpropertyInfo.data.district, lang: "en" };
+                        // const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', neighbourhoodObj, true);
+                        // if (getNeighborhoodObjInfo.status) {
+                        //     setNeighborhoodList(getNeighborhoodObjInfo.data);
+                        // }
                     } else {
                         setErrorMessage("Property not found.");
                     }
@@ -324,6 +337,15 @@ export default function EditProperty({params}) {
             const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data);
+                if(getDistrictInfo.data.length == 0){
+                    const neighbourhoodObj = { city_id: cityId , lang:"en" };
+                    const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
+                    if (getNeighborhoodObjInfo.status) {
+                        setNeighborhoodList(getNeighborhoodObjInfo.data);
+                    } else {
+                        setNeighborhoodList([]);
+                    }
+                }
             } else {
                 setDistrictList([]);
             }
