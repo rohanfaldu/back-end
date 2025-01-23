@@ -10,7 +10,7 @@ import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
 import variablesList from "../../components/common/variable";
-
+import { Pagination } from "@/components/layout/pagination";
 export default function ProjectAmenitiesListing() {
   const [cities, setCities] = useState([]); // Store properties for the current page
   const [loading, setLoading] = useState(true); // Manage loading state
@@ -23,7 +23,7 @@ export default function ProjectAmenitiesListing() {
       currentPage: variablesList.currentPage,
       itemsPerPage: variablesList.itemsPerPage,
   }); // Track pagination info
-
+  const [currentPage, setCurrentPage] = useState(1);
   const fetchStates = async (page = variablesList.currentPage, term = '', status = '') => {
     setLoading(true);
     try {
@@ -83,9 +83,8 @@ export default function ProjectAmenitiesListing() {
   };
 
   const handlePageChange = (page) => {
-    setPagination({ ...pagination, currentPage: page });
+    setPagination({ ...pagination, currentPage: page }); // Update the current page
   };
-
   return (
     <>
       {loading ? (
@@ -155,7 +154,8 @@ export default function ProjectAmenitiesListing() {
                           </tbody>
                         </table>
                       </div>
-                      <ul className="wd-navigation">
+                      <Pagination totalPages={pagination.totalPages} currentPage={pagination.currentPage} onPageChange={handlePageChange} />
+                      {/* <ul className="wd-navigation">
                         {Array.from({ length: pagination.totalPages }, (_, index) => (
                           <li key={index}>
                             <Link
@@ -167,7 +167,7 @@ export default function ProjectAmenitiesListing() {
                             </Link>
                           </li>
                         ))}
-                      </ul>
+                      </ul> */}
                     </div>
                   </>
                 ) : (

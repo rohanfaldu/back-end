@@ -10,7 +10,7 @@ import Image from 'next/image';
 import EditIcon from "../../public/images/favicon/edit.png";
 import DeleteIcon from "../../public/images/favicon/delete.png";
 import variablesList from "../../components/common/variable";
-
+import { Pagination } from "@/components/layout/pagination";
 export default function ProjectAmenitiesListing() {
   const [neighborhoods, setNeighborhoods] = useState([]); // Store properties for the current page
   const [loading, setLoading] = useState(true); // Manage loading state
@@ -157,7 +157,7 @@ export default function ProjectAmenitiesListing() {
                           </tbody>
                         </table>
                       </div>
-                      <ul className="wd-navigation">
+                      {/* <ul className="wd-navigation">
                         {Array.from({ length: pagination.totalPages }, (_, index) => (
                           <li key={index}>
                             <Link
@@ -169,7 +169,9 @@ export default function ProjectAmenitiesListing() {
                             </Link>
                           </li>
                         ))}
-                      </ul>
+                      </ul> */}
+                      <Pagination totalPages={pagination.totalPages} currentPage={pagination.currentPage} onPageChange={handlePageChange} />
+                      
                     </div>
                   </>
                 ) : (
