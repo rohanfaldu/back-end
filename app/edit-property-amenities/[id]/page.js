@@ -153,7 +153,7 @@ export default function EditPropertyAmenities({ params }) {
                                                 />
                                                {filePreview ? (
                                                     <img
-                                                        src={filePictureImg}
+                                                        src={filePreview}
                                                         alt="Preview"
                                                         className="uploadFileImage"
                                                     />
