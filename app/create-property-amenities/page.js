@@ -26,6 +26,7 @@ export default function CreatePropertyAmenities() {
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [loading, setLoading] = useState(false); // Loader state
+    const [isChecked, setIsChecked] = useState(false);
 
     const router = useRouter();
     const validationSchema = Yup.object({
@@ -51,7 +52,6 @@ export default function CreatePropertyAmenities() {
                     pictureUrl = fileUrls[0];
                 }
                                             setLoading(true); // Start loader
-
                 const checkPropertyInfo = await insertData('api/property-type-listings/check', { key: values.key }, true);
                 console.log(checkPropertyInfo);
 
@@ -64,6 +64,7 @@ export default function CreatePropertyAmenities() {
                             type: values.type,
                             key: values.key,
                             category: 1,
+                            is_filtered: isChecked
                         };
 
                         console.log('Property Data:', propertyData);
@@ -105,6 +106,9 @@ export default function CreatePropertyAmenities() {
 		const selectedRadioId = event.target.id
 		setSelectedRadio(selectedRadioId)
 	}
+    const handleCheckboxChange = () => {
+        setIsChecked(prev => !prev);
+    };
     const messageClass = (sucessMessage) ? "message success" : "message error";
 	return (
 		 <>
@@ -122,6 +126,7 @@ export default function CreatePropertyAmenities() {
                     type: "",
                     key: "",
                     icon_img: "",
+                    is_filtered: false
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -220,7 +225,19 @@ export default function CreatePropertyAmenities() {
                                         </div>
                                     </fieldset>
                                 </div>
-
+                                <div className="box-amenities-property box-amenities box grid-2 gap-50">
+                                    <fieldset className="amenities-item">
+                                        <Field
+                                             type="checkbox"
+                                             name="is_filtered"
+                                             className="tf-checkbox style-1 primary"
+                                             checked={isChecked}
+                                             onChange={handleCheckboxChange}
+                                        />
+                                        <label for="cb1" className="text-cb-amenities">Add to Filter</label>
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
+                                    </fieldset>
+                                </div>                 
                             </div>
 
                             <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Add Property Amenities</button>

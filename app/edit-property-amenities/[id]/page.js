@@ -21,6 +21,7 @@ export default function EditPropertyAmenities({ params }) {
     const [filePreview, setFilePreview] = useState(null);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [message, setMessage] = useState({ type: "", content: "" });
+    const [isChecked, setIsChecked] = useState(false);
 
     const validationSchema = Yup.object().shape({
         title_en: Yup.string().required("Title (English) is required"),
@@ -36,6 +37,7 @@ export default function EditPropertyAmenities({ params }) {
                 setLoading(true);
                 const response = await insertData('api/property-type-listings/getbyid', { id }, true);
                 setEminities(response.data || {});
+                setIsChecked(response.data?.is_filtered);
             } catch (error) {
                 setMessage({ type: "error", content: "Failed to fetch property amenities data." });
             } finally {
@@ -66,8 +68,9 @@ export default function EditPropertyAmenities({ params }) {
                 key: values.key,
                 lang: "en",
                 category: 1,
+                is_filtered: isChecked
             };
-
+            console.log(propertyData, '>>>>>>>>> propertyData')
             const response = await updateData(`api/property-type-listings/${id}`, propertyData, true);
 
             if (response.status) {
@@ -84,9 +87,12 @@ export default function EditPropertyAmenities({ params }) {
             setSubmitting(false);
         }
     };
+    const handleCheckboxChange = () => {
+        setIsChecked(prev => !prev);
+    };
 
     if (loading) return <Preloader />;
-
+    console.log(eminities,'>>>>>>>>>>> eminities');
     return (
         <LayoutAdmin>
             {message.content && (
@@ -99,6 +105,7 @@ export default function EditPropertyAmenities({ params }) {
                     type: eminities?.type || "",
                     key: eminities?.key || "",
                     icon_img: eminities?.icon || null,
+                    is_filtered:  eminities?.is_filtered || false,
                 }}
                 validationSchema={validationSchema}
                 enableReinitialize
@@ -170,7 +177,19 @@ export default function EditPropertyAmenities({ params }) {
                                         </div>
                                     </fieldset>
                                 </div>
-
+                                <div className="box-amenities-property box-amenities box grid-2 gap-50">
+                                    <fieldset className="amenities-item">
+                                        <Field
+                                             type="checkbox"
+                                             name="is_filtered"
+                                             className="tf-checkbox style-1 primary"
+                                             checked={isChecked}
+                                             onChange={handleCheckboxChange}
+                                        />
+                                        <label for="cb1" className="text-cb-amenities">Add to Filter</label>
+                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
+                                    </fieldset>
+                                </div>    
                             <button type="submit" className="tf-btn primary">Update Property Amenities</button>
                         </div>
                     </Form>
