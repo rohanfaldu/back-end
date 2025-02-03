@@ -166,7 +166,7 @@ export default function EditProperty({params}) {
                     }
                 }
                 if(stateList.length === 0){
-                    const stateObj = {};
+                    const stateObj = {page: 0,limit: 100000};
                     const getStateInfo = await insertData('api/state', stateObj, true);
                     // console.log(getStateInfo.data.states[0].id);
                     if(getStateInfo) {
