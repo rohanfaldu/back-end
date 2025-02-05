@@ -116,7 +116,7 @@ export default function ProjectListing() {
               <div className="widget-box-2 wd-listing">
                 <div class="top d-flex justify-content-between align-items-center">
                   <h6 className="title">Project Listing</h6>
-                  <Link className="remove-file tf-btn primary" href="/create-project">Add Project</Link>
+                  {/* <Link className="remove-file tf-btn primary" href="/create-project">Add Project</Link> */}
                 </div>
                 {properties.length > 0 ? (
                   <>
@@ -155,16 +155,16 @@ export default function ProjectListing() {
                               </td>
                               <td>
                                 <ul className="list-action">
-                                  <li className="edit">
+                                  {/* <li className="edit">
                                     <Link href={`/edit-project/${property.slug}`} className="item">
                                       <Image
-                                        src={EditIcon} // Imported image object or static path
+                                        src={EditIcon}
                                         alt="Edit icon"
                                         width={25}
                                         height={25}
                                       />
                                     </Link>
-                                  </li>
+                                  </li> */}
                                   <li className="delete">
                                     <a className="remove-file item" onClick={() => openModal(property.id)}>
                                       <Image

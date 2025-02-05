@@ -144,9 +144,9 @@ export default function Sidebar() {
 							</svg>
 							Project</Link>
 							<ul style={{ display: `${isAccordion  == 6 ? "block" : "none"}` }}>
-								<li className={`${checkCurrentMenuItem("/create-project")}`}>
+								{/* <li className={`${checkCurrentMenuItem("/create-project")}`}>
 									<Link href="/create-project">Create Project</Link>
-								</li>
+								</li> */}
 								<li className={`${checkCurrentMenuItem("/project-listing")}`}>
 									<Link href="/project-listing">Project Listing</Link>
 
@@ -178,9 +178,9 @@ export default function Sidebar() {
 							</svg>
 							Property</Link>
 							<ul style={{ display: `${isAccordion  == 8 ? "block" : "none"}` }}>
-								<li className={`${checkCurrentMenuItem("/create-property")}`}>
+								{/* <li className={`${checkCurrentMenuItem("/create-property")}`}>
 									<Link href="/create-property">Create Property</Link>
-								</li>
+								</li> */}
 								<li className={`${checkCurrentMenuItem("/property-listing")}`}>
 									<Link href="/property-listing">Property Listing</Link>
 

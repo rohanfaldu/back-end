@@ -128,7 +128,7 @@ export default function PropertyListing() {
               <div className="widget-box-2 wd-listing">
                 <div class="top d-flex justify-content-between align-items-center">
                   <h6 className="title">Property Listing</h6>
-                  <Link className="remove-file tf-btn primary" href="/create-property">Add Property</Link>
+                  {/* <Link className="remove-file tf-btn primary" href="/create-property">Add Property</Link> */}
                 </div>
                 {properties.length > 0 ? (
                   <>
@@ -184,16 +184,16 @@ export default function PropertyListing() {
                                       />
                                     </Link>
                                   </li> */}
-                                   <li className="edit">
+                                   {/* <li className="edit">
                                         <Link href={`/edit-property/${property.slug}`} className="item">
                                           <Image 
-                                            src={EditIcon} // Imported image object or static path 
+                                            src={EditIcon} 
                                             alt="Edit icon" 
                                             width={25} 
                                             height={25} 
                                           />
                                         </Link>
-                                    </li>
+                                    </li> */}
                                     
                                     <li className="delete">
                                       <a
