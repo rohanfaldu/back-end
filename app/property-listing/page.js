@@ -128,7 +128,7 @@ export default function PropertyListing() {
               <div className="widget-box-2 wd-listing">
                 <div class="top d-flex justify-content-between align-items-center">
                   <h6 className="title">Property Listing</h6>
-                  {/* <Link className="remove-file tf-btn primary" href="/create-property">Add Property</Link> */}
+                  <Link className="remove-file tf-btn primary" href="/create-property">Add Property</Link>
                 </div>
                 {properties.length > 0 ? (
                   <>
