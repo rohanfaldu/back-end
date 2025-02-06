@@ -741,53 +741,46 @@ export default function CreateProperty() {
                                                 <div className="box-floor-img uploadfile">
                                                 {/* Upload Button */}
                                                 <div className="btn-upload">
-                                                    <label className="tf-btn primary">
-                                                    Choose Files
-                                                    <input
-                                                        type="file"
-                                                        multiple
-                                                        className="ip-file"
-                                                        onChange={(event) => {
-                                                        let imageList = [];
-                                                        const files = Array.from(event.target.files); // Convert to an array
-                                                        const validPreviews = [];
-                                                        files.forEach((file) => {
-                                                            // Check file size (less than 150KB)
-                                                            // Create an Image object to check its dimensions
-                                                                const img = new Image();
-                                                                const reader = new FileReader();
-                                                                reader.onload = (e) => {
-                                                                    img.src = e.target.result; // Set image src to the file's data URL
+    <label className="tf-btn primary">
+        Choose Files
+        <input
+            type="file"
+            multiple
+            className="ip-file"
+            onChange={(event) => {
+                const files = Array.from(event.target.files);
+                let updatedImageList = [...filePreviews]; // Preserve existing previews
+                let updatedValidFiles = [...form.values[field.name] || []]; // Preserve existing selected files
 
-                                                                    // Once the image is loaded, check its dimensions
-                                                                    img.onload = () => {
-                                                                    const imageHeight = img.height;  // Get image height
-                                                                    const imageWidth = img.width;    // Get image width
+                files.forEach((file) => {
+                    const img = new Image();
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.src = e.target.result;
+                        img.onload = () => {
+                            const imageHeight = img.height;
+                            const imageWidth = img.width;
 
-                                                                    // You can add your dimension validation here
-                                                                    if (imageHeight <= 80|| imageWidth <= 100) {
-                                                                        alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
-                                                                    } else {
-                                                                        // Add the file as a valid image and generate the preview
-                                                                        validPreviews.push(URL.createObjectURL(file));
-                                                                        imageList.push(file); // Add valid file to the list
-                                                                    }
+                            if (imageHeight <= 80 || imageWidth <= 100) {
+                                alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
+                            } else {
+                                updatedImageList.push(URL.createObjectURL(file));
+                                updatedValidFiles.push(file);
+                            }
 
-                                                                    // Update state and Formik with valid files
-                                                                    setFilePreviews(validPreviews); // Set previews for valid files
-                                                                    form.setFieldValue(field.name, imageList);
-                                                                    };
-                                                                };
+                            setFilePreviews([...updatedImageList]); // Update state with new images
+                            form.setFieldValue(field.name, [...updatedValidFiles]); // Update Formik field value
+                        };
+                    };
 
-                                                                // Read the file as a Data URL to create a preview
-                                                                reader.readAsDataURL(file);
-                                                            //}
-                                                        });
-                                                        }}
-                                                        style={{ display: "none" }}
-                                                    />
-                                                    </label>
-                                                </div>
+                    reader.readAsDataURL(file);
+                });
+            }}
+            style={{ display: "none" }}
+        />
+    </label>
+</div>
+
 
 
                                                 <p className="file-name fw-5">Or drop images here to upload</p>
