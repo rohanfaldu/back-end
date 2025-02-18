@@ -14,7 +14,7 @@ import { insertData, updateData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
 import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
-
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 export default function EditDeveloper({params}) {
     const { id } = params;
     const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +31,13 @@ export default function EditDeveloper({params}) {
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [fileCoverImg, setFileCoverImg] = useState(null);
-
+    const [cityList, setCityList] = useState([]);
+    
+    const [propertyMapCoords, setPropertyMapCoords] = useState({
+        latitude: 33.5945144,
+        longitude: -7.6200284,
+        zoom: 6
+    });
 
 
 
@@ -50,6 +56,11 @@ export default function EditDeveloper({params}) {
                     setFileCoverImg(getDeveloperInfo.data.developer.cover);
                     setSelectedCode(getDeveloperInfo.data.user.country_code);
                     setSelectedWhatsupCode(getDeveloperInfo.data.developer.country_code)
+                    setPropertyMapCoords({
+                        latitude: getDeveloperInfo.data.developer.latitude,
+                        longitude: getDeveloperInfo.data.developer.longitude,
+                        zoom: 12
+                    });
                     setErrorMessage('');
                 } else {
                     setShowErrorPopup(true);
@@ -60,6 +71,22 @@ export default function EditDeveloper({params}) {
                 setLoading(false);
             }
         };
+
+        const fetchCityOptions = async() => {
+            try {
+                    if(cityList.length === 0){
+                    const requestData = {
+                        page: 1,
+                        limit: 10000000,
+                    };
+                    const response = await insertData("api/city", requestData, true);
+                    setCityList(response.data.cities);
+                }
+            } catch (error) {
+              console.error("Error fetching cities:", error);
+            }
+          };
+            fetchCityOptions();
             fetchData();
         }, []);
 
@@ -96,9 +123,9 @@ export default function EditDeveloper({params}) {
         phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
         country_code: Yup.string().required("Country code is required"),
         agency_packages: Yup.string().required("Agency packages are required"),
+        city_id: Yup.string().required("City is required"),
         
     });
-
 
 
     const router = useRouter();
@@ -162,7 +189,12 @@ export default function EditDeveloper({params}) {
                     pinterest_link: values.pinterest_link,
                     linkedin_link: values.linkedin_link,
                     instagram_link: values.instagram_link,
-                    cover: imageUrlCover
+                    cover: imageUrlCover,
+                    city_id: values.city_id,
+                    latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
+                    address: values.address,
+
                 };
 
                 const developerCreateData = {
@@ -184,7 +216,11 @@ export default function EditDeveloper({params}) {
                     license_number: values.license_number ?? null,
                     agency_packages: values.agency_packages ?? null,
                     country_code: values.developer_country_code,
-                    cover: imageUrlCover
+                    cover: imageUrlCover,
+                    city_id: values.city_id,
+                    latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
+                    address: values.address,
                 };
 
                 console.log(developerDetail.id,"developerDetail")
@@ -259,12 +295,13 @@ export default function EditDeveloper({params}) {
                             pinterest_link: developerDetail?.pinterest_link || "",
                             linkedin_link: developerDetail?.linkedin_link || "",
                             instagram_link: developerDetail?.instagram_link || "",
+                            city_id: developerDetail.city_id || "",
 
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
                         >
-                        {({ errors, touched, handleChange, handleBlur, setFieldValue }) => (
+                        {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
                             <Form>
                                 <div>
                                     
@@ -528,6 +565,55 @@ export default function EditDeveloper({params}) {
                                                 <Field type="text" name="instagram_link" className="box-fieldset" />
                                                 {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                             </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Location</h6>
+                                        <div className="box grid-4 gap-30">
+                                            
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Cities:</label>
+                                                <Field
+                                                    as="select"
+                                                    name="city_id"
+                                                    className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedCity = e.target.value;
+                                                        setFieldValue("city_id", selectedCity);
+                                                    }}
+                                                    value={values.city_id}
+                                                >
+                                                    <option value="">Select Cities</option>
+                                                    {cityList && cityList.length > 0 ? (
+                                                        cityList.map((cities) => (
+                                                            <option key={cities.id} value={cities.id}>
+                                                                {cities.city_name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                            </fieldset>
+
+                                            
+
+                                        </div>
+                                        <div className="box box-fieldset">
+                                            <PropertyMapMarker
+                                                latitude={propertyMapCoords.latitude}
+                                                longitude={propertyMapCoords.longitude}
+                                                zoom={propertyMapCoords.zoom}
+                                                address={developerDetail.address}
+                                                onPlaceSelected={(newAddress, newLocation) => {
+                                                    setFieldValue('address', newAddress);
+                                                    setFieldValue('latitude', newLocation.lat);
+                                                    setFieldValue('longitude', newLocation.lng);
+                                                    //handleAddressSelect(newAddress, newLocation);
+                                                }
+                                                }
+                                            />
                                         </div>
                                     </div>
 

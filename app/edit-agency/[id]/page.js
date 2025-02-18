@@ -14,6 +14,7 @@ import { updateData, insertData } from "../../../components/api/Axios/Helper";
 import Preloader from '@/components/elements/Preloader';
 import { allCountries } from "country-telephone-data";
 import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 
 
 export default function EditAgency({params}) {
@@ -32,7 +33,12 @@ export default function EditAgency({params}) {
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [agencyPackageList, setAgencyPackageList] = useState([]);
     const [fileCoverImg, setFileCoverImg] = useState(null);
-
+    const [cityList, setCityList] = useState([]);
+    const [propertyMapCoords, setPropertyMapCoords] = useState({
+        latitude: 33.5945144,
+        longitude: -7.6200284,
+        zoom: 6
+    });
 
 
 
@@ -53,6 +59,11 @@ export default function EditAgency({params}) {
                 setFileCoverImg(getAgencyInfo.data.agency.cover);
                 setSelectedCode(getAgencyInfo.data.user.country_code);
                 setSelectedWhatsupCode(getAgencyInfo.data.agency.country_code)
+                setPropertyMapCoords({
+                    latitude: getAgencyInfo.data.agency.latitude,
+                    longitude: getAgencyInfo.data.agency.longitude,
+                    zoom: 12
+                });
                 setErrorMessage('');
             } else {
                 setShowErrorPopup(true);
@@ -63,6 +74,22 @@ export default function EditAgency({params}) {
             setLoading(false);
         }
 	};
+
+     const fetchCityOptions = async() => {
+        try {
+                if(cityList.length === 0){
+                const requestData = {
+                    page: 1,
+                    limit: 10000000,
+                };
+                const response = await insertData("api/city", requestData, true);
+                setCityList(response.data.cities);
+            }
+        } catch (error) {
+          console.error("Error fetching cities:", error);
+        }
+      };
+        fetchCityOptions();
 		fetchData();
 	}, [id]);
 
@@ -90,6 +117,7 @@ export default function EditAgency({params}) {
             phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
             country_code: Yup.string().required("Country code is required"),
             agency_packages: Yup.string().required("Agency packages are required"),
+            city_id: Yup.string().required("City is required"),
        });
     const router = useRouter();
 
@@ -156,7 +184,11 @@ export default function EditAgency({params}) {
                     pinterest_link: values.pinterest_link,
                     linkedin_link: values.linkedin_link,
                     instagram_link: values.instagram_link,
-                    cover: imageUrlCover
+                    cover: imageUrlCover,
+                    city_id: values.city_id,
+                    latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
+                    address: values.address,
                 };
 
 
@@ -179,7 +211,11 @@ export default function EditAgency({params}) {
                     license_number: values.license_number ?? null,
                     agency_packages: values.agency_packages ?? null,
                     country_code: values.agency_country_code,
-                    cover: imageUrlCover
+                    cover: imageUrlCover,
+                    city_id: values.city_id,
+                    latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                    longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
+                    address: values.address,
                 };
 
 
@@ -269,6 +305,7 @@ export default function EditAgency({params}) {
                             pinterest_link: agencyDetails?.pinterest_link || "",
                             linkedin_link: agencyDetails?.linkedin_link || "",
                             instagram_link: agencyDetails?.instagram_link || "",
+                            city_id: agencyDetails.city_id || "",
                         }}
 
                         validationSchema={validationSchema}
@@ -604,6 +641,54 @@ export default function EditAgency({params}) {
                                         </div>
                                         </div>
 
+<div className="widget-box-2">
+                                        <h6 className="title">Location</h6>
+                                        <div className="box grid-4 gap-30">
+                                            
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Cities:</label>
+                                                <Field
+                                                    as="select"
+                                                    name="city_id"
+                                                    className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedCity = e.target.value;
+                                                        setFieldValue("city_id", selectedCity);
+                                                    }}
+                                                    value={values.city_id}
+                                                >
+                                                    <option value="">Select Cities</option>
+                                                    {cityList && cityList.length > 0 ? (
+                                                        cityList.map((cities) => (
+                                                            <option key={cities.id} value={cities.id}>
+                                                                {cities.city_name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                            </fieldset>
+
+                                            
+
+                                        </div>
+                                        <div className="box box-fieldset">
+                                            <PropertyMapMarker
+                                                latitude={propertyMapCoords.latitude}
+                                                longitude={propertyMapCoords.longitude}
+                                                zoom={propertyMapCoords.zoom}
+                                                address={agencyDetails.address}
+                                                onPlaceSelected={(newAddress, newLocation) => {
+                                                    setFieldValue('address', newAddress);
+                                                    setFieldValue('latitude', newLocation.lat);
+                                                    setFieldValue('longitude', newLocation.lng);
+                                                    //handleAddressSelect(newAddress, newLocation);
+                                                }
+                                                }
+                                            />
+                                        </div>
+                                    </div>
                                     <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency</button>
                                         {showErrorPopup && Object.keys(errors).length > 0 && (
                                             <ErrorPopup

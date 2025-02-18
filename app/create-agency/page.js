@@ -11,6 +11,8 @@ import { allCountries } from "country-telephone-data";
 import { insertUploadImage } from "../../components/common/imageUpload";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 import Preloader from "@/components/elements/Preloader"; // Import Preloader component
+import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
+
 
 export default function CreateAgency() {
     const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +26,12 @@ export default function CreateAgency() {
     const [selectedWhatsupCode, setSelectedWhatsupCode] = useState("+33");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [loading, setLoading] = useState(false); // Loader state
-
+    const [cityList, setCityList] = useState([]);
+    const [propertyMapCoords, setPropertyMapCoords] = useState({
+        latitude: 33.5945144,
+        longitude: -7.6200284,
+        zoom: 6
+    });
     const router = useRouter();
     const validationSchema = Yup.object({
         username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
@@ -42,7 +49,7 @@ export default function CreateAgency() {
         linkedin_link: Yup.string().url("Invalid URL").nullable(),
         instagram_link: Yup.string().url("Invalid URL").nullable(),
         agency_packages: Yup.string().required("Agency packages are required"),
-        
+         city_id: Yup.string().required("City is required"),
     });
 
     useEffect (() => {
@@ -58,6 +65,23 @@ export default function CreateAgency() {
                 console.error('Error inserting data:', error);
             }
         }
+
+        const fetchCityOptions = async() => {
+            try {
+                    if(cityList.length === 0){
+                    const requestData = {
+                        page: 1,
+                        limit: 10000000,
+                    };
+                    const response = await insertData("api/city", requestData, true);
+                    setCityList(response.data.cities);
+                }
+            } catch (error) {
+              console.error("Error fetching cities:", error);
+            }
+          };
+
+        fetchCityOptions();
         fetchData();
     });
 
@@ -122,7 +146,11 @@ export default function CreateAgency() {
                                 license_number: values.license_number ?? null,
                                 agency_packages: values.agency_packages ?? null,
                                 country_code: values.whatsup_country_code,
-                                cover: fileUrls
+                                cover: fileUrls,
+                                city_id: values.city_id,
+                                address: values.address,
+                                latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
+                                longitude: isNaN(parseFloat(values.longitude)) ? parseFloat(propertyMapCoords.longitude) : parseFloat(values.longitude),
                             };
 
                             const createAgencyInfo = await insertData('api/agencies/create', agencyData, true);
@@ -197,7 +225,9 @@ export default function CreateAgency() {
                     country_code: "+33",
                     whatsup_country_code: "+33",
                     agency_packages: "",
-                    cover_img:""
+                    cover_img:"",
+                    city_id: "",
+
                  }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -482,6 +512,46 @@ export default function CreateAgency() {
                                         <Field type="text" name="instagram_link" className="box-fieldset" />
                                         {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                     </fieldset>
+                                </div>
+                            </div>
+                             <div className="widget-box-2">
+                                <h6 className="title">Location</h6>
+                                <div className="box grid-4 gap-30">
+                                    
+                                    <fieldset className="box box-fieldset">
+                                        <label htmlFor="desc">Cities:</label>
+                                            <Field as="select" name="city_id" className="nice-select country-code"
+                                                onChange={(e) => {
+                                                    const selectedState = e.target.value;
+                                                    setFieldValue("city_id", selectedState);
+                                                    
+                                                }}
+                                            >
+                                                <option value="">Select Cities</option>
+                                                {cityList && cityList.length > 0 ? (
+                                                    cityList.map((cities) => (
+                                                        <option key={cities.id} value={cities.id}>
+                                                            {cities.city_name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </Field>
+                                    </fieldset>
+                                </div>
+                                <div className="box box-fieldset">
+                                    <PropertyMapMarker
+                                        latitude={propertyMapCoords.latitude}
+                                        longitude={propertyMapCoords.longitude}
+                                        zoom={propertyMapCoords.zoom}
+                                        onPlaceSelected={(newAddress, newLocation) => {
+                                            setFieldValue('address', newAddress);
+                                            setFieldValue('latitude', newLocation.lat);
+                                            setFieldValue('longitude', newLocation.lng);
+                                        }
+                                    }
+                                    />
                                 </div>
                             </div>
                             <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Agency</button>
