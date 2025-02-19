@@ -68,7 +68,7 @@ export default function CreateAgency() {
 
         const fetchCityOptions = async() => {
             try {
-                    if(cityList.length === 0){
+                    if(cityList.length === 0){ 
                     const requestData = {
                         page: 1,
                         limit: 10000000,
