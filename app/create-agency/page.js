@@ -285,7 +285,7 @@ export default function CreateAgency() {
                                                     const selectedState = e.target.value;
                                                     setSelectedCode(selectedState);
                                                     setFieldValue("country_code", selectedState);
-                                                }}
+                                                }} 
                                             >
                                                 {/* Default selected option: Show only the country code */}
                                                 <option value={selectedCode || "+33"}>
