@@ -269,15 +269,17 @@ export default function EditProperty({params}) {
     const handleDistrictChange = async (DistrictId) => {
         console.log('District ID:', DistrictId);
         const selectedDistricts = districtList.find((districts) => districts.id === DistrictId);
-        console.log('selectedState ID:', selectedDistricts.latitude);
-        const { latitude, longitude } = selectedDistricts;
+        if (selectedDistricts) {
+            const { latitude, longitude } = selectedDistricts;
+            setPropertyMapCoords({
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                zoom: 12
+            });
+        }
         setNeighborhoodList([]);
 
-        setPropertyMapCoords({
-            latitude: parseFloat(latitude),
-            longitude: parseFloat(longitude),
-            zoom: 12
-        });
+        
 
         if (!DistrictId) {
             setNeighborhoodList([]); // Clear cities if no state is selected
@@ -318,15 +320,23 @@ export default function EditProperty({params}) {
     const handleCityChange = async (cityId) => {
         console.log('City ID:', cityId);
         const selectedCites = cityList.find((cities) => cities.id === cityId);
-        console.log('selectedState ID:', selectedCites.latitude);
-        const { latitude, longitude } = selectedCites;
+       if (selectedCites) {
+            console.log('selectedState ID:', selectedCites.latitude);
+            const { latitude, longitude } = selectedCites;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 12
+            });
+        }
+        // const { latitude, longitude } = selectedCites;
         setNeighborhoodList([]);
 
-        setPropertyMapCoords({
-            latitude: latitude,
-            longitude: longitude,
-            zoom: 12
-        });
+        // setPropertyMapCoords({
+        //     latitude: latitude,
+        //     longitude: longitude,
+        //     zoom: 12
+        // });
 
         if (!cityId) {
             setDistrictList([]); // Clear cities if no state is selected
@@ -521,8 +531,8 @@ export default function EditProperty({params}) {
                     link_uuid: values.link_uuid ?? null,
                     state_id: values.state_id,
                     city_id: values.city_id,
-                    district_id: values.districts_id,
-                    neighborhoods_id: values.neighborhood_id,
+                    district_id: values.districts_id === "" ? null : values.districts_id,
+                    neighborhoods_id: values.neighborhood_id === "" ? null : values.neighborhood_id,
                     latitude: values.latitude ? String(values.latitude) : "33.985047",
                     longitude: values.longitude ? String(values.longitude) : "-118.469483",
                     transaction: values.transaction_type,
