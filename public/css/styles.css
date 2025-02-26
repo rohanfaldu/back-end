@@ -161,7 +161,7 @@ body {
 }
 
 img {
-  max-width: 100%;
+  /* max-width: 100%; */
   height: auto;
   transform: scale(1);
   vertical-align: middle;
