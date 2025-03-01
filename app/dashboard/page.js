@@ -46,20 +46,22 @@ export default function Dashboard() {
 										<div className="box-icon w-68 round">
 											<span className="icon icon-list-dashes" />
 										</div>
-										<div className="content-box">
-											<div className="title-count">Total Users</div>
-											<div className="d-flex align-items-end">
-												<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.total_users} ><CountetNumber count={dashboardData?.data?.total_users} /></h6>
-												{/* <span className="fw-7 text-variant-2">{dashboardData?.data?.normal_user_count}</span> */}
+										<Link href={`/user-listing`} className="item">
+											<div className="content-box">
+												<div className="title-count">Total Users</div>
+												<div className="d-flex align-items-end">
+													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.total_users} ><CountetNumber count={dashboardData?.data?.total_users} /></h6>
+													{/* <span className="fw-7 text-variant-2">{dashboardData?.data?.normal_user_count}</span> */}
+												</div>
 											</div>
-										</div>
+										</Link>
 									</div>
 									<div className="counter-box">
 										<div className="box-icon w-68 round">
 											<span className="icon icon-clock-countdown" />
 										</div>
 										<div className="content-box">
-											<div className="title-count">Total Projecs</div>
+											<div className="title-count">Total Projects</div>
 											<div className="d-flex align-items-end">
 												<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.project_count}><CountetNumber count={dashboardData?.data?.project_count} /></h6>
 											</div>
@@ -76,6 +78,32 @@ export default function Dashboard() {
 											</div>
 										</div>
 									</div>
+									<Link href={`/developer-listing`} className="item">
+										<div className="counter-box">
+											<div className="box-icon w-68 round">
+												<span className="icon icon-bookmark" />
+											</div>
+											<div className="content-box">
+												<div className="title-count">Total Active Developer</div>
+												<div className="d-flex align-items-end">
+													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.active_developer}><CountetNumber count={dashboardData?.data?.active_developer} /></h6>
+												</div>
+											</div>
+										</div>
+									</Link>
+									<Link href={`/agency-listing`} className="item">
+										<div className="counter-box">
+											<div className="box-icon w-68 round">
+												<span className="icon icon-bookmark" />
+											</div>
+											<div className="content-box">
+												<div className="title-count">Total Active Agency</div>
+												<div className="d-flex align-items-end">
+													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.active_agency}><CountetNumber count={dashboardData?.data?.active_agency} /></h6>
+												</div>
+											</div>
+										</div>
+									</Link>
 									{/* <div className="counter-box">
 										<div className="box-icon w-68 round">
 											<span className="icon icon-review" />
