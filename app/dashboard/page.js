@@ -67,17 +67,19 @@ export default function Dashboard() {
 											</div>
 										</div>
 									</div>
-									<div className="counter-box">
-										<div className="box-icon w-68 round">
-											<span className="icon icon-bookmark" />
-										</div>
-										<div className="content-box">
-											<div className="title-count">Total Property</div>
-											<div className="d-flex align-items-end">
-												<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.property_count}><CountetNumber count={dashboardData?.data?.property_count} /></h6>
+									<Link href={`/property-listing`} className="item">
+										<div className="counter-box">
+											<div className="box-icon w-68 round">
+												<span className="icon icon-bookmark" />
+											</div>
+											<div className="content-box">
+												<div className="title-count">Total Property</div>
+												<div className="d-flex align-items-end">
+													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.property_count}><CountetNumber count={dashboardData?.data?.property_count} /></h6>
+												</div>
 											</div>
 										</div>
-									</div>
+									</Link>
 									<Link href={`/developer-listing`} className="item">
 										<div className="counter-box">
 											<div className="box-icon w-68 round">
@@ -100,6 +102,19 @@ export default function Dashboard() {
 												<div className="title-count">Total Active Agency</div>
 												<div className="d-flex align-items-end">
 													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.active_agency}><CountetNumber count={dashboardData?.data?.active_agency} /></h6>
+												</div>
+											</div>
+										</div>
+									</Link>
+									<Link href={`/property-visit`} className="item">
+										<div className="counter-box">
+											<div className="box-icon w-68 round">
+												<span className="icon icon-bookmark" />
+											</div>
+											<div className="content-box">
+												<div className="title-count">Property Visit Schedule</div>
+												<div className="d-flex align-items-end">
+													<h6 className="number" data-speed={2000} data-to={dashboardData?.data?.property_visit_count}><CountetNumber count={dashboardData?.data?.property_visit_count} /></h6>
 												</div>
 											</div>
 										</div>
