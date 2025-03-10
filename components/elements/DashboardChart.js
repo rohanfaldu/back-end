@@ -1,73 +1,52 @@
+import * as React from "react";
+import { useState } from "react";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { PieChart } from "@mui/x-charts/PieChart";
 
-'use client'
-import 'chart.js/auto'
-import { Line } from "react-chartjs-2"
+export default function ViewChart() {
+  const [duration, setDuration] = useState("weekly");
 
-export default function DashboardChart() {
-    const data = {
-        labels: [
-            "4 Jan",
-            "5 Jan",
-            "6 Jan",
-            "7 Jan",
-            "8 Jan",
-            "9 Jan",
-            "10 Jan",
-            "11 Jan",
-            "12 Jan",
-            "13 Jan",
-            "14 Jan",
-            "15 Jan",
-        ],
-        datasets: [
-            {
-                fill: true,
-                label: `$ Sales Overview`,
-                backgroundColor: "transparent",
-                borderColor: "#ED2027",
-                data: [0, 105, 92, 155, 138, 205, 120, 92, 155, 138, 205, 320],
-                lineTension: 0,
-                pointRadius: 2,
-                borderWidth: 3,
-            },
-            // {
-            //     label: "Facebook",
-            //     backgroundColor: "rgba(0, 138, 255, 0.5)",
-            //     borderColor: "transparent",
-            //     data: lineData.youtube,
-            //     lineTension: 0,
-            //     // borderDash: [10, 5],
-            //     borderWidth: 1,
-            //     pointRadius: 0,
-            // },
-        ],
-    }
+  // Static Data for Pie Chart
+  const pieData = {
+    weekly: [
+      { id: 0, value: 40, label: "Lead to Visit", color: "#FF4906" },
+      { id: 1, value: 60, label: "Direct Visit", color: "#00ABC4" },
+    ],
+    monthly: [
+      { id: 0, value: 30, label: "Lead to Visit", color: "#FF4906" },
+      { id: 1, value: 70, label: "Direct Visit", color: "#00ABC4" },
+    ],
+    yearly: [
+      { id: 0, value: 25, label: "Lead to Visit", color: "#FF4906" },
+      { id: 1, value: 75, label: "Direct Visit", color: "#00ABC4" },
+    ],
+  };
 
-    const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false,
-            }
-        },
-        scales: {
-            x: {
-                grid: {
-                    display: true,
-                    drawBorder: false,
-                    color: "rgba(0,0,0,0.05)"
-                }
-            },
-            y: {
-                grid: {
-                    display: false,
-                    drawBorder: false,
-                }
-            },
-        },
-    }
-    return (
-        <><Line data={data} height={300} options={options} id="lineChart" /></>
-    )
+  return (
+    <div style={{ width: "100%" }}>
+      <div style={{ marginBottom: "10px", display: "flex", justifyContent: "end" }}>
+        <select value={duration} onChange={(e) => setDuration(e.target.value)}>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      <PieChart
+        series={[{
+          data: pieData[duration],
+          innerRadius: 90,
+          outerRadius: 150,
+          paddingAngle: 5,
+          cornerRadius: 5,
+          startAngle: -135,
+          endAngle: 225,
+          cx: 550,
+          cy: 150,
+        }]}
+        width={1000}
+        height={400}
+      />
+    </div>
+  );
 }
