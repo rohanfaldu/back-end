@@ -10,6 +10,7 @@ import LayoutAdmin from "@/components/layout/LayoutAdmin"
 import Link from "next/link";
 import { insertData, deletedData } from "../../components/api/Axios/Helper";
 import Preloader from "@/components/elements/Preloader";
+import LikeChart from "@/components/elements/LikeChart"
 export default function Dashboard() {
 	const [startDate, setStartDate] = useState(new Date())
 	const [endDate, setEndDate] = useState(new Date())
@@ -137,10 +138,23 @@ export default function Dashboard() {
 									<div className="col-xl-12">
 										
 										<div className="widget-box-2 wd-chart">
-											<h6 className="title">Page Inside</h6>
+											<h6 className="title">Lead to Visit Conversion Rate</h6>
 											
 											<div className="chart-box">
 												<DashboardChart />
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div className="wrapper-content row" style={{marginTop: '20px'}}>
+									<div className="col-xl-12">
+										
+										<div className="widget-box-2 wd-chart">
+											<h6 className="title">Property Likes Engagement</h6>
+											
+											<div className="chart-box">
+												<LikeChart />
 											</div>
 										</div>
 									</div>
