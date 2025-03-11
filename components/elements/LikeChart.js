@@ -123,8 +123,8 @@ export default function LikeChart() {
         height={300}
         series={[
           { data: likes, label: "Likes", id: "likesId", color: "#FFAB00" },
-          { data: chats, label: "Chats", id: "chatsId", color: "#1976D2" },
-          { data: visits, label: "Visits", id: "visitsId", color: "#388E3C" }
+          { data: chats, label: "Chats", id: "chatsId", color: "#00ABC4" },
+          { data: visits, label: "Visits", id: "visitsId", color: "#2EC400" }
         ]}
         xAxis={[{ data: xLabels, scaleType: "band", tickLabelStyle: { angle: 45, textAnchor: "start" } }]}
       />
