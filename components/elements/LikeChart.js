@@ -89,20 +89,26 @@ export default function LikeChart() {
   // Static Data
   const staticData = {
     weekly: {
-      uData: [20, 25, 18, 30, 35, 28, 40],
+      likes: [20, 25, 18, 30, 35, 28, 40],
+      chats: [15, 20, 12, 25, 30, 22, 35],
+      visits: [50, 60, 55, 70, 80, 75, 90],
       xLabels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     },
     monthly: {
-      uData: [200, 220, 250, 230, 270, 290, 300, 280, 260, 240],
+      likes: [200, 220, 250, 230, 270, 290, 300, 280, 260, 240],
+      chats: [150, 180, 200, 190, 210, 230, 250, 240, 220, 200],
+      visits: [500, 550, 600, 580, 620, 650, 680, 670, 640, 610],
       xLabels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8", "Week 9", "Week 10"],
     },
     yearly: {
-      uData: [1000, 1200, 1350, 1500, 1600, 1800, 1750, 1900, 2000, 2200, 2300, 2500],
+      likes: [1000, 1200, 1350, 1500, 1600, 1800, 1750, 1900, 2000, 2200, 2300, 2500],
+      chats: [900, 1100, 1250, 1400, 1500, 1700, 1650, 1800, 1900, 2100, 2200, 2400],
+      visits: [2000, 2500, 2700, 3000, 3200, 3500, 3400, 3700, 3900, 4100, 4300, 4500],
       xLabels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     },
   };
 
-  const { uData, xLabels } = staticData[duration];
+  const { likes, chats, visits, xLabels } = staticData[duration];
 
   return (
     <div style={{ width: "100%" }}>
@@ -113,10 +119,13 @@ export default function LikeChart() {
           <option value="yearly">Yearly</option>
         </select>
       </div>
-
       <BarChart
         height={300}
-        series={[{ data: uData, label: "Likes", id: "uvId", color: "#FFAB00" }]}
+        series={[
+          { data: likes, label: "Likes", id: "likesId", color: "#FFAB00" },
+          { data: chats, label: "Chats", id: "chatsId", color: "#1976D2" },
+          { data: visits, label: "Visits", id: "visitsId", color: "#388E3C" }
+        ]}
         xAxis={[{ data: xLabels, scaleType: "band", tickLabelStyle: { angle: 45, textAnchor: "start" } }]}
       />
     </div>
