@@ -354,7 +354,9 @@ export default function MyProperty() {
                                     <span>{user.email_address}</span><br />
                                     <span>{user.mobile_number}</span>
                                   </td>
-                                  <td>{user.publish_property}</td>
+                                  <td onClick={() => window.location.href = `/property-listing/${user.id}`} style={{ cursor: "pointer" }}>
+                                    {user.publish_property}
+                                  </td>
                                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                   <td>
                                     <div className="status-wrap">
