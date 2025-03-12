@@ -358,6 +358,8 @@ export default function MyProperty() {
                                 <th>Image</th>
                                 <th>Name</th>
                                 <th>Email Address / Phone Number</th>
+                                <th>Property Published</th>
+                                <th>Project Published</th>
                                 <th>Date Published</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -378,6 +380,8 @@ export default function MyProperty() {
                                     <span>{user.email_address}</span><br />
                                     <span>{user.mobile_number}</span>
                                   </td>
+                                  <td>{user.publish_property}</td>
+                                  <td>{user.publish_project}</td>
                                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                   <td>
                                     <div className="status-wrap">
