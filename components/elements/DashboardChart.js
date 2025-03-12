@@ -21,6 +21,7 @@ export default function ViewChart() {
       { id: 1, value: 75, label: "Visit", color: "#00ABC4" },
     ],
   };
+  const valueFormatter = (value) => `${value}%`;
 
   return (
     <div style={{ width: "100%" }}>
@@ -33,19 +34,17 @@ export default function ViewChart() {
       </div>
 
       <PieChart
-        series={[{
-          data: pieData[duration],
-          innerRadius: 90,
-          outerRadius: 150,
-          paddingAngle: 5,
-          cornerRadius: 5,
-          startAngle: -135,
-          endAngle: 225,
-          cx: 550,
-          cy: 150,
-        }]}
-        width={1000}
-        height={400}
+         width={1000}
+         height={400}
+        series={[
+          {
+            data: pieData[duration],
+            innerRadius: 90,
+            arcLabel: (params) => valueFormatter(params.value), // Show percentage on slices
+            arcLabelMinAngle: 20, // Only show labels if slice is large enough
+          },
+        ]}
+        skipAnimation={false} // Keep animations enabled
       />
     </div>
   );
