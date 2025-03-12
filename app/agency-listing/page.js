@@ -330,10 +330,10 @@ export default function MyProperty() {
                             <thead>
                               <tr>
                                 <th>Image</th>
-                                <th>Name</th>
-                                <th>Email Address / Phone Number</th>
-                                <th>Property Published</th>
-                                <th>Date Published</th>
+                                {/* <th>Name</th> */}
+                                <th>Name / Email Address / Phone Number</th>
+                                <th>Property</th>
+                                <th>Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                               </tr>
@@ -348,8 +348,9 @@ export default function MyProperty() {
                                       </div>
                                     </div>
                                   </td>
-                                  <td>{user.full_name}</td>
+                                  {/* <td>{user.full_name}</td> */}
                                   <td>
+                                    <span>{user.full_name}</span><br />
                                     <span>{user.email_address}</span><br />
                                     <span>{user.mobile_number}</span>
                                   </td>

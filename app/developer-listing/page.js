@@ -356,11 +356,11 @@ export default function MyProperty() {
                             <thead>
                               <tr>
                                 <th>Image</th>
-                                <th>Name</th>
-                                <th>Email Address / Phone Number</th>
-                                <th>Property Published</th>
-                                <th>Project Published</th>
-                                <th>Date Published</th>
+                                {/* <th>Name</th> */}
+                                <th>Name / Email Address / Phone Number</th>
+                                <th>Property</th>
+                                <th>Project</th>
+                                <th>Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                               </tr>
@@ -375,13 +375,22 @@ export default function MyProperty() {
                                       </div>
                                     </div>
                                   </td>
-                                  <td>{user.full_name}</td>
+                                  {/* <td>{user.full_name}</td> */}
                                   <td>
+                                    <span>{user.full_name}</span><br />
                                     <span>{user.email_address}</span><br />
                                     <span>{user.mobile_number}</span>
                                   </td>
-                                  <td>{user.publish_property}</td>
-                                  <td>{user.publish_project}</td>
+                                  <td onClick={() => window.location.href = `/property-listing/${user.id}`} style={{ cursor: "pointer" }}>
+                                    {user.publish_property}
+                                  </td>
+                                  {/* <a href={`/project-listing/${user.id}`} className="item"> */}
+                                  <td onClick={() => window.location.href = `/project-listing/${user.id}`} style={{ cursor: "pointer" }}>
+                                    {user.publish_project}
+                                  </td>
+
+                                  {/* </a> */}
+
                                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                   <td>
                                     <div className="status-wrap">
