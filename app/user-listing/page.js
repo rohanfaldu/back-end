@@ -353,8 +353,9 @@ export default function MyProperty() {
                             <thead>
                               <tr>
                                 <th>Image</th>
-                                <th>Name</th>
-                                <th>Email Address / Phone Number</th>
+                                <th>Name / Email Address / Phone Number</th>
+                                <th>Property Like / View</th>
+                                <th>Last Activity</th>
                                 <th>Date Published</th>
                                 {/* <th>Status</th> */}
                                 {/* <th>Action</th> */}
@@ -370,11 +371,36 @@ export default function MyProperty() {
                                       </div>
                                     </div>
                                   </td>
-                                  <td>{user.full_name}</td>
                                   <td>
+                                    <span>{user.full_name}</span><br />
                                     <span>{user.email_address}</span><br />
                                     <span>{user.mobile_number}</span>
                                   </td>
+                                  <td>
+                                    <span onClick={() => window.location.href = `/property-listing/like/${user.id}`} style={{ cursor: "pointer" }}>{user.user_like_property}</span> /&nbsp; 
+                                    <span onClick={() => window.location.href = `/property-listing/view/${user.id}`} style={{ cursor: "pointer" }}>{user.user_view_property}</span>
+                                  </td>
+                                  <td>
+                                    <span>
+                                      {user?.last_activity_at?.last_activity_at
+                                        ? new Date(user.last_activity_at.last_activity_at).toLocaleString('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            hour12: false, // Ensures 24-hour format
+                                          })
+                                        : '-'}
+                                    </span>
+                                  </td>
+
+
+                                  {/* <td>
+                                    <span>{user.email_address}</span><br />
+                                    <span>{user.mobile_number}</span>
+                                  </td> */}
                                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                   {/* <td>
                                     <div className="status-wrap">
