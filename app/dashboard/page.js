@@ -151,7 +151,7 @@ export default function Dashboard() {
 									<div className="col-xl-12">
 										
 										<div className="widget-box-2 wd-chart">
-											<h6 className="title">Property Likes Engagement</h6>
+											<h6 className="title">Property Likes, Comments and Views Engagement</h6>
 											
 											<div className="chart-box">
 												<LikeChart />
