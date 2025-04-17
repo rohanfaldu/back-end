@@ -10,21 +10,21 @@ import { use, useState, useEffect } from "react"
 import { useRouter } from 'next/navigation';
 import { insertData, insertImageData } from "../../components/api/Axios/Helper";
 import { insertMultipleUploadImage } from "../../components/common/imageUpload";
-import { capitalizeFirstChar, validateYouTubeURL } from "../../components/common/functions";
+import { capitalizeFirstChar, validateYouTubeURL, checkURL } from "../../components/common/functions";
 import Preloader from "@/components/elements/Preloader";
 import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 // import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 // Adjust the path based on your project structure
 //import ReactGooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
-import  "../../components/errorPopup/ErrorPopup.css";
+import "../../components/errorPopup/ErrorPopup.css";
 import ErrorPopup from "../../components/errorPopup/ErrorPopup.js";
 
 export default function CreateProperty() {
     const [loading, setLoading] = useState(false); // Loader state
-	const [errorMessage, setErrorMessage] = useState('');
-	const [sucessMessage, setSucessMessage] = useState(false);
-	const [propertyMeta, setPropertyMeta] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [sucessMessage, setSucessMessage] = useState(false);
+    const [propertyMeta, setPropertyMeta] = useState(false);
     const [filePictureImg, setFilePictureImg] = useState(null);
     const [stateList, setStateList] = useState([]);
     const [cityList, setCityList] = useState([]);
@@ -84,7 +84,7 @@ export default function CreateProperty() {
 
                 if (stateList.length === 0) {
                     apiCalls.push(
-                        insertData('api/state', {page:0,limit:10000}, true).then((res) => {
+                        insertData('api/state', { page: 0, limit: 10000 }, true).then((res) => {
                             if (res) setStateList(res.data.states);
                         })
                     );
@@ -160,28 +160,28 @@ export default function CreateProperty() {
         projectOfListing.length,
         propertyMeta,
         currencyList.length,
-    ]); 
-  
+    ]);
+
     const handleStateChange = async (stateId) => {
         setCityList([]); // Clear the city list first
         setDistrictList([]); // Clear the district list
         setNeighborhoodList([]); // Clear the neighborhood list
         const selectedState = stateList.find((state) => state.id === stateId);
-            if (selectedState) {
-                const { latitude, longitude } = selectedState;
-                setPropertyMapCoords({
-                    latitude: latitude,
-                    longitude: longitude,
-                    zoom: 10
-                });
-        
-                const cityObj = { state_id: stateId, lang: "en" };
-                const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
-                if (getCityInfo.status) {
-                    console.log(getCityInfo.data.cities);
-                    setCityList(getCityInfo.data.cities);
-                }
+        if (selectedState) {
+            const { latitude, longitude } = selectedState;
+            setPropertyMapCoords({
+                latitude: latitude,
+                longitude: longitude,
+                zoom: 10
+            });
+
+            const cityObj = { state_id: stateId, lang: "en" };
+            const getCityInfo = await insertData('api/city/getbystate', cityObj, true);
+            if (getCityInfo.status) {
+                console.log(getCityInfo.data.cities);
+                setCityList(getCityInfo.data.cities);
             }
+        }
     };
     const handleDistrictChange = async (DistrictId) => {
         console.log('District ID:', DistrictId);
@@ -199,7 +199,7 @@ export default function CreateProperty() {
             return;
         }
         try {
-            const districtObj = { district_id: DistrictId , lang:"en" };
+            const districtObj = { district_id: DistrictId, lang: "en" };
             const getNeighborhoodObjInfo = await insertData('api/neighborhood/id', districtObj, true);
             if (getNeighborhoodObjInfo.status) {
                 setNeighborhoodList(getNeighborhoodObjInfo.data);
@@ -250,8 +250,8 @@ export default function CreateProperty() {
             const getDistrictInfo = await insertData('api/district/getbycity', districtObj, true);
             if (getDistrictInfo.status) {
                 setDistrictList(getDistrictInfo.data);
-                if(getDistrictInfo.data.length == 0){
-                    const neighbourhoodObj = { city_id: cityId , lang:"en" };
+                if (getDistrictInfo.data.length == 0) {
+                    const neighbourhoodObj = { city_id: cityId, lang: "en" };
                     const getNeighborhoodObjInfo = await insertData('api/neighborhood/cityid', neighbourhoodObj, true);
                     if (getNeighborhoodObjInfo.status) {
                         setNeighborhoodList(getNeighborhoodObjInfo.data);
@@ -281,8 +281,8 @@ export default function CreateProperty() {
 
 
     const handleFileChangeVideo = (event, setFieldValue) => {
-        console.log( 'video' );
-        console.log( event );
+        console.log('video');
+        console.log(event);
         const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
         const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
         //const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
@@ -295,8 +295,8 @@ export default function CreateProperty() {
     };
 
     const handleFileChange = (event, setFieldValue) => {
-        console.log( 'image' );
-        console.log( event );
+        console.log('image');
+        console.log(event);
         const files = Array.from(event.currentTarget.files);  // Convert FileList to Array
         //const videoFile = files.find(file => file.type === "video/mp4");  // Check for video files
         const imageFiles = files.filter(file => file.type.startsWith("image/"));  // Filter for image files
@@ -320,7 +320,7 @@ export default function CreateProperty() {
 
     };
 
-      // Handler for image remove
+    // Handler for image remove
 
 
     // Handle form submission
@@ -334,7 +334,7 @@ export default function CreateProperty() {
             //     setShowErrorPopup(true);
             //     return;
             // }
-    
+
             // Validate YouTube link only if it's not empty
             if (!isVideoUpload && values.video_link && !validateYouTubeURL(values.video_link)) {
                 setErrors({ serverError: "Please upload a valid YouTube video link like https://www.youtube.com/watch?v=YOUR_VIDEO_ID." });
@@ -342,10 +342,16 @@ export default function CreateProperty() {
                 return;
             }
     
+            if (!checkURL(values.vr_link)) {
+                setErrors({ serverError: "Please Enter valid URL" });
+                setShowErrorPopup(true);
+                return;
+            }
+
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
                 .map((project) => ({ property_type_id: project.id, value: "true" }));
-    
+
             if (propertyOfMetaNumberValue && Object.keys(propertyOfMetaNumberValue).length > 0) {
                 // Update selected amenities based on propertyOfMetaNumberValue
                 Object.entries(propertyOfMetaNumberValue).forEach(([key, value]) => {
@@ -357,25 +363,25 @@ export default function CreateProperty() {
                     }
                 });
             }
-    
+
             console.log("Selected Amenities:", selectedAmenities);
             // Process image uploads
             const uploadImageObj = Array.isArray(values.picture_img)
                 ? values.picture_img.filter(item => item !== null)
                 : [values.picture_img].filter(item => item !== null);
-    
+
             if (values.video != null) {
                 uploadImageObj.push(values.video);
             }
-    
+
             setSucessMessage("Processing .........");
 
             const uploadImageUrl = await insertMultipleUploadImage("image", uploadImageObj);
-    
+
             if (uploadImageUrl.files.length > 0) {
                 const imageUrls = [];
                 let videoUrl = null;
-    
+
                 uploadImageUrl.files.forEach((file) => {
                     if (file.mimeType.startsWith("image")) {
                         imageUrls.push(file.url);
@@ -383,14 +389,14 @@ export default function CreateProperty() {
                         videoUrl = file.url;
                     }
                 });
-    
+
                 const pictureUrl = imageUrls.join(", ");
                 console.log("Image URLs:", pictureUrl);
                 console.log("Video URL:", videoUrl);
-    
+
                 // Use video URL from upload or fallback to video link
                 videoUrl = videoUrl || (values.video_link ? values.video_link : null);
-    
+
                 const propertyData = {
                     title_en: values.title_en,
                     title_fr: values.title_fr,
@@ -417,12 +423,12 @@ export default function CreateProperty() {
                     project_id: values.project_id ?? null,
                     address: values.address,
                 };
-    
+
                 console.log("Property Data:", propertyData);
                 const createPropertyInfo = await insertData("api/property/create", propertyData, true);
                 console.log('response');
                 console.log(createPropertyInfo.status);
-    
+
                 if (createPropertyInfo.status) {
                     setSucessMessage(createPropertyInfo.message || "Property created successfully.");
                     resetForm();
@@ -446,7 +452,7 @@ export default function CreateProperty() {
             setSucessMessage("");
         }
     };
-    
+
 
 
     const handleCheckboxChange = (key) => {
@@ -456,7 +462,7 @@ export default function CreateProperty() {
         }));
     };
 
-	const [selectedRadio, setSelectedRadio] = useState('radio1')
+    const [selectedRadio, setSelectedRadio] = useState('radio1')
 
 
     const handleRadioChange = (event, setFieldValue) => {
@@ -464,13 +470,13 @@ export default function CreateProperty() {
         setIsVideoUpload(isUpload);
 
         if (!isUpload) {
-          // Switching to YouTube Link
-          setVideoPreview(null); // Clear video preview
-          setFieldValue("video", null); // Clear Formik video field
-        }else if(isUpload){
+            // Switching to YouTube Link
+            setVideoPreview(null); // Clear video preview
+            setFieldValue("video", null); // Clear Formik video field
+        } else if (isUpload) {
 
-          setFieldValue("video_link", null);
-          setVideoLink(null); // Update YouTube link manually
+            setFieldValue("video_link", null);
+            setVideoLink(null); // Update YouTube link manually
 
         }
     };
@@ -482,40 +488,40 @@ export default function CreateProperty() {
     };
     // console.log(checkedItems);
     const messageClass = (sucessMessage) ? "message success" : "message error";
-	return (
+    return (
         <>
-        {loading ? (
-            <Preloader />
-        ) : (
-		<>
-			<LayoutAdmin>
-            {errorMessage && <div className={messageClass}>{errorMessage}</div>}
-            <Formik
-                initialValues={{
-                    title_en: "",
-                    title_fr: "",
-                    description_en: "",
-                    description_fr: "",
-                    price: "",
-                    picture_img: [],
-                    video: null,
-                    video_link: "",
-                    state_id: "",
-                    city_id: "",
-                    districts_id: "",
-                    neighborhood_id: "",
-                    transaction_type: "",
-                    property_type: "",
-                    user_id: "",
-                    size_sqft: "",
-                 }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-                >
-                {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
-                    <Form>
-                        <div>
-                            {/* <div className="widget-box-2">
+            {loading ? (
+                <Preloader />
+            ) : (
+                <>
+                    <LayoutAdmin>
+                        {errorMessage && <div className={messageClass}>{errorMessage}</div>}
+                        <Formik
+                            initialValues={{
+                                title_en: "",
+                                title_fr: "",
+                                description_en: "",
+                                description_fr: "",
+                                price: "",
+                                picture_img: [],
+                                video: null,
+                                video_link: "",
+                                state_id: "",
+                                city_id: "",
+                                districts_id: "",
+                                neighborhood_id: "",
+                                transaction_type: "",
+                                property_type: "",
+                                user_id: "",
+                                size_sqft: "",
+                            }}
+                            validationSchema={validationSchema}
+                            onSubmit={handleSubmit}
+                        >
+                            {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
+                                <Form>
+                                    <div>
+                                        {/* <div className="widget-box-2">
                                 <h6 className="title">Upload Agency User Image</h6>
                                 <div className="box-uploadfile text-center">
                                     <label className="uploadfile">
@@ -540,168 +546,163 @@ export default function CreateProperty() {
                                     )}
                                 </div>
                             </div> */}
-                            <div className="widget-box-2">
-                                <h6 className="title">Property Information</h6>
-                                <div className="box grid-2 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Title English:<span>*</span></label>
-                                        <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Title French:<span>*</span></label>
-                                        <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
-                                        {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                                <div className="grid-1 box gap-30">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Description English:<span>*</span></label>
-                                        <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                                <div className="grid-1 box gap-30">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Description French:<span>*</span></label>
-                                        <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                        {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div className="widget-box-2">
-                                <h6 className="title">Other Information</h6>
-                                <div className="box grid-2 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Transaction Type:<span>*</span></label>
-                                        <Field as="select" name="transaction_type" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("transaction_type", selectedState);
-                                                }}
-                                            >
-                                            <option value="">Select Transaction Type</option>
-                                            <option value="sale">Fore Sale</option>
-                                            <option value="rental">For Rental</option>
-                                        </Field>
-                                        {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Property Type:<span>*</span></label>
-                                        <Field as="select" name="property_type" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("property_type", selectedState);
-                                                }}
-                                            >
-                                            <option value="">Select Property Type</option>
-                                            {propertyofTypesListing && propertyofTypesListing.length > 0 ? (
-                                                propertyofTypesListing.map((property) => (
-                                                    <option key={property.id} value={property.id}>{capitalizeFirstChar(property.title)}</option>
-                                                ))
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Project Listing:<span>*</span></label>
-                                        <Field as="select" name="project_id" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("project_id", selectedState);
-                                                }}
-                                            >
-                                            <option value="">Select Project Listing</option>
-                                            {projectOfListing && projectOfListing.length > 0 ? (
-                                                projectOfListing.map((propertyList) => (
-                                                    <option key={propertyList.id} value={propertyList.id}>{capitalizeFirstChar(propertyList.title)}</option>
-                                                ))
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </Field>
-                                        {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">User Listing:<span>*</span></label>
-                                        <Field as="select" name="user_id" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("user_id", selectedState);
-                                                }}
-                                            >
-                                            <option value="">Select User Listing</option>
-                                            {userList && userList.length > 0 ? (
-                                                userList.map((user) => (
-                                                    (user.full_name !== null)?<option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option>:<></>
-                                                ))
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </Field>
-                                        {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                <fieldset className="box-fieldset ">
-                                        <label htmlFor="name">Price<span>*</span>:</label>
-                                            <div className="phone-and-country-code">
-                                                <Field as="select" name="currency_id" className="nice-select country-code"
-                                                    id="country-code"
-                                                    value={currencyCode}
-                                                    onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setCurrencyCode(selectedState);
-                                                        setFieldValue("currency_id", selectedState);
-                                                        //handleCityChange(selectedState);
-                                                    }}
-                                                >
-                                                    <option value="">Select Currency</option>
-                                                    {currencyList && currencyList.length > 0 ? (
-                                                        currencyList.map((currency, index) =>(
-                                                            <option key={index} value={currency.id}>{currency.name}
-                                                            </option>
-                                                        ))
-                                                    ) : (
-                                                        <></>
-                                                    )}
-                                                </Field>
-                                                <Field type="text" id="price" name="price" className="form-control style-1" />
+                                        <div className="widget-box-2">
+                                            <h6 className="title">Property Information</h6>
+                                            <div className="box grid-2 gap-30">
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Title English:<span>*</span></label>
+                                                    <Field type="text" id="title_en" name="title_en" className="form-control style-1" />
+                                                    {/* <ErrorMessage name="title_en" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Title French:<span>*</span></label>
+                                                    <Field type="text" id="title_fr" name="title_fr" className="form-control style-1" />
+                                                    {/* <ErrorMessage name="title_fr" component="div" className="error" /> */}
+                                                </fieldset>
                                             </div>
-                                            {/* <ErrorMessage name="price" component="div" className="error" /> */}
-                                        {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="title">Direction:<span>*</span></label>
-                                        <Field as="select" name="direction" id="direction" className="nice-select country-code">
-                                            <option value="">Select Direction</option>
-                                            <option value="north">North</option>
-                                            <option value="south">South</option>
-                                            <option value="east">East</option>
-                                            <option value="west">West</option>
-                                        </Field>
-                                        {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="description">Size of SqMeter:<span>*</span></label>
-                                        <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
-                                        {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
-                                    </fieldset>
-                                    {/* <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">VR Link:</label>
-                                        <Field type="text" name="vr_link" className="box-fieldset"  />
-                                        // <ErrorMessage name="vr_link" component="div" className="error" />
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
+                                            <div className="grid-1 box gap-30">
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="description">Description English:<span>*</span></label>
+                                                    <Field type="textarea" as="textarea" id="description_en" name="description_en" className="textarea-tinymce" />
+                                                    {/* <ErrorMessage name="description_en" component="div" className="error" /> */}
+                                                </fieldset>
+                                            </div>
+                                            <div className="grid-1 box gap-30">
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="description">Description French:<span>*</span></label>
+                                                    <Field type="textarea" as="textarea" id="description_fr" name="description_fr" className="textarea-tinymce" />
+                                                    {/* <ErrorMessage name="description_fr" component="div" className="error" /> */}
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                        <div className="widget-box-2">
+                                            <h6 className="title">Other Information</h6>
+                                            <div className="box grid-2 gap-30">
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Transaction Type:<span>*</span></label>
+                                                    <Field as="select" name="transaction_type" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("transaction_type", selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Transaction Type</option>
+                                                        <option value="sale">Fore Sale</option>
+                                                        <option value="rental">For Rental</option>
+                                                    </Field>
+                                                    {/* <ErrorMessage name="transaction_type" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Property Type:<span>*</span></label>
+                                                    <Field as="select" name="property_type" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("property_type", selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Property Type</option>
+                                                        {propertyofTypesListing && propertyofTypesListing.length > 0 ? (
+                                                            propertyofTypesListing.map((property) => (
+                                                                <option key={property.id} value={property.id}>{capitalizeFirstChar(property.title)}</option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Project Listing:<span>*</span></label>
+                                                    <Field as="select" name="project_id" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("project_id", selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Project Listing</option>
+                                                        {projectOfListing && projectOfListing.length > 0 ? (
+                                                            projectOfListing.map((propertyList) => (
+                                                                <option key={propertyList.id} value={propertyList.id}>{capitalizeFirstChar(propertyList.title)}</option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="project_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">User Listing:<span>*</span></label>
+                                                    <Field as="select" name="user_id" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("user_id", selectedState);
+                                                        }}
+                                                    >
+                                                        <option value="">Select User Listing</option>
+                                                        {userList && userList.length > 0 ? (
+                                                            userList.map((user) => (
+                                                                (user.full_name !== null) ? <option key={user.id} value={user.id}>{capitalizeFirstChar(user.full_name)}</option> : <></>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="user_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                            </div>
+                                            <div className="box grid-3 gap-30">
+                                                <fieldset className="box-fieldset ">
+                                                    <label htmlFor="name">Price<span>*</span>:</label>
+                                                    <div className="phone-and-country-code">
+                                                        <Field as="select" name="currency_id" className="nice-select country-code"
+                                                            id="country-code"
+                                                            value={currencyCode}
+                                                            onChange={(e) => {
+                                                                const selectedState = e.target.value;
+                                                                setCurrencyCode(selectedState);
+                                                                setFieldValue("currency_id", selectedState);
+                                                                //handleCityChange(selectedState);
+                                                            }}
+                                                        >
+                                                            <option value="">Select Currency</option>
+                                                            {currencyList && currencyList.length > 0 ? (
+                                                                currencyList.map((currency, index) => (
+                                                                    <option key={index} value={currency.id}>{currency.name}
+                                                                    </option>
+                                                                ))
+                                                            ) : (
+                                                                <></>
+                                                            )}
+                                                        </Field>
+                                                        <Field type="text" id="price" name="price" className="form-control style-1" />
+                                                    </div>
+                                                    {/* <ErrorMessage name="price" component="div" className="error" /> */}
+                                                    {/* <ErrorMessage name="currency_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="title">Direction:<span>*</span></label>
+                                                    <Field as="select" name="direction" id="direction" className="nice-select country-code">
+                                                        <option value="">Select Direction</option>
+                                                        <option value="north">North</option>
+                                                        <option value="south">South</option>
+                                                        <option value="east">East</option>
+                                                        <option value="west">West</option>
+                                                    </Field>
+                                                    {/* <ErrorMessage name="property_type" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="description">Size of SqMeter:<span>*</span></label>
+                                                    <Field type="number" id="size_sqft" name="size_sqft" className="form-control style-1" min="0" />
+                                                    {/* <ErrorMessage name="size_sqft" component="div" className="error" /> */}
+                                                </fieldset>
+                                                {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">Link UUID:</label>
                                         <Field type="text"  name="link_uuid" className="box-fieldset" />
                                         // <ErrorMessage name="link_uuid" component="div" className="error" />
                                     </fieldset> */}
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                    {/* <fieldset className="box box-fieldset">
+                                            </div>
+                                            <div className="box grid-3 gap-30">
+                                                {/* <fieldset className="box box-fieldset">
                                         <label htmlFor="desc">License number:</label>
                                         <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
                                         
@@ -711,293 +712,307 @@ export default function CreateProperty() {
                                         <Field type="text" name="credit" className="box-fieldset"  />
                                         
                                     </fieldset> */}
-                                    
-                                </div>
-                                <div className="box grid-3 gap-30">
-                                        {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
-                                            projectOfNumberListing.map((project) => (
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">{project.name}:</label>
-                                                        <Field
-                                                            type="number"
-                                                            name={project.id}
-                                                            min="0"
-                                                            className="box-fieldset"
-                                                            onChange={(e) => handleNumberChange(project.id, e.target.value)}
-                                                        />
-                                                        {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
-                                                </fieldset>
-                                            ))
-                                        ) : (
-                                            <></>
-                                        )}
-                                </div>
-                                <div className="box grid-2 box gap-30">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="picture_img">Picture Images:</label>
-                                        <Field
-                                            name="picture_img"
-                                            component={({ field, form }) => (
-                                                <div className="box-floor-img uploadfile">
-                                                {/* Upload Button */}
-                                                <div className="btn-upload">
-    <label className="tf-btn primary">
-        Choose Files
-        <input
-            type="file"
-            multiple
-            className="ip-file"
-            onChange={(event) => {
-                const files = Array.from(event.target.files);
-                let updatedImageList = [...filePreviews]; // Preserve existing previews
-                let updatedValidFiles = [...form.values[field.name] || []]; // Preserve existing selected files
 
-                files.forEach((file) => {
-                    const img = new Image();
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        img.src = e.target.result;
-                        img.onload = () => {
-                            const imageHeight = img.height;
-                            const imageWidth = img.width;
+                                            </div>
+                                            <div className="box grid-3 gap-30">
+                                                {projectOfNumberListing && projectOfNumberListing.length > 0 ? (
+                                                    projectOfNumberListing.map((project) => (
+                                                        <fieldset className="box box-fieldset">
+                                                            <label htmlFor="desc">{project.name}:</label>
+                                                            <Field
+                                                                type="number"
+                                                                name={project.id}
+                                                                min="0"
+                                                                className="box-fieldset"
+                                                                onChange={(e) => handleNumberChange(project.id, e.target.value)}
+                                                            />
+                                                            {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
+                                                        </fieldset>
+                                                    ))
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                            <div className="box grid-2 box gap-30">
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="picture_img">Picture Images:</label>
+                                                    <Field
+                                                        name="picture_img"
+                                                        component={({ field, form }) => (
+                                                            <div className="box-floor-img uploadfile">
+                                                                {/* Upload Button */}
+                                                                <div className="btn-upload">
+                                                                    <label className="tf-btn primary">
+                                                                        Choose Files
+                                                                        <input
+                                                                            type="file"
+                                                                            multiple
+                                                                            className="ip-file"
+                                                                            onChange={(event) => {
+                                                                                const files = Array.from(event.target.files);
+                                                                                let updatedImageList = [...filePreviews]; // Preserve existing previews
+                                                                                let updatedValidFiles = [...form.values[field.name] || []]; // Preserve existing selected files
 
-                            if (imageHeight <= 80 || imageWidth <= 100) {
-                                alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
-                            } else {
-                                updatedImageList.push(URL.createObjectURL(file));
-                                updatedValidFiles.push(file);
-                            }
+                                                                                files.forEach((file) => {
+                                                                                    const img = new Image();
+                                                                                    const reader = new FileReader();
+                                                                                    reader.onload = (e) => {
+                                                                                        img.src = e.target.result;
+                                                                                        img.onload = () => {
+                                                                                            const imageHeight = img.height;
+                                                                                            const imageWidth = img.width;
 
-                            setFilePreviews([...updatedImageList]); // Update state with new images
-                            form.setFieldValue(field.name, [...updatedValidFiles]); // Update Formik field value
-                        };
-                    };
+                                                                                            if (imageHeight <= 80 || imageWidth <= 100) {
+                                                                                                alert('Please upload images with a maximum height of 80px and a maximum width of 80px');
+                                                                                            } else {
+                                                                                                updatedImageList.push(URL.createObjectURL(file));
+                                                                                                updatedValidFiles.push(file);
+                                                                                            }
 
-                    reader.readAsDataURL(file);
-                });
-            }}
-            style={{ display: "none" }}
-        />
-    </label>
-</div>
+                                                                                            setFilePreviews([...updatedImageList]); // Update state with new images
+                                                                                            form.setFieldValue(field.name, [...updatedValidFiles]); // Update Formik field value
+                                                                                        };
+                                                                                    };
+
+                                                                                    reader.readAsDataURL(file);
+                                                                                });
+                                                                            }}
+                                                                            style={{ display: "none" }}
+                                                                        />
+                                                                    </label>
+                                                                </div>
 
 
 
-                                                <p className="file-name fw-5">Or drop images here to upload</p>
+                                                                <p className="file-name fw-5">Or drop images here to upload</p>
 
-                                                {/* Error Message */}
-                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
-                                                </div>
-                                            )}
-                                            />
-
-                                    </fieldset>
-                                    <fieldset className="box-fieldset">
-                                        {/* Image Previews */}
-                                        <div className="image-preview-container image-gallery">
-                                            {filePreviews.length > 0 && (<p className="fw-5">Image Preview:</p>)}
-                                            {filePreviews.map((preview, index) => (
-                                                <div key={index} className="preview-item">
-                                                    <img
-                                                        src={preview}
-                                                        alt={`Preview ${index + 1}`}
-                                                        className="uploadFileImage"
+                                                                {/* Error Message */}
+                                                                {/* <ErrorMessage name="picture_img" component="div" className="error" /> */}
+                                                            </div>
+                                                        )}
                                                     />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const newFilePreviews = filePreviews.filter((_, i) => i !== index);
-                                                            const newImageList = values.picture_img.filter((_, i) => i !== index);
-                                                            setFilePreviews(newFilePreviews);
-                                                            setFieldValue("picture_img", newImageList);
-                                                          }}
-                                                        className="remove-image-btn"
+
+                                                </fieldset>
+                                                <fieldset className="box-fieldset">
+                                                    {/* Image Previews */}
+                                                    <div className="image-preview-container image-gallery">
+                                                        {filePreviews.length > 0 && (<p className="fw-5">Image Preview:</p>)}
+                                                        {filePreviews.map((preview, index) => (
+                                                            <div key={index} className="preview-item">
+                                                                <img
+                                                                    src={preview}
+                                                                    alt={`Preview ${index + 1}`}
+                                                                    className="uploadFileImage"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const newFilePreviews = filePreviews.filter((_, i) => i !== index);
+                                                                        const newImageList = values.picture_img.filter((_, i) => i !== index);
+                                                                        setFilePreviews(newFilePreviews);
+                                                                        setFieldValue("picture_img", newImageList);
+                                                                    }}
+                                                                    className="remove-image-btn"
+                                                                >
+                                                                    &times;
+                                                                </button>
+
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div className="box grid-1 box gap-50">
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="video_link">YouTube Link:</label>
+                                                    {/* YouTube Link Input Field */}
+                                                    <div>
+                                                        <Field
+                                                            type="text"
+                                                            name="video_link"
+                                                            className="form-control"
+                                                            placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
+                                                        />
+                                                        {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div className="box grid-1 box gap-50">
+                                                <fieldset className="box-fieldset">
+                                                    <label htmlFor="vr_link">VR Link:</label>
+                                                    {/* YouTube Link Input Field */}
+                                                    <div>
+                                                        <Field
+                                                            type="text"
+                                                            name="vr_link"
+                                                            className="form-control"
+                                                            placeholder="https://www.google.com"
+                                                        />
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                        <div className="widget-box-2">
+                                            <h6 className="title">Location</h6>
+                                            <div className="box grid-4 gap-30">
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="desc">State:</label>
+                                                    <Field as="select" name="state_id" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("state_id", selectedState);
+                                                            handleStateChange(selectedState);
+                                                        }}>
+                                                        <option value="">Select State</option>
+                                                        {stateList && stateList.length > 0 ? (
+                                                            stateList.map((state) => (
+                                                                <option value={state.id}>{state.name}</option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="desc">Cities:</label>
+                                                    <Field as="select" name="city_id" className="nice-select country-code"
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setFieldValue("city_id", selectedState);
+                                                            handleCityChange(selectedState);
+                                                        }}
                                                     >
-                                                        &times;
-                                                    </button>
+                                                        <option value="">Select Cities</option>
+                                                        {cityList && cityList.length > 0 ? (
+                                                            cityList.map((cities) => (
+                                                                <option key={cities.id} value={cities.id}>
+                                                                    {cities.name}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="desc">District:</label>
+                                                    <Field as="select" name="districts_id" className="nice-select country-code" onChange={(e) => {
+                                                        const selectedDistrict = e.target.value;
+                                                        setFieldValue("districts_id", selectedDistrict);
+                                                        handleDistrictChange(selectedDistrict);
+                                                    }}>
+                                                        <option value="">Select District</option>
+                                                        {districtList && districtList.length > 0 ? (
+                                                            districtList.map((districts) => (
+                                                                <option key={districts.id} value={districts.id}>
+                                                                    {districts.name}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                                <fieldset className="box box-fieldset">
+                                                    <label htmlFor="desc">Neighborhood:</label>
+                                                    <Field as="select" name="neighborhood_id" className="nice-select country-code" onChange={(e) => {
+                                                        const selectedNeighborhood = e.target.value;
+                                                        setFieldValue("neighborhood_id", selectedNeighborhood);
+                                                        handleNeighborhoodChange(selectedNeighborhood);
+                                                    }}>
+                                                        <option value="">Select Neighborhood</option>
+                                                        {neighborhoodList && neighborhoodList.length > 0 ? (
+                                                            neighborhoodList.map((neighborhoods) => (
+                                                                <option key={neighborhoods.id} value={neighborhoods.id}>
+                                                                    {neighborhoods.name}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </Field>
+                                                    {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
+                                                </fieldset>
+                                            </div>
+                                            <div className="box box-fieldset">
+                                                {/* <label htmlFor="location">Address:<span>*</span></label> */}
+                                                {/* <div className="box-ip"> */}
 
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </fieldset>
-                                </div>
-                                <div className="box grid-1 box gap-50">
-                                    <fieldset className="box-fieldset">
-                                        <label htmlFor="video_link">YouTube Link:</label>
-                                        {/* YouTube Link Input Field */}
-                                        <div>
-                                            <Field
-                                                type="text"
-                                                name="video_link"
-                                                className="form-control"
-                                                placeholder="https://www.youtube.com/watch?v=QgAQcrvHsHQ"
-                                            />
-                                            {/* <ErrorMessage name="video_link" component="div" className="error" /> */}
-                                        </div>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div className="widget-box-2">
-                                <h6 className="title">Location</h6>
-                                <div className="box grid-4 gap-30">
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">State:</label>
-                                        <Field as="select" name="state_id" className="nice-select country-code"
-                                            onChange={(e) => {
-                                                const selectedState = e.target.value;
-                                                setFieldValue("state_id", selectedState);
-                                                handleStateChange(selectedState);
-                                            }}>
-                                                <option value="">Select State</option>
-                                                {stateList && stateList.length > 0 ? (
-                                                    stateList.map((state) => (
-                                                        <option value={state.id}>{state.name}</option>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )}
-                                        </Field>
-                                        {/* <ErrorMessage name="state_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Cities:</label>
-                                            <Field as="select" name="city_id" className="nice-select country-code"
-                                                onChange={(e) => {
-                                                    const selectedState = e.target.value;
-                                                    setFieldValue("city_id", selectedState);
-                                                    handleCityChange(selectedState);
-                                                }}
-                                            >
-                                                <option value="">Select Cities</option>
-                                                {cityList && cityList.length > 0 ? (
-                                                    cityList.map((cities) => (
-                                                        <option key={cities.id} value={cities.id}>
-                                                            {cities.name}
-                                                        </option>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </Field>
-                                        {/* <ErrorMessage name="city_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">District:</label>
-                                            <Field as="select" name="districts_id" className="nice-select country-code"  onChange={(e) => {
-                                                    const selectedDistrict = e.target.value;
-                                                    setFieldValue("districts_id", selectedDistrict);
-                                                    handleDistrictChange(selectedDistrict);
-                                                }}>
-                                                <option value="">Select District</option>
-                                                {districtList && districtList.length > 0 ? (
-                                                    districtList.map((districts) => (
-                                                        <option key={districts.id} value={districts.id}>
-                                                            {districts.name}
-                                                        </option>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </Field>
-                                        {/* <ErrorMessage name="districts_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                    <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Neighborhood:</label>
-                                            <Field as="select" name="neighborhood_id" className="nice-select country-code"  onChange={(e) => {
-                                                    const selectedNeighborhood = e.target.value;
-                                                    setFieldValue("neighborhood_id", selectedNeighborhood);
-                                                    handleNeighborhoodChange(selectedNeighborhood);
-                                                }}>
-                                                <option value="">Select Neighborhood</option>
-                                                {neighborhoodList && neighborhoodList.length > 0 ? (
-                                                    neighborhoodList.map((neighborhoods) => (
-                                                        <option key={neighborhoods.id} value={neighborhoods.id}>
-                                                            {neighborhoods.name}
-                                                        </option>
-                                                    ))
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </Field>
-                                        {/* <ErrorMessage name="neighborhood_id" component="div" className="error" /> */}
-                                    </fieldset>
-                                </div>
-                                <div className="box box-fieldset">
-                                    {/* <label htmlFor="location">Address:<span>*</span></label> */}
-                                    {/* <div className="box-ip"> */}
-
-                                        {/* <GooglePlacesAutocomplete /> */}
+                                                {/* <GooglePlacesAutocomplete /> */}
 
 
-                                     {/* <ReactGooglePlacesAutocomplete
+                                                {/* <ReactGooglePlacesAutocomplete
                                         apiKey="AIzaSyCwhqQx0uqNX7VYhsgByiF9TzXwy81CFag"
                                         selectProps={{
                                             value: address,
                                             onChange: (selected) => handlePlaceSelect(selected),
                                         }}
                                     /> <br/> */}
-                                    {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
+                                                {/* <Link href="#" className="btn-location"><i className="icon icon-location" /></Link>
                                     </div><br/><br/><br/> */}
-                                    <PropertyMapMarker
-                                        latitude={propertyMapCoords.latitude}
-                                        longitude={propertyMapCoords.longitude}
-                                        zoom={propertyMapCoords.zoom}
-                                        onPlaceSelected={(newAddress, newLocation) => {
-                                                setFieldValue('address', newAddress);
-                                                setFieldValue('latitude', newLocation.lat);
-                                                setFieldValue('longitude', newLocation.lng);
-                                                handleAddressSelect(newAddress, newLocation);
-                                            }
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="widget-box-2">
-                                <h6 className="title">Amenities </h6>
-                                <div className="box-amenities-property">
-                                    <div className="box-amenities">
-                                        {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
-                                            projectOfBooleanListing.map((project) => (
-                                                <fieldset className="amenities-item">
-                                                    <Field
-                                                        type="checkbox" name={project.id}
-                                                        className="tf-checkbox style-1 primary"
-                                                        checked={!!checkedItems[project.key]} // Set checked status
-                                                        onChange={() => handleCheckboxChange(project.key)}
-                                                    />
-                                                    <label for="cb1" className="text-cb-amenities">{project.name}</label>
-                                                    {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
-                                                </fieldset>
-                                            ))
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit"  className="tf-btn primary"onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
-                        </div >
-                          {/* Error Popup */}
-                            {showErrorPopup && Object.keys(errors).length > 0 && (
-                                <ErrorPopup
-                                    errors={errors}
-                                    validationSchema={validationSchema}
-                                    onClose={() => setShowErrorPopup(false)}
-                                />
-                            )}
-                            {sucessMessage && (
-                                <SuccessPopup
-                                    message={sucessMessage}
-                                    onClose={() => setSucessMessage(false)}
-                                />
-                            )}
-                    </Form>
+                                                <PropertyMapMarker
+                                                    latitude={propertyMapCoords.latitude}
+                                                    longitude={propertyMapCoords.longitude}
+                                                    zoom={propertyMapCoords.zoom}
+                                                    onPlaceSelected={(newAddress, newLocation) => {
+                                                        setFieldValue('address', newAddress);
+                                                        setFieldValue('latitude', newLocation.lat);
+                                                        setFieldValue('longitude', newLocation.lng);
+                                                        handleAddressSelect(newAddress, newLocation);
+                                                    }
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="widget-box-2">
+                                            <h6 className="title">Amenities </h6>
+                                            <div className="box-amenities-property">
+                                                <div className="box-amenities">
+                                                    {projectOfBooleanListing && projectOfBooleanListing.length > 0 ? (
+                                                        projectOfBooleanListing.map((project) => (
+                                                            <fieldset className="amenities-item">
+                                                                <Field
+                                                                    type="checkbox" name={project.id}
+                                                                    className="tf-checkbox style-1 primary"
+                                                                    checked={!!checkedItems[project.key]} // Set checked status
+                                                                    onChange={() => handleCheckboxChange(project.key)}
+                                                                />
+                                                                <label for="cb1" className="text-cb-amenities">{project.name}</label>
+                                                                {/* <ErrorMessage name={project.key} component="div" className="error" /> */}
+                                                            </fieldset>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)} >Add Property</button>
+                                    </div >
+                                    {/* Error Popup */}
+                                    {showErrorPopup && Object.keys(errors).length > 0 && (
+                                        <ErrorPopup
+                                            errors={errors}
+                                            validationSchema={validationSchema}
+                                            onClose={() => setShowErrorPopup(false)}
+                                        />
+                                    )}
+                                    {sucessMessage && (
+                                        <SuccessPopup
+                                            message={sucessMessage}
+                                            onClose={() => setSucessMessage(false)}
+                                        />
+                                    )}
+                                </Form>
 
-                )}
-            </Formik>
-			</LayoutAdmin >
-		</>
+                            )}
+                        </Formik>
+                    </LayoutAdmin >
+                </>
             )}
         </>
-  );
+    );
 }
