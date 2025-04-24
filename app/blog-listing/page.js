@@ -101,6 +101,7 @@ export default function BlogListing() {
 			if (response.status) {
 				setIsModalOpen(false);
 				fetchProperties(pagination.currentPage, searchTerm, statusFilter);
+				router.replace("/blog-listing");
 			} else {
 				alert(response.message);
 			}
@@ -347,7 +348,7 @@ export default function BlogListing() {
 																			/>
 																			</Link>
 																		</li> */}
-																		{/* <li className="edit">
+																		<li className="edit">
 																			<Link href={`/edit-blog/${blog.id}`} className="item">
 																				<Image
 																					src={EditIcon}
@@ -370,7 +371,7 @@ export default function BlogListing() {
 																					height={25}
 																				/>
 																			</a>
-																		</li> */}
+																		</li>
 																		<li className="delete">
 																			<a
 																				className="remove-file item"
