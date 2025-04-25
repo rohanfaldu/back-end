@@ -118,6 +118,9 @@ export default function EditAgency({params}) {
             country_code: Yup.string().required("Country code is required"),
             agency_packages: Yup.string().required("Agency packages are required"),
             city_id: Yup.string().required("City is required"),
+            facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
+            twitter_link: Yup.string().url("Invalid URL").nullable().required("Twitter link is required"),
+            youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
        });
     const router = useRouter();
 
@@ -613,15 +616,15 @@ export default function EditAgency({params}) {
                                         <h6 className="title">Other Information</h6>
                                         <div className="box grid-3 gap-30">
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Facebook Link:</label>
+                                                <label htmlFor="desc">Facebook Link:<span>*</span></label>
                                                 <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Twitter Link:</label>
+                                                <label htmlFor="desc">Twitter Link:<span>*</span></label>
                                                 <Field type="text" name="twitter_link" className="box-fieldset"  />
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Youtube Link:</label>
+                                                <label htmlFor="desc">Youtube Link:<span>*</span></label>
                                                 <Field type="text"  name="youtube_link" className="box-fieldset" />
                                             </fieldset>
                                         </div>

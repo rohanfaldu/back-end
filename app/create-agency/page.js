@@ -42,9 +42,9 @@ export default function CreateAgency() {
         phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
         image: Yup.mixed().required("Image is required"),
         password: Yup.string() .min(6, "Password must be at least 6 characters") .required("Password is required"),
-        facebook_link: Yup.string().url("Invalid URL").nullable(),
-        twitter_link: Yup.string().url("Invalid URL").nullable(),
-        youtube_link: Yup.string().url("Invalid URL").nullable(),
+        facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
+        twitter_link: Yup.string().url("Invalid URL").nullable().required("Twitter link is required"),
+        youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
         pinterest_link: Yup.string().url("Invalid URL").nullable(),
         linkedin_link: Yup.string().url("Invalid URL").nullable(),
         instagram_link: Yup.string().url("Invalid URL").nullable(),
@@ -481,17 +481,17 @@ export default function CreateAgency() {
                                 <h6 className="title">Other Information</h6>
                                 <div className="box grid-3 gap-30">
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Facebook Link:</label>
+                                        <label htmlFor="desc">Facebook Link:<span>*</span></label>
                                         <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                         {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Twitter Link:</label>
+                                        <label htmlFor="desc">Twitter Link:<span>*</span></label>
                                         <Field type="text" name="twitter_link" className="box-fieldset"  />
                                         {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
                                     </fieldset>
                                     <fieldset className="box box-fieldset">
-                                        <label htmlFor="desc">Youtube Link:</label>
+                                        <label htmlFor="desc">Youtube Link:<span>*</span></label>
                                         <Field type="text"  name="youtube_link" className="box-fieldset" />
                                         {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                     </fieldset>
