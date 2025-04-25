@@ -41,11 +41,11 @@ export default function CreateAgency() {
         image: Yup.mixed().required("Image is required"),
         password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
         facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
-        twitter_link: Yup.string().url("Invalid URL").nullable().required("Twitter link is required"),
+        twitter_link: Yup.string().url("Invalid URL").nullable(),
         youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
-        pinterest_link: Yup.string().url("Invalid pinterest URL").nullable(),
-        linkedin_link: Yup.string().url("Invalid linkedin URL").nullable(),
-        instagram_link: Yup.string().url("Invalid instagram URL").nullable(),
+        pinterest_link: Yup.string().url("Invalid URL").nullable(),
+        linkedin_link: Yup.string().url("Invalid URL").nullable().required("Linkedin link is required"),
+        instagram_link: Yup.string().url("Invalid URL").nullable().required("Instagram link is required"),
         agency_packages: Yup.string().required("Agency packages are required"),
         city_id: Yup.string().required("City is required"),
     });
@@ -474,36 +474,36 @@ export default function CreateAgency() {
                                         </div>
                                         <div className="widget-box-2">
                                             <h6 className="title">Other Information</h6>
-                                            <div className="box grid-3 gap-30">
+                                            <div className="box grid-2 gap-30">
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Facebook Link:<span>*</span></label>
                                                     <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                                 </fieldset>
-                                                <fieldset className="box box-fieldset">
+                                                {/* <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Twitter Link:<span>*</span></label>
                                                     <Field type="text" name="twitter_link" className="box-fieldset" />
-                                                    {/* <ErrorMessage name="twitter_link" component="div" className="error" /> */}
-                                                </fieldset>
+                                                    {/* <ErrorMessage name="twitter_link" component="div" className="error" /> 
+                                                </fieldset> */}
                                                 <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Youtube Link:<span>*</span></label>
                                                     <Field type="text" name="youtube_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                                 </fieldset>
                                             </div>
-                                            <div className="box grid-3 gap-30">
-                                                <fieldset className="box box-fieldset">
+                                            <div className="box grid-2 gap-30">
+                                                {/* <fieldset className="box box-fieldset">
                                                     <label htmlFor="desc">Pinterest Link:</label>
                                                     <Field type="text" name="pinterest_link" className="box-fieldset" />
-                                                    {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> */}
-                                                </fieldset>
+                                                    {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> 
+                                                </fieldset> */}
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Linkedin Link:</label>
+                                                    <label htmlFor="desc">Linkedin Link:<span>*</span></label>
                                                     <Field type="text" name="linkedin_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Instagram Link:</label>
+                                                    <label htmlFor="desc">Instagram Link:<span>*</span></label>
                                                     <Field type="text" name="instagram_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                                 </fieldset>

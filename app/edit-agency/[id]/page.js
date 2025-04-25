@@ -17,13 +17,13 @@ import ErrorPopup from "@/components/errorPopup/ErrorPopup.js";
 import PropertyMapMarker from "@/components/elements/PropertyMapMarker";
 
 
-export default function EditAgency({params}) {
+export default function EditAgency({ params }) {
     const { id } = params;
     const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
-	const [sucessMessage, setSucessMessage] = useState(false);
-	const [loading, setLoading] = useState(true);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [sucessMessage, setSucessMessage] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [filePreview, setFilePreview] = useState(null);
     const [userDetail, setUserDetail] = useState(null);
     const [agencyDetails, setAgencyDetail] = useState(null);
@@ -47,62 +47,62 @@ export default function EditAgency({params}) {
     useEffect(() => {
         console.log(id);
         const fetchData = async () => {
-		try {
-            setLoading(true);
-            const type = { user_id: id };
-            const getAgencyInfo = await insertData('api/agencies/getbyuserid', type, true);
+            try {
+                setLoading(true);
+                const type = { user_id: id };
+                const getAgencyInfo = await insertData('api/agencies/getbyuserid', type, true);
 
-            if (getAgencyInfo.status) {
-                setUserDetail(getAgencyInfo.data.user);
-                setAgencyDetail(getAgencyInfo.data.agency);
-                setFilePreview(getAgencyInfo.data.user.image);
-                setFileCoverImg(getAgencyInfo.data.agency.cover);
-                setSelectedCode(getAgencyInfo.data.user.country_code);
-                setSelectedWhatsupCode(getAgencyInfo.data.agency.country_code)
-                setPropertyMapCoords({
-                    latitude: getAgencyInfo.data.agency.latitude,
-                    longitude: getAgencyInfo.data.agency.longitude,
-                    zoom: 12
-                });
-                setErrorMessage('');
-            } else {
+                if (getAgencyInfo.status) {
+                    setUserDetail(getAgencyInfo.data.user);
+                    setAgencyDetail(getAgencyInfo.data.agency);
+                    setFilePreview(getAgencyInfo.data.user.image);
+                    setFileCoverImg(getAgencyInfo.data.agency.cover);
+                    setSelectedCode(getAgencyInfo.data.user.country_code);
+                    setSelectedWhatsupCode(getAgencyInfo.data.agency.country_code)
+                    setPropertyMapCoords({
+                        latitude: getAgencyInfo.data.agency.latitude,
+                        longitude: getAgencyInfo.data.agency.longitude,
+                        zoom: 12
+                    });
+                    setErrorMessage('');
+                } else {
+                    setShowErrorPopup(true);
+                }
+            } catch (err) {
                 setShowErrorPopup(true);
+            } finally {
+                setLoading(false);
             }
-		} catch (err) {
-            setShowErrorPopup(true); 
-		} finally{
-            setLoading(false);
-        }
-	};
+        };
 
-     const fetchCityOptions = async() => {
-        try {
-                if(cityList.length === 0){
-                const requestData = {
-                    page: 1,
-                    limit: 10000000,
-                };
-                const response = await insertData("api/city", requestData, true);
-                setCityList(response.data.cities);
+        const fetchCityOptions = async () => {
+            try {
+                if (cityList.length === 0) {
+                    const requestData = {
+                        page: 1,
+                        limit: 10000000,
+                    };
+                    const response = await insertData("api/city", requestData, true);
+                    setCityList(response.data.cities);
+                }
+            } catch (error) {
+                console.error("Error fetching cities:", error);
             }
-        } catch (error) {
-          console.error("Error fetching cities:", error);
-        }
-      };
+        };
         fetchCityOptions();
-		fetchData();
-	}, [id]);
+        fetchData();
+    }, [id]);
 
-    useEffect (() => {
+    useEffect(() => {
         const fetchData = async () => {
-            try{
-                if(agencyPackageList.length === 0){
-                    const getAgencyPackageListInfo = await insertData('api/agency-packages/', {page: 1, limit: 100}, true);
-                    if(getAgencyPackageListInfo) {
+            try {
+                if (agencyPackageList.length === 0) {
+                    const getAgencyPackageListInfo = await insertData('api/agency-packages/', { page: 1, limit: 100 }, true);
+                    if (getAgencyPackageListInfo) {
                         setAgencyPackageList(getAgencyPackageListInfo.data.list);
                     }
                 }
-            }catch (error) {
+            } catch (error) {
                 console.error('Error inserting data:', error);
             }
         }
@@ -110,18 +110,21 @@ export default function EditAgency({params}) {
     });
 
 
-   const validationSchema = Yup.object({
-            username: Yup.string() .min(3, "User name must be at least 3 characters") .required("User name is required"),
-            fullname: Yup.string().min(5, "Full name must be at least 5 characters") .required("Full name is required"),
-            email: Yup.string() .email("Invalid email format") .required("Email is required"),
-            phone: Yup.string() .matches(/^\d{10}$/, "Phone number must be exactly 10 digits") .required("Phone Number is required"),
-            country_code: Yup.string().required("Country code is required"),
-            agency_packages: Yup.string().required("Agency packages are required"),
-            city_id: Yup.string().required("City is required"),
-            facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
-            twitter_link: Yup.string().url("Invalid URL").nullable().required("Twitter link is required"),
-            youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
-       });
+    const validationSchema = Yup.object({
+        username: Yup.string().min(3, "User name must be at least 3 characters").required("User name is required"),
+        fullname: Yup.string().min(5, "Full name must be at least 5 characters").required("Full name is required"),
+        email: Yup.string().email("Invalid email format").required("Email is required"),
+        phone: Yup.string().matches(/^\d{10}$/, "Phone number must be exactly 10 digits").required("Phone Number is required"),
+        country_code: Yup.string().required("Country code is required"),
+        agency_packages: Yup.string().required("Agency packages are required"),
+        city_id: Yup.string().required("City is required"),
+        facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
+        twitter_link: Yup.string().url("Invalid URL").nullable(),
+        youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
+        pinterest_link: Yup.string().url("Invalid URL").nullable(),
+        linkedin_link: Yup.string().url("Invalid URL").nullable().required("Linkedin link is required"),
+        instagram_link: Yup.string().url("Invalid URL").nullable().required("Instagram link is required"),
+    });
     const router = useRouter();
 
 
@@ -129,11 +132,11 @@ export default function EditAgency({params}) {
     const handleSubmit = async (values, { resetForm }) => {
         console.log(id);
         setErrorMessage('');
-    
+
         // Create FormData for image upload
         const formData = new FormData();
         formData.append('image', values.image);
-    
+
         const formDataCover = new FormData();
         formDataCover.append('image', values.cover_img);
 
@@ -145,14 +148,14 @@ export default function EditAgency({params}) {
                 });
                 imageUrl = response.data.data.files.map(file => file.url)[0];
             }
-    
+
             let imageUrlCover = fileCoverImg;
             if (values.cover_img instanceof File) {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images/upload/single`, formDataCover, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 imageUrlCover = response.data.data.files.map(file => file.url)[0];
-                console.log(imageUrlCover,"imageUrlCover");
+                console.log(imageUrlCover, "imageUrlCover");
             }
 
             const userData = {
@@ -164,7 +167,7 @@ export default function EditAgency({params}) {
                 image_url: imageUrl,
                 user_id: id
             };
-    
+
             console.log(userData);
 
             const updateUserInfo = await insertData("auth/update/allRole", userData, true);
@@ -222,50 +225,50 @@ export default function EditAgency({params}) {
                 };
 
 
-                if(agencyDetails.id == undefined){
+                if (agencyDetails.id == undefined) {
                     const createAgencyInfo = await insertData('api/agencies/create', agencyCreateData, true);
-                    if(createAgencyInfo.status){
+                    if (createAgencyInfo.status) {
                         setSucessMessage(createAgencyInfo.message);
                         router.push('/agency-listing');
-                    }else{
+                    } else {
                         setErrors({ serverError: createAgencyInfo.message || "Failed to create state." });
                         setShowErrorPopup(true);
                     }
-                }else{
+                } else {
                     const updateAgencyInfo = await updateData(`api/agencies/${agencyDetails.id}`, agencyData, true);
-                    if(updateAgencyInfo.status){
+                    if (updateAgencyInfo.status) {
                         setSucessMessage(updateAgencyInfo.message);
                         router.push('/agency-listing');
-                    }else{
+                    } else {
                         setErrors({ serverError: updateAgencyInfo.message || "Failed to create state." });
                         setShowErrorPopup(true);
                     }
                 }
 
-                
+
             } else {
                 setErrorMessage(updateUserInfo.data.message);
             }
-    
+
         } catch (error) {
             console.error('Error updating user information:', error);
             setErrorMessage('Failed to update user information. Please try again.');
         }
     };
-    
+
 
 
     const messageClass = (sucessMessage) ? "message success" : "message error";
 
-	return (
-		<>
-            {loading?
-                    <><Preloader /></>
+    return (
+        <>
+            {loading ?
+                <><Preloader /></>
                 :
-			        <LayoutAdmin>
+                <LayoutAdmin>
                     {errorMessage && <div className={messageClass}>{errorMessage}</div>}
                     <Formik
-                        initialValues={{  
+                        initialValues={{
                             // image: userDetail?.image || "",
                             // description_en: userDetail?.description_en || "",
                             // description_fr: userDetail?.description_fr || "",
@@ -279,7 +282,7 @@ export default function EditAgency({params}) {
                             // agency_packages: userDetail?.agency_packages || "",
                             // picture_img: userDetail?.picture_img || "",
                             // cover_img: userDetail?.cover_img || "",
-                             
+
 
                             image: userDetail?.image || "",
                             username: userDetail?.user_name || "",
@@ -313,53 +316,53 @@ export default function EditAgency({params}) {
 
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
-                        >
+                    >
                         {({ errors, touched, handleChange, handleBlur, setFieldValue, values }) => (
 
                             <Form>
-                                    <div>
-                                        <div className="widget-box-2">
-                                    <h6 className="title">Upload Agency User Image</h6>
-                                    <div className="box-uploadfile text-center">
-                                    <label className="uploadfile">
-                                            <span className="icon icon-img-2" />
-                                            <div className="btn-upload">
-                                                <span className="tf-btn primary">Choose Image</span>
-                                                <input
-                                                    type="file"
-                                                    className="ip-file"
-                                                    onChange={(event) => {
-                                                        console.log(event)
-                                                        const file = event.currentTarget.files[0];
-                                                        console.log("Uploaded File: ", file); 
-                                                        if (file) {
-                                                            setFieldValue("image", file);
-                                                            setFilePreview(URL.createObjectURL(file)); 
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                            {filePreview && (
-                                                <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} />
-                                            )}
-                                            <p className="file-name fw-5"> Or drop image here to upload </p>
-                                        </label>
+                                <div>
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Upload Agency User Image</h6>
+                                        <div className="box-uploadfile text-center">
+                                            <label className="uploadfile">
+                                                <span className="icon icon-img-2" />
+                                                <div className="btn-upload">
+                                                    <span className="tf-btn primary">Choose Image</span>
+                                                    <input
+                                                        type="file"
+                                                        className="ip-file"
+                                                        onChange={(event) => {
+                                                            console.log(event)
+                                                            const file = event.currentTarget.files[0];
+                                                            console.log("Uploaded File: ", file);
+                                                            if (file) {
+                                                                setFieldValue("image", file);
+                                                                setFilePreview(URL.createObjectURL(file));
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                                {filePreview && (
+                                                    <img src={filePreview} alt="Preview" style={{ width: "100px", marginTop: "10px" }} />
+                                                )}
+                                                <p className="file-name fw-5"> Or drop image here to upload </p>
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="widget-box-2">
-                                    <h6 className="title">User Information</h6>
-                                    <div className="box grid-3 gap-30">
-                                        <fieldset className="box box-fieldset">
-                                            <label htmlFor="title">User Name:<span>*</span></label>
-                                            <Field type="text" id="username" name="username" className="form-control style-1" />
-                                        </fieldset>
-                                        <fieldset className="box box-fieldset">
-                                            <label htmlFor="title">Full Name:<span>*</span></label>
-                                            <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
-                                        </fieldset>
-                                        <fieldset className="box-fieldset">
-                                            <label htmlFor="name">Mobile Number<span>*</span>:</label>
-                                            {/* <div className="phone-and-country-code">
+                                    <div className="widget-box-2">
+                                        <h6 className="title">User Information</h6>
+                                        <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">User Name:<span>*</span></label>
+                                                <Field type="text" id="username" name="username" className="form-control style-1" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="title">Full Name:<span>*</span></label>
+                                                <Field type="text" id="fullname" name="fullname" className="form-control style-1" />
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                {/* <div className="phone-and-country-code">
                                                 <Field
                                                     as="select"
                                                     name="country_code"
@@ -394,47 +397,47 @@ export default function EditAgency({params}) {
 
 
 
-                                            <div className="phone-and-country-code">
-                                                <select
-                                                    name="country_code"
-                                                    className="nice-select country-code"
-                                                    id="country-code"
-                                                    value={selectedCode || "+33"} // Default to +33
-                                                    onChange={(e) => {
-                                                        const selectedState = e.target.value;
-                                                        setSelectedCode(selectedState);
-                                                        setFieldValue("country_code", selectedState);
-                                                    }}
-                                                >
-                                                    {/* Default selected option: Show only the country code */}
-                                                    <option value={selectedCode || "+33"}>
-                                                        {selectedCode || "+33"}
-                                                    </option>
+                                                <div className="phone-and-country-code">
+                                                    <select
+                                                        name="country_code"
+                                                        className="nice-select country-code"
+                                                        id="country-code"
+                                                        value={selectedCode || "+33"} // Default to +33
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setSelectedCode(selectedState);
+                                                            setFieldValue("country_code", selectedState);
+                                                        }}
+                                                    >
+                                                        {/* Default selected option: Show only the country code */}
+                                                        <option value={selectedCode || "+33"}>
+                                                            {selectedCode || "+33"}
+                                                        </option>
 
-                                                    {/* Dropdown options: Show country name and code */}
-                                                    {allCountries &&
-                                                        allCountries.length > 0 &&
-                                                        allCountries
-                                                            .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
-                                                            .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
-                                                            .map((country, index) => (
-                                                                <option key={index} value={`+${country.dialCode}`}>
-                                                                    {country.name} (+{country.dialCode})
-                                                                </option>
-                                                            ))}
-                                                </select>
-                                                <Field type="text" id="phone" name="phone" className="form-control style-1" />
-                                            </div>
-                                        </fieldset>
+                                                        {/* Dropdown options: Show country name and code */}
+                                                        {allCountries &&
+                                                            allCountries.length > 0 &&
+                                                            allCountries
+                                                                .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                                .map((country, index) => (
+                                                                    <option key={index} value={`+${country.dialCode}`}>
+                                                                        {country.name} (+{country.dialCode})
+                                                                    </option>
+                                                                ))}
+                                                    </select>
+                                                    <Field type="text" id="phone" name="phone" className="form-control style-1" />
+                                                </div>
+                                            </fieldset>
 
 
-                                    </div>
-                                    <div className="box grid-2 gap-30">
-                                        <fieldset className="box box-fieldset">
-                                            <label htmlFor="desc">Email:<span>*</span></label>
-                                            <Field type="email" id="email" name="email" />
-                                        </fieldset>
-                                        {/* <fieldset className="box-fieldset">
+                                        </div>
+                                        <div className="box grid-2 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Email:<span>*</span></label>
+                                                <Field type="email" id="email" name="email" />
+                                            </fieldset>
+                                            {/* <fieldset className="box-fieldset">
                                             <label htmlFor="pass">Password<span>*</span>:</label>
                                             <Field
                                                 type={showPassword ? "text" : "password"}
@@ -451,27 +454,27 @@ export default function EditAgency({params}) {
                                                 {showPassword ? <img src="/images/favicon/password-hide.png" /> : <img src="/images/favicon/password-show.png" /> }
                                             </span>
                                         </fieldset> */}
+                                        </div>
                                     </div>
-                                </div>
 
 
-                                
-                                        <div className="widget-box-2">
-                                            <h6 className="title">Agency Information</h6>
-                                            <div className="grid-2 box gap-30">
-                                                <fieldset className="box-fieldset">
-                                                    <label htmlFor="description_en">Description English:</label>
-                                                    <Field type="textarea"  as="textarea"  id="description_en" name="description_en" className="textarea-tinymce" />
-                                                </fieldset>
-                                                <fieldset className="box-fieldset">
-                                                    <label htmlFor="description_fr">Description French:</label>
-                                                    <Field type="textarea"  as="textarea"  id="description_fr" name="description_fr" className="textarea-tinymce" />
-                                                </fieldset>
-                                            </div>
-                                            <div className="box grid-4 gap-30">
-                                                <fieldset className="box-fieldset">
-                                                    <label htmlFor="name">Mobile Number<span>*</span>:</label>
-                                                    {/* <div className="phone-and-country-code">
+
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Agency Information</h6>
+                                        <div className="grid-2 box gap-30">
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="description_en">Description English:</label>
+                                                <Field type="textarea" as="textarea" id="description_en" name="description_en" className="textarea-tinymce" />
+                                            </fieldset>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="description_fr">Description French:</label>
+                                                <Field type="textarea" as="textarea" id="description_fr" name="description_fr" className="textarea-tinymce" />
+                                            </fieldset>
+                                        </div>
+                                        <div className="box grid-4 gap-30">
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                {/* <div className="phone-and-country-code">
                                                         <Field
                                                             as="select"
                                                             name="agency_country_code"
@@ -505,149 +508,149 @@ export default function EditAgency({params}) {
                                                     </div> */}
 
 
-                                                    <div className="phone-and-country-code">
-                                                            <select
-                                                                name="agency_country_code"
-                                                                className="nice-select country-code"
-                                                                id="agency-country-code"
-                                                                value={selectedWhatsupCode || "+33"} // Default to +33
-                                                                onChange={(e) => {
-                                                                    const selectedState = e.target.value;
-                                                                    setSelectedWhatsupCode(selectedState);
-                                                                    setFieldValue("agency_country_code", selectedState);
-                                                                }}
-                                                            >
-                                                                {/* Default selected option: Show only the country code */}
-                                                                <option value={selectedWhatsupCode || "+33"}>
-                                                                    {selectedWhatsupCode || "+33"}
-                                                                </option>
+                                                <div className="phone-and-country-code">
+                                                    <select
+                                                        name="agency_country_code"
+                                                        className="nice-select country-code"
+                                                        id="agency-country-code"
+                                                        value={selectedWhatsupCode || "+33"} // Default to +33
+                                                        onChange={(e) => {
+                                                            const selectedState = e.target.value;
+                                                            setSelectedWhatsupCode(selectedState);
+                                                            setFieldValue("agency_country_code", selectedState);
+                                                        }}
+                                                    >
+                                                        {/* Default selected option: Show only the country code */}
+                                                        <option value={selectedWhatsupCode || "+33"}>
+                                                            {selectedWhatsupCode || "+33"}
+                                                        </option>
 
-                                                                {/* Dropdown options: Show country name and code */}
-                                                                {allCountries &&
-                                                                    allCountries.length > 0 &&
-                                                                    allCountries
-                                                                        .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
-                                                                        .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
-                                                                        .map((country, index) => (
-                                                                            <option key={index} value={`+${country.dialCode}`}>
-                                                                                {country.name} (+{country.dialCode})
-                                                                            </option>
-                                                                        ))}
-                                                            </select>
-                                                        <Field type="text" id="phone" name="agency_phone" className="form-control style-1" />
-                                                    </div>
-
-
-                                                </fieldset>
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="service_area_en">Service Area English:</label>
-                                                    <Field type="text" name="service_area_en" className="box-fieldset"  />
-                                                </fieldset>
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Service Area French:</label>
-                                                    <Field type="text" name="service_area_fr" className="box-fieldset"  />
-                                                </fieldset>
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Tax Number:</label>
-                                                    <Field type="text"  name="tax_number" className="box-fieldset" />
-                                                </fieldset>
-                                            </div>
-                                            <div className="box grid-3 gap-30">
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">License number:</label>
-                                                    <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
-                                                </fieldset>
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="credit">Credit:</label>
-                                                    <Field type="text" name="credit" className="box-fieldset"  />
-                                                </fieldset>
-                                                <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Agency Packages:</label>
-                                                        <Field as="select" name="agency_packages" className="nice-select country-code"
-                                                            onChange={(e) => {
-                                                                const selectedState = e.target.value;
-                                                                setFieldValue("agency_packages", selectedState);
-                                                            }}
-                                                        >
-                                                            <option value="">Select Agency Packages</option>
-                                                            {agencyPackageList && agencyPackageList.length > 0 ? (
-                                                                agencyPackageList.map((agency) => (
-                                                                    <option key={agency.id} value={agency.id}>
-                                                                        {agency.name}
+                                                        {/* Dropdown options: Show country name and code */}
+                                                        {allCountries &&
+                                                            allCountries.length > 0 &&
+                                                            allCountries
+                                                                .filter((country) => country.name !== "Western Sahara") // Exclude Western Sahara
+                                                                .sort((a, b) => a.dialCode.localeCompare(b.dialCode)) // Sort by dial code
+                                                                .map((country, index) => (
+                                                                    <option key={index} value={`+${country.dialCode}`}>
+                                                                        {country.name} (+{country.dialCode})
                                                                     </option>
-                                                                ))
-                                                            ) : (
-                                                                <></>
-                                                            )}
-                                                        </Field>
-                                                </fieldset>
-                                            </div>
-                                            <div>
-                                                <fieldset className="box-fieldset">
-                                                    <label htmlFor="bedrooms">Cover Image:</label>
-                                                    <div className="box-floor-img uploadfile">
-                                                        <div className="btn-upload">
-                                                            <Link href="#" className="tf-btn primary">Choose File</Link>
-                                                            <input
-                                                                type="file"
-                                                                className="ip-file"
-                                                                onChange={(event) => {
-                                                                    const file = event.currentTarget.files[0];
-                                                                    setFieldValue("cover_img", file);
-                                                                    setFileCoverImg(URL.createObjectURL(file));
-                                                                }}
-                                                            />
-                                                        
-                                                            {fileCoverImg && (
-                                                                <img src={fileCoverImg} alt="Preview"  className="uploadFileImage" />
-                                                            )}
-                                                        </div>
-                                                        <p className="file-name fw-5"> Or drop image here to upload </p>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                            {console.log(fileCoverImg,"fileCoverImg")}
+                                                                ))}
+                                                    </select>
+                                                    <Field type="text" id="phone" name="agency_phone" className="form-control style-1" />
+                                                </div>
 
-                                            
+
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="service_area_en">Service Area English:</label>
+                                                <Field type="text" name="service_area_en" className="box-fieldset" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Service Area French:</label>
+                                                <Field type="text" name="service_area_fr" className="box-fieldset" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Tax Number:</label>
+                                                <Field type="text" name="tax_number" className="box-fieldset" />
+                                            </fieldset>
                                         </div>
-
-                                        
-                                        <div className="widget-box-2">
-                                        <h6 className="title">Other Information</h6>
                                         <div className="box grid-3 gap-30">
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">License number:</label>
+                                                <Field type="text" id="license_number" name="license_number" className="box-fieldset" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="credit">Credit:</label>
+                                                <Field type="text" name="credit" className="box-fieldset" />
+                                            </fieldset>
+                                            <fieldset className="box box-fieldset">
+                                                <label htmlFor="desc">Agency Packages:</label>
+                                                <Field as="select" name="agency_packages" className="nice-select country-code"
+                                                    onChange={(e) => {
+                                                        const selectedState = e.target.value;
+                                                        setFieldValue("agency_packages", selectedState);
+                                                    }}
+                                                >
+                                                    <option value="">Select Agency Packages</option>
+                                                    {agencyPackageList && agencyPackageList.length > 0 ? (
+                                                        agencyPackageList.map((agency) => (
+                                                            <option key={agency.id} value={agency.id}>
+                                                                {agency.name}
+                                                            </option>
+                                                        ))
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </Field>
+                                            </fieldset>
+                                        </div>
+                                        <div>
+                                            <fieldset className="box-fieldset">
+                                                <label htmlFor="bedrooms">Cover Image:</label>
+                                                <div className="box-floor-img uploadfile">
+                                                    <div className="btn-upload">
+                                                        <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                        <input
+                                                            type="file"
+                                                            className="ip-file"
+                                                            onChange={(event) => {
+                                                                const file = event.currentTarget.files[0];
+                                                                setFieldValue("cover_img", file);
+                                                                setFileCoverImg(URL.createObjectURL(file));
+                                                            }}
+                                                        />
+
+                                                        {fileCoverImg && (
+                                                            <img src={fileCoverImg} alt="Preview" className="uploadFileImage" />
+                                                        )}
+                                                    </div>
+                                                    <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        {console.log(fileCoverImg, "fileCoverImg")}
+
+
+                                    </div>
+
+
+                                    <div className="widget-box-2">
+                                        <h6 className="title">Other Information</h6>
+                                        <div className="box grid-2 gap-30">
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Facebook Link:<span>*</span></label>
                                                 <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                             </fieldset>
-                                            <fieldset className="box box-fieldset">
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Twitter Link:<span>*</span></label>
                                                 <Field type="text" name="twitter_link" className="box-fieldset"  />
-                                            </fieldset>
+                                            </fieldset> */}
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Youtube Link:<span>*</span></label>
-                                                <Field type="text"  name="youtube_link" className="box-fieldset" />
+                                                <Field type="text" name="youtube_link" className="box-fieldset" />
                                             </fieldset>
                                         </div>
-                                        <div className="box grid-3 gap-30">
-                                            <fieldset className="box box-fieldset">
+                                        <div className="box grid-2 gap-30">
+                                            {/* <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Pinterest Link:</label>
                                                 <Field type="text" name="pinterest_link" className="box-fieldset" />
-                                            </fieldset>
+                                            </fieldset> */}
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Linkedin Link:</label>
+                                                <label htmlFor="desc">Linkedin Link:<span>*</span></label>
                                                 <Field type="text" name="linkedin_link" className="box-fieldset" />
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Instagram Link:</label>
+                                                <label htmlFor="desc">Instagram Link:<span>*</span></label>
                                                 <Field type="text" name="instagram_link" className="box-fieldset" />
                                             </fieldset>
                                         </div>
-                                        </div>
+                                    </div>
 
-<div className="widget-box-2">
+                                    <div className="widget-box-2">
                                         <h6 className="title">Location</h6>
                                         <div className="box grid-4 gap-30">
-                                            
+
                                             <fieldset className="box box-fieldset">
                                                 <label htmlFor="desc">Cities:</label>
                                                 <Field
@@ -673,7 +676,7 @@ export default function EditAgency({params}) {
                                                 </Field>
                                             </fieldset>
 
-                                            
+
 
                                         </div>
                                         <div className="box box-fieldset">
@@ -692,22 +695,22 @@ export default function EditAgency({params}) {
                                             />
                                         </div>
                                     </div>
-                                    <button type="submit"  className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency</button>
-                                        {showErrorPopup && Object.keys(errors).length > 0 && (
-                                            <ErrorPopup
-                                                errors={errors}
-                                                validationSchema={validationSchema}
-                                                onClose={() => setShowErrorPopup(false)}
-                                            />
-                                        )}
-                                    </div>
+                                    <button type="submit" className="tf-btn primary" onClick={() => setShowErrorPopup(!showErrorPopup)}>Update Agency</button>
+                                    {showErrorPopup && Object.keys(errors).length > 0 && (
+                                        <ErrorPopup
+                                            errors={errors}
+                                            validationSchema={validationSchema}
+                                            onClose={() => setShowErrorPopup(false)}
+                                        />
+                                    )}
+                                </div>
                             </Form>
                         )}
-                        </Formik>
+                    </Formik>
 
 
-                    </LayoutAdmin >
+                </LayoutAdmin >
             }
-		</>
-	)
+        </>
+    )
 }
