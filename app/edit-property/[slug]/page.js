@@ -82,7 +82,7 @@ export default function EditProperty({params}) {
                         property_slug: slug,
                     };
                     const getpropertyInfo = await insertData('api/property/getbyIds', requestData, true);
-                        // console.log(getpropertyInfo);
+                        console.log(getpropertyInfo, '>>>>>>>>>>>>> getpropertyInfo');
     
                     if (getpropertyInfo.data) {
                         setPropertyDetail(getpropertyInfo.data);
@@ -421,7 +421,8 @@ export default function EditProperty({params}) {
 
     // Handle form submission
     const handleSubmit = async (values, { resetForm, setErrors }) => {
-        console.log(values);
+        console.log(values, '>>>>>>>>>>>> values');
+        console.log(propertyMapCoords, '>>>>>>>>>>>> propertyMapCoords');
 
         try {
 
@@ -469,10 +470,6 @@ export default function EditProperty({params}) {
                 ];
 
                 console.log(metaDetailsPass,"metaDetailsPass")
-
-
-
-
 
             // Prepare images and videos for upload
             const uploadImageObj = Array.isArray(values.picture_img) ? values.picture_img : [values.picture_img];
@@ -533,8 +530,8 @@ export default function EditProperty({params}) {
                     city_id: values.city_id,
                     district_id: values.districts_id === "" ? null : values.districts_id,
                     neighborhoods_id: values.neighborhood_id === "" ? null : values.neighborhood_id,
-                    latitude: values.latitude ? String(values.latitude) : "33.985047",
-                    longitude: values.longitude ? String(values.longitude) : "-118.469483",
+                    latitude: values.latitude ? String(values.latitude) : String(propertyMapCoords.latitude),
+                    longitude: values.longitude ? String(values.longitude) : String(propertyMapCoords.longitude),
                     transaction: values.transaction_type,
                     type_id: values.property_type,
                     size: parseInt(values.size_sqft) ?? 0,
