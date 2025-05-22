@@ -463,7 +463,7 @@ export default function EditProject({ params }) {
                     description_en: values.description_en,
                     description_fr: values.description_fr,
                     price: parseInt(values.price) ?? 0,
-                    vr_link: values.vr_link,
+                    vr_link: values.vr_link ?? null,
                     picture: imageUrls.length > 0 ? imageUrls : values.picture_img, // Default to an empty array if `values.picture_img` is undefined
                     icon: iconUrl,
                     video: videoUrl,

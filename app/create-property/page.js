@@ -342,11 +342,11 @@ export default function CreateProperty() {
                 return;
             }
     
-            if (!checkURL(values.vr_link)) {
-                setErrors({ serverError: "Please Enter valid URL" });
-                setShowErrorPopup(true);
-                return;
-            }
+            // if (!checkURL(values.vr_link)) {
+            //     setErrors({ serverError: "Please Enter valid URL" });
+            //     setShowErrorPopup(true);
+            //     return;
+            // }
 
             const selectedAmenities = projectOfBooleanListing
                 .filter((project) => checkedItems[project.key])
