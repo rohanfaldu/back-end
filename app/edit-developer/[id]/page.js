@@ -120,17 +120,16 @@ export default function EditDeveloper({ params }) {
         username: Yup.string().min(3, "User name must be at least 3 characters").required("User name is required"),
         fullname: Yup.string().min(5, "Full name must be at least 5 characters").required("Full name is required"),
         email: Yup.string().email("Invalid email format").required("Email is required"),
-        phone: Yup.string().matches(/^\d{10}$/, "Phone number must be exactly 10 digits").required("Phone Number is required"),
+        phone: Yup.string().required("Phone Number is required"),
         country_code: Yup.string().required("Country code is required"),
         agency_packages: Yup.string().required("Agency packages are required"),
         city_id: Yup.string().required("City is required"),
-        facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
-        twitter_link: Yup.string().url("Invalid URL").nullable(),
-        youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
-        pinterest_link: Yup.string().url("Invalid URL").nullable(),
-        linkedin_link: Yup.string().url("Invalid URL").nullable().required("Linkedin link is required"),
-        instagram_link: Yup.string().url("Invalid URL").nullable().required("Instagram link is required"),
-
+        facebook_link: Yup.string().url("Facebook link Invalid URL"),
+        twitter_link: Yup.string().url("Twitter link Invalid URL"),
+        youtube_link: Yup.string().url("Youtube link Invalid URL"),
+        pinterest_link: Yup.string().url("pinterest link Invalid URL"),
+        linkedin_link: Yup.string().url("Linkedin link Invalid URL"),
+        instagram_link: Yup.string().url("Instagram link Invalid URL"),
     });
 
 
@@ -182,19 +181,19 @@ export default function EditDeveloper({ params }) {
                     credit: values.credit,
                     description_en: values.description_en,
                     description_fr: values.description_fr,
-                    whatsup_number: values.developer_phone,
+                    whatsup_number: values.developer_phone ?? null,
                     service_area_en: values.service_area_en,
                     service_area_fr: values.service_area_fr,
                     tax_number: values.tax_number,
                     license_number: values.license_number,
                     country_code: values.developer_country_code,
                     agency_packages: values.agency_packages,
-                    facebook_link: values.facebook_link,
-                    twitter_link: values.twitter_link,
-                    youtube_link: values.youtube_link,
-                    pinterest_link: values.pinterest_link,
-                    linkedin_link: values.linkedin_link,
-                    instagram_link: values.instagram_link,
+                    facebook_link: values.facebook_link ?? null,
+                    twitter_link: values.twitter_link ?? null,
+                    youtube_link: values.youtube_link ?? null,
+                    pinterest_link: values.pinterest_link ?? null,
+                    linkedin_link: values.linkedin_link ?? null,
+                    instagram_link: values.instagram_link ?? null,
                     cover: imageUrlCover,
                     city_id: values.city_id,
                     latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
@@ -429,7 +428,7 @@ export default function EditDeveloper({ params }) {
                                         </div>
                                         <div className="box grid-3 gap-30">
                                             <fieldset className="box-fieldset">
-                                                <label htmlFor="name">Mobile Number<span>*</span>:</label>
+                                                <label htmlFor="name">Mobile Number:</label>
                                                 <div className="phone-and-country-code">
                                                     <select
                                                         name="developer_country_code"
@@ -487,7 +486,7 @@ export default function EditDeveloper({ params }) {
                                                 {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Agency Packages:</label>
+                                                <label htmlFor="desc">Agency Packages:<span>*</span></label>
                                                 <Field as="select" name="agency_packages" className="nice-select country-code"
                                                     onChange={(e) => {
                                                         const selectedState = e.target.value;
@@ -540,7 +539,7 @@ export default function EditDeveloper({ params }) {
                                         <h6 className="title">Other Information</h6>
                                         <div className="box grid-2 gap-30">
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Facebook Link:<span>*</span></label>
+                                                <label htmlFor="desc">Facebook Link:</label>
                                                 <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                                 {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                             </fieldset>
@@ -550,7 +549,7 @@ export default function EditDeveloper({ params }) {
                                                 {/* <ErrorMessage name="twitter_link" component="div" className="error" /> 
                                             </fieldset> */}
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Youtube Link:<span>*</span></label>
+                                                <label htmlFor="desc">Youtube Link:</label>
                                                 <Field type="text" name="youtube_link" className="box-fieldset" />
                                                 {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                             </fieldset>
@@ -562,12 +561,12 @@ export default function EditDeveloper({ params }) {
                                                 {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> 
                                             </fieldset> */}
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Linkedin Link:<span>*</span></label>
+                                                <label htmlFor="desc">Linkedin Link:</label>
                                                 <Field type="text" name="linkedin_link" className="box-fieldset" />
                                                 {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                             </fieldset>
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Instagram Link:<span>*</span></label>
+                                                <label htmlFor="desc">Instagram Link:</label>
                                                 <Field type="text" name="instagram_link" className="box-fieldset" />
                                                 {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                             </fieldset>
@@ -579,7 +578,7 @@ export default function EditDeveloper({ params }) {
                                         <div className="box grid-4 gap-30">
 
                                             <fieldset className="box box-fieldset">
-                                                <label htmlFor="desc">Cities:</label>
+                                                <label htmlFor="desc">Cities:<span>*</span></label>
                                                 <Field
                                                     as="select"
                                                     name="city_id"

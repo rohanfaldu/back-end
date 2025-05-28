@@ -61,7 +61,7 @@ export default function MyProperty() {
         setLoading(false); // Stop loading
       }
     };
-  // console.log('filteredProperties');
+  console.log('filteredProperties', filteredProperties);
   // console.log(filteredProperties.length);
   useEffect(() => {
     filterAndPaginateData(); // Apply filter and pagination whenever inputs change
@@ -422,7 +422,7 @@ export default function MyProperty() {
                                       <li className="delete">
                                         <a
                                           className="remove-file item"
-                                          onClick={() => handleView(user.id)}
+                                          onClick={() => handleView(user.slug)}
                                           style={{ border: 'none', background: 'transparent', padding: 0 }}
                                           target="_blank"
                                           rel="noopener noreferrer"
