@@ -313,7 +313,7 @@ export default function CreateProject() {
                     description_en: values.description_en,
                     description_fr: values.description_fr,
                     price: parseInt(values.price) ?? 0,
-                    vr_link: values.vr_link,
+                    vr_link: values.vr_link ?? null,
                     picture: imageUrls,
                     icon: iconUrl,
                     video: videoUrl,
