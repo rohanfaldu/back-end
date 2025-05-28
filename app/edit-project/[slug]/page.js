@@ -444,7 +444,6 @@ export default function EditProject({ params }) {
                     return false;
                 }
     
-                // Use the provided video link if no video was uploaded
                 videoUrl = videoUrl || values.video_link;
 
                 console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
