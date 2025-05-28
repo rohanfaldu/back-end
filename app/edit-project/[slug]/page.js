@@ -449,10 +449,7 @@ export default function EditProject({ params }) {
 
                 console.log("Project Data:", { imageUrls, videoUrl, iconUrl });
 
-                // Default video URL if not uploaded
                 
-
-
                 console.log('values');
                 console.log(values);
 
