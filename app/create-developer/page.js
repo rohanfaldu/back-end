@@ -37,15 +37,15 @@ export default function CreateAgency() {
         email: Yup.string().email("Invalid email format").required("Email is required"),
         country_code: Yup.string().required("Country code is required"),
         whatsup_country_code: Yup.string().required("Country code is required"),
-        phone: Yup.string().matches(/^\d{10}$/, "Phone number must be exactly 10 digits").required("Phone Number is required"),
+        phone: Yup.string().required("Phone Number is required"),
         image: Yup.mixed().required("Image is required"),
         password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-        facebook_link: Yup.string().url("Invalid URL").nullable().required("Facebook link is required"),
-        twitter_link: Yup.string().url("Invalid URL").nullable(),
-        youtube_link: Yup.string().url("Invalid URL").nullable().required("Youtube link is required"),
-        pinterest_link: Yup.string().url("Invalid URL").nullable(),
-        linkedin_link: Yup.string().url("Invalid URL").nullable().required("Linkedin link is required"),
-        instagram_link: Yup.string().url("Invalid URL").nullable().required("Instagram link is required"),
+        facebook_link: Yup.string().url("Facebook link Invalid URL"),
+        twitter_link: Yup.string().url("Twitter link Invalid URL"),
+        youtube_link: Yup.string().url("Youtube link Invalid URL"),
+        pinterest_link: Yup.string().url("pinterest link Invalid URL"),
+        linkedin_link: Yup.string().url("Linkedin link Invalid URL"),
+        instagram_link: Yup.string().url("Instagram link Invalid URL"),
         agency_packages: Yup.string().required("Agency packages are required"),
         city_id: Yup.string().required("City is required"),
     });
@@ -96,7 +96,7 @@ export default function CreateAgency() {
             if (getUserInfo.status === false) {
                 /********* Upload Image ***********/
                 const fileUrls = await insertUploadImage('image', values.image);
-
+                console.log(fileUrls,' >>>>>>>>>>>> File')
                 if (fileUrls) {
                     try {
                         setLoading(true); // Start loader
@@ -119,11 +119,16 @@ export default function CreateAgency() {
                         };
 
                         const createUserInfo = await insertData('auth/create/user', userData, false);
-
-                        if (createUserInfo.status === true) {
+                        console.log(createUserInfo, ">>>>> createUserInfo");
+                        if (createUserInfo.status) {
+                            console.log('Here');
                             setSucessMessage(true);
                             setShowErrorPopup("Developer created successfully");
-                            const fileUrls = await insertUploadImage('cover_img', values.cover_img);
+                            let fileUrls = null;
+                            if(values.cover_img){
+                                fileUrls = await insertUploadImage('cover_img', values.cover_img);
+                            }
+                            
                             /********* Create Developer ***********/
                             const user_id = createUserInfo.data.userProfile.id;
                             const developerData = {
@@ -146,7 +151,7 @@ export default function CreateAgency() {
                                 agency_packages: values.agency_packages ?? null,
                                 country_code: values.whatsup_country_code,
                                 picture: null,
-                                cover: fileUrls,
+                                cover: fileUrls ?? null,
                                 city_id: values.city_id,
                                 address: values.address,
                                 latitude: isNaN(parseFloat(values.latitude)) ? parseFloat(propertyMapCoords.latitude) : parseFloat(values.latitude),
@@ -168,6 +173,7 @@ export default function CreateAgency() {
                             setShowErrorPopup(true);
                         }
                     } catch (error) {
+                        console.log('Create developer Error: ', error);
                         setErrors({ serverError: error.message });
                         setShowErrorPopup(true);
                     }
@@ -180,6 +186,7 @@ export default function CreateAgency() {
                 setShowErrorPopup(true);
             }
         } catch (error) {
+             console.log('Call user API Error : ', error);
             setErrors({ serverError: error.message });
             setShowErrorPopup(true);
         } finally {
@@ -409,7 +416,7 @@ export default function CreateAgency() {
                                                     {/* <ErrorMessage name="credit" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Agency Packages:</label>
+                                                    <label htmlFor="desc">Agency Packages:<span>*</span></label>
                                                     <Field as="select" name="agency_packages" className="nice-select country-code"
                                                         onChange={(e) => {
                                                             const selectedState = e.target.value;
@@ -433,24 +440,24 @@ export default function CreateAgency() {
                                             </div>
                                             <div className="grid-2 box gap-30">
                                                 {/*  <fieldset className="box-fieldset">
-                                        <label htmlFor="bedrooms">Picture Image:</label>
-                                        <div className="box-floor-img uploadfile">
-                                            <div className="btn-upload">
-                                                <Link href="#" className="tf-btn primary">Choose File</Link>
-                                                <input
-                                                    type="file"
-                                                    className="ip-file"
-                                                    onChange={(event) => {
-                                                        const file = event.currentTarget.files[0];
-                                                        setFieldValue("picture_img", file);
-                                                        setFilePictureImg(URL.createObjectURL(file));
-                                                    }}
-                                                />
-                                                {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
-                                            </div>
-                                            <p className="file-name fw-5"> Or drop image here to upload </p>
-                                        </div>
-                                    </fieldset>*/}
+                                                        <label htmlFor="bedrooms">Picture Image:</label>
+                                                        <div className="box-floor-img uploadfile">
+                                                            <div className="btn-upload">
+                                                                <Link href="#" className="tf-btn primary">Choose File</Link>
+                                                                <input
+                                                                    type="file"
+                                                                    className="ip-file"
+                                                                    onChange={(event) => {
+                                                                        const file = event.currentTarget.files[0];
+                                                                        setFieldValue("picture_img", file);
+                                                                        setFilePictureImg(URL.createObjectURL(file));
+                                                                    }}
+                                                                />
+                                                                {filePictureImg && ( <img src={filePictureImg} alt="Preview" className="uploadFileImage" /> )}
+                                                            </div>
+                                                            <p className="file-name fw-5"> Or drop image here to upload </p>
+                                                        </div>
+                                                    </fieldset>*/}
                                                 <fieldset className="box-fieldset">
                                                     <label htmlFor="bedrooms">Cover Image:</label>
                                                     <div className="box-floor-img uploadfile">
@@ -476,7 +483,7 @@ export default function CreateAgency() {
                                             <h6 className="title">Other Information</h6>
                                             <div className="box grid-2 gap-30">
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Facebook Link:<span>*</span></label>
+                                                    <label htmlFor="desc">Facebook Link:</label>
                                                     <Field type="text" id="facebook_link" name="facebook_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="facebook_link" component="div" className="error" /> */}
                                                 </fieldset>
@@ -486,7 +493,7 @@ export default function CreateAgency() {
                                                     {/* <ErrorMessage name="twitter_link" component="div" className="error" /> 
                                                 </fieldset> */}
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Youtube Link:<span>*</span></label>
+                                                    <label htmlFor="desc">Youtube Link:</label>
                                                     <Field type="text" name="youtube_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="youtube_link" component="div" className="error" /> */}
                                                 </fieldset>
@@ -498,12 +505,12 @@ export default function CreateAgency() {
                                                     {/* <ErrorMessage name="pinterest_link" component="div" className="error" /> 
                                                 </fieldset> */}
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Linkedin Link:<span>*</span></label>
+                                                    <label htmlFor="desc">Linkedin Link:</label>
                                                     <Field type="text" name="linkedin_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="linkedin_link" component="div" className="error" /> */}
                                                 </fieldset>
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Instagram Link:<span>*</span></label>
+                                                    <label htmlFor="desc">Instagram Link:</label>
                                                     <Field type="text" name="instagram_link" className="box-fieldset" />
                                                     {/* <ErrorMessage name="instagram_link" component="div" className="error" /> */}
                                                 </fieldset>
@@ -515,7 +522,7 @@ export default function CreateAgency() {
                                             <div className="box grid-4 gap-30">
 
                                                 <fieldset className="box box-fieldset">
-                                                    <label htmlFor="desc">Cities:</label>
+                                                    <label htmlFor="desc">Cities:<span>*</span></label>
                                                     <Field as="select" name="city_id" className="nice-select country-code"
                                                         onChange={(e) => {
                                                             const selectedState = e.target.value;
